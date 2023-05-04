@@ -1,119 +1,110 @@
-# This is a sample build configuration for JavaScript.
-# Check our guides at https://confluence.atlassian.com/x/14UWN for more examples.
-# Only use spaces to indent your .yml configuration.
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
-image: node:14.17.3
-  
-definitions:
-  services:
-    docker:
-      memory: 2048
+image: atlassian/default-image:3
 
 pipelines:
   branches:
     master:
-    - step:
-        name: Build
-        caches:
-          - node
-        script:
-          - unset CI
-          - yarn install
-          - yarn add env-cmd
-          - yarn build:production
-        artifacts:
-          - build/**
-    - step:
-        name: pushing to s3
-        deployment: production
-        script:
-          - pipe: atlassian/aws-s3-deploy:0.4.5
-            variables:
-              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-              AWS_DEFAULT_REGION: 'us-east-1'
-              S3_BUCKET: 'blueclerkcloudfront'
-              LOCAL_PATH: 'build'
-              ACL: 'public-read'
+      - step:
+          name: Build
+          caches:
+            - node
+          script:
+            - unset CI
+            - yarn install
+            - yarn add env-cmd
+            - yarn build:production
+          artifacts:
+            - build/**
+      - step:
+          name: pushing to s3
+          deployment: production
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.4.5
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: 'us-east-1'
+                S3_BUCKET: 'blueclerkcloudfront'
+                LOCAL_PATH: 'build'
+                ACL: 'public-read'
 
-          - pipe: atlassian/aws-cloudfront-invalidate:0.1.1
-            variables:
-              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-              AWS_DEFAULT_REGION: 'us-east-1'
-              DISTRIBUTION_ID: 'E18B11G7D9D3CU'
+            - pipe: atlassian/aws-cloudfront-invalidate:0.1.1
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: 'us-east-1'
+                DISTRIBUTION_ID: 'E18B11G7D9D3CU'
 
     dev:
-    - step:
-        name: Build
-        caches:
-          - node
-        script:
-          - unset CI
-          - yarn install
-          - yarn add env-cmd
-          - yarn build:staging
-        artifacts:
-          - build/**
-    - step:
-        name: pushing to s3
-        deployment: production
-        script:
-          - pipe: atlassian/aws-s3-deploy:0.4.5
-            variables:
-              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-              AWS_DEFAULT_REGION: 'us-east-1'
-              S3_BUCKET: 'blueclerk-react-app'
-              LOCAL_PATH: 'build'
-              ACL: 'public-read'
+      - step:
+          name: Build
+          caches:
+            - node
+          script:
+            - unset CI
+            - yarn install
+            - yarn add env-cmd
+            - yarn build:staging
+          artifacts:
+            - build/**
+      - step:
+          name: pushing to s3
+          deployment: production
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.4.5
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: 'us-east-1'
+                S3_BUCKET: 'blueclerk-react-app'
+                LOCAL_PATH: 'build'
+                ACL: 'public-read'
 
-          - pipe: atlassian/aws-cloudfront-invalidate:0.1.1
-            variables:
-              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-              AWS_DEFAULT_REGION: 'us-east-1'
-              DISTRIBUTION_ID: 'E17AYQHQYHYHNY'
-    - step:
-        name: E2E-Tests
-        script:
-          - pipe: atlassian/trigger-pipeline:5.0.1
-            variables:
-              BITBUCKET_USERNAME: $BITBUCKET_USERNAME
-              BITBUCKET_APP_PASSWORD: $BITBUCKET_APP_PASSWORD
-              REPOSITORY: 'blueclerk-e2e'
-              REF_TYPE: 'branch'
-              REF_NAME: 'master'
-              WAIT: 'true'
+            - pipe: atlassian/aws-cloudfront-invalidate:0.1.1
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: 'us-east-1'
+                DISTRIBUTION_ID: 'E17AYQHQYHYHNY'
+      - step:
+          name: E2E-Tests
+          script:
+            - pipe: atlassian/trigger-pipeline:5.0.1
+              variables:
+                BITBUCKET_USERNAME: $BITBUCKET_USERNAME
+                BITBUCKET_APP_PASSWORD: $BITBUCKET_APP_PASSWORD
+                REPOSITORY: 'https://bitbucket.org/blueclerk/blueclerk-e2e'
+                REPOSITORY: 'blueclerk-e2e'
+                REF_TYPE: 'branch'
+                REF_NAME: 'master'
+                WAIT: 'true'
 
-    testing:
-    - step:
-        name: Build
-        caches:
-          - node
-        script:
-          - unset CI
-          - yarn install
-          - yarn build
-        artifacts:
-          - build/**
-    - step:
-        name: pushing to s3
-        deployment: production
-        script:
-          - pipe: atlassian/aws-s3-deploy:0.4.5
-            variables:
-              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-              AWS_DEFAULT_REGION: 'us-east-1'
-              S3_BUCKET: 'blueclerk-testing'
-              LOCAL_PATH: 'build'
-              ACL: 'public-read'
+    develop:
+      - step:
+          name: Build
+          caches:
+            - node
+          script:
+            - unset CI
+            - yarn install
+            - yarn build:develop
+          artifacts:
+            - build/**
+      - step:
+          name: pushing to s3
+          deployment: production
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.4.5
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: 'us-east-1'
+                S3_BUCKET: 'blueclerk-react-develop-deployment'
+                LOCAL_PATH: 'build'
+                ACL: 'public-read'
 
-          - pipe: atlassian/aws-cloudfront-invalidate:0.1.1
-            variables:
-              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-              AWS_DEFAULT_REGION: 'us-east-1'
-              DISTRIBUTION_ID: 'E2WUPD9FPCPR34'
+            - pipe: atlassian/aws-cloudfront-invalidate:0.1.1
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: 'us-east-1'
+                DISTRIBUTION_ID: 'E1V19VX69NRM1U'
