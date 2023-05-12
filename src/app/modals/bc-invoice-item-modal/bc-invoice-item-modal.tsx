@@ -107,6 +107,11 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         typeof tiers[tier_id].charge !== 'undefined'
           ? `${tiers[tier_id].charge}`
           : '',
+      cost:
+        tiers[tier_id].cost !== null &&
+        typeof tiers[tier_id].cost !== 'undefined'
+          ? `${tiers[tier_id].cost}`
+          : '',
     }))
     .filter((tier) => tier.isActive);
 
@@ -134,8 +139,9 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         values.tax = 0;
       }
       // dispatch(updateInvoiceItem.fetch(values));
-      const tiers: { ['string']: { _id: string; charge: string } } =
-        values.tiers;
+      const tiers: {
+        ['string']: { _id: string; charge: string; cost: string };
+      } = values.tiers;
       const tierArr = Object.values(tiers).map((tier) => ({
         tierId: tier._id,
         charge: !(
@@ -144,6 +150,13 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
           tier.charge === ''
         )
           ? parseFloat(tier.charge).toFixed(2)
+          : null,
+        cost: !(
+          typeof tier.cost === 'undefined' ||
+          tier.cost === null ||
+          tier.cost === ''
+        )
+          ? parseFloat(tier.cost).toFixed(2)
           : null,
       }));
 
@@ -378,6 +391,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                 >
                   <MenuItem value={'true'}>{'Fixed'}</MenuItem>
                   <MenuItem value={'false'}>{'Hourly'}</MenuItem>
+                  <MenuItem value={'%'}>{'Percentage(%)'}</MenuItem>
                 </Select>
               </Grid>
               <Grid
@@ -412,8 +426,8 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                 </FormControl>
               </Grid>
             </Grid>
-            <Grid container justifyContent="center" className="pricing">
-              <Grid container justifyContent="center">
+            <Grid container className="pricing">
+              <Grid container justify="center">
                 <Typography variant={'h6'}>
                   <strong>Tier Prices</strong>
                 </Typography>
@@ -479,73 +493,77 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                 ))}
               </Grid>
             </Grid>
-            <Grid container justifyContent="center" className="pricing">
-              <Grid container justifyContent="center">
-                <Typography variant={'h6'}>
-                  <strong>Job costing</strong>
-                </Typography>
-              </Grid>
-              <Grid container>
-                {activeTiers.map((tier) => (
-                  <Grid
-                    item
-                    xs={12}
-                    sm={4}
-                    container
-                    alignItems="center"
-                    key={tier.name}
-                  >
+            {formik.values.isFixed !== '%' && (
+              <Grid container className="pricing">
+                <Grid container justify="center">
+                  <Typography variant={'h6'}>
+                    <strong>Job costing</strong>
+                  </Typography>
+                </Grid>
+                <Grid container>
+                  {activeTiers.map((tier) => (
                     <Grid
-                      style={{
-                        padding: '0 7px 0 0',
-                        color: '#4F4F4F',
-                        fontWeight: 500,
-                      }}
+                      item
+                      xs={12}
+                      sm={4}
+                      container
+                      alignItems="center"
+                      key={tier.name}
                     >
-                      TIER {tier.name} COST
+                      <Grid
+                        style={{
+                          padding: '0 7px 0 0',
+                          color: '#4F4F4F',
+                          fontWeight: 500,
+                        }}
+                      >
+                        TIER {tier.name} COST
+                      </Grid>
+                      <FormControl>
+                        <BCInput
+                          onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            formik.setFieldValue(
+                              `tiers.${tier._id}.cost`,
+                              replaceAmountToDecimal(e.target.value)
+                            );
+                          }}
+                          handleChange={(
+                            e: React.ChangeEvent<HTMLInputElement>
+                          ) => {
+                            const amount = e.target.value;
+                            if (!validateDecimalAmount(amount)) return;
+                            formik.setFieldValue(
+                              `tiers.${tier._id}.cost`,
+                              amount
+                            );
+                          }}
+                          name={`tiers.${tier._id}.cost`}
+                          value={`${formik.values.tiers[tier._id].cost}`}
+                          margin={'none'}
+                          inputProps={{
+                            style: {
+                              padding: '12px 14px',
+                              width: 110,
+                            },
+                          }}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                $
+                              </InputAdornment>
+                            ),
+                            style: {
+                              borderRadius: 8,
+                              marginTop: 10,
+                            },
+                          }}
+                        />
+                      </FormControl>
                     </Grid>
-                    <FormControl>
-                      <BCInput
-                        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          formik.setFieldValue(
-                            `tiers.${tier._id}.charge`,
-                            replaceAmountToDecimal(e.target.value)
-                          );
-                        }}
-                        handleChange={(
-                          e: React.ChangeEvent<HTMLInputElement>
-                        ) => {
-                          const amount = e.target.value;
-                          if (!validateDecimalAmount(amount)) return;
-                          formik.setFieldValue(
-                            `tiers.${tier._id}.charge`,
-                            amount
-                          );
-                        }}
-                        name={`tiers.${tier._id}.charge`}
-                        value={`${formik.values.tiers[tier._id].charge}`}
-                        margin={'none'}
-                        inputProps={{
-                          style: {
-                            padding: '12px 14px',
-                            width: 110,
-                          },
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
-                          ),
-                          style: {
-                            borderRadius: 8,
-                            marginTop: 10,
-                          },
-                        }}
-                      />
-                    </FormControl>
-                  </Grid>
-                ))}
+                  ))}
+                </Grid>
               </Grid>
-            </Grid>
+            )}
           </Grid>
         </DialogContent>
         <hr

@@ -2,23 +2,16 @@ import BCTabs from '../../../components/bc-tab/bc-tab';
 import BCBackButton from 'app/components/bc-back-button/bc-back-button';
 import ServicesAndProducts from './services-and-products/services-and-products';
 import Discounts from './discounts/discounts';
+import Setup from './setup/setup';
 import SwipeableViews from 'react-swipeable-views';
-import { modalTypes } from '../../../../constants';
 import styles from './services-and-products-list.styles';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button, Fab, useTheme, withStyles } from '@material-ui/core';
+import { useDispatch } from 'react-redux';
+import { useTheme, withStyles } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { getCustomers } from 'actions/customer/customer.action';
-import {
-  openModalAction,
-  setModalDataAction,
-} from 'actions/bc-modal/bc-modal.action';
-import { info, error } from 'actions/snackbar/snackbar.action';
 import { getAllJobTypesAPI } from 'api/job.api';
 import '../../../../scss/popup.scss';
 import { useLocation, useHistory } from 'react-router-dom';
-import * as CONSTANTS from '../../../../constants';
-import { CSButton } from '../../../../helpers/custom';
 
 function AdminServicesAndProductsPage({ classes }: any) {
   const dispatch = useDispatch();
@@ -50,6 +43,11 @@ function AdminServicesAndProductsPage({ classes }: any) {
       newValue === 1 ? 'services/discounts' : 'services/services-and-products'
     );
   };
+  const views = [
+    { label: 'Services & Products', Component: ServicesAndProducts },
+    { label: 'Discounts', Component: Discounts },
+    { label: 'Setup', Component: Setup },
+  ];
 
   return (
     <div className={classes.pageMainContainer}>
@@ -62,24 +60,21 @@ function AdminServicesAndProductsPage({ classes }: any) {
             curTab={curTab}
             indicatorColor={'primary'}
             onChangeTab={handleTabChange}
-            tabsData={['Services & Products', 'Discounts', 'Setup'].map(
-              (label, i) => ({
-                label,
-                value: i,
-              })
-            )}
+            tabsData={views.map(({ label }, i) => ({
+              label,
+              value: i,
+            }))}
           />
           <SwipeableViews
             axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
             index={curTab}
             disabled
           >
-            <div className={classes.dataContainer} id={'0'}>
-              {curTab === 0 && <ServicesAndProducts />}
-            </div>
-            <div className={classes.dataContainer} id={'1'}>
-              {curTab === 1 && <Discounts />}
-            </div>
+            {views.map(({ Component }, i) => (
+              <div key={i} className={classes.dataContainer} id={String(i)}>
+                <Component />
+              </div>
+            ))}
           </SwipeableViews>
         </div>
       </div>
