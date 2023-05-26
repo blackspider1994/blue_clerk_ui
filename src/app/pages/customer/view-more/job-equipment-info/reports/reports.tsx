@@ -68,6 +68,7 @@ function CustomersJobEquipmentInfoReportsPage({ classes }: any) {
     history.push({
       pathname: `/main/customers/${customerName}`,
       state: {
+        ...location,
         customerName,
         customerId,
         from: 1

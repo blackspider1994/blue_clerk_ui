@@ -2,7 +2,7 @@ import BCTableContainer from '../../../components/bc-table-container/bc-table-co
 import BCTabs from '../../../components/bc-tab/bc-tab';
 import SwipeableViews from 'react-swipeable-views';
 import { formatDatTimelll, formatDate } from 'helpers/format';
-import { loadJobReportsActions } from 'actions/customer/job-report/job-report.action';
+import { loadJobReportsActions, setDateFilterRange } from 'actions/customer/job-report/job-report.action';
 import styles from '../customer.styles';
 import { Grid, withStyles } from "@material-ui/core";
 import React, { useEffect, useState } from 'react';
@@ -29,7 +29,7 @@ function JobReportsPage({ classes, theme }: any) {
   const customStyles = useCustomStyles();
   // const { loading, jobReports, error } = useSelector(({ jobReport }: any) =>
   //   jobReport);
-  const { loading, jobReports, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword} = useSelector(
+  const { loading, jobReports, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword, dateFilterRange} = useSelector(
     ({ jobReport }: any) => ({
       loading: jobReport.loading,
       jobReports: jobReport.jobReports,
@@ -39,9 +39,10 @@ function JobReportsPage({ classes, theme }: any) {
       currentPageIndex: jobReport.currentPageIndex,
       currentPageSize: jobReport.currentPageSize,
       keyword: jobReport.keyword,
+      dateFilterRange: jobReport.dateFilterRange
     })
   );
-  const [selectionRange, setSelectionRange] = useState<Range | null>(null);
+  // const [selectionRange, setSelectionRange] = useState<Range | null>(null);
   const [curTab, setCurTab] = useState(0);
   const history = useHistory();
 
@@ -154,17 +155,19 @@ function JobReportsPage({ classes, theme }: any) {
     }
   ];
 
-  const filteredReports = selectionRange ? jobReports.filter((report: any) => {
+  const filteredReports = dateFilterRange ? jobReports.filter((report: any) => {
     // return moment(report.jobDate).isBetween(selectionRange.startDate, selectionRange.endDate, 'day', '[]');
     return true
   }) : jobReports;
 
   useEffect(() => {
+
     if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
       // dispatch(loadJobReportsActions.fetch());
       dispatch(getAllJobReportsAPI(undefined,undefined,undefined,undefined,currentDivision.params));
       return () => {
         dispatch(setKeyword(''));
+        dispatch(setDateFilterRange(null));
         dispatch(setCurrentPageIndex(currentPageIndex));
         dispatch(setCurrentPageSize(currentPageSize));
       }
@@ -172,16 +175,17 @@ function JobReportsPage({ classes, theme }: any) {
   }, [currentDivision.isDivisionFeatureActivated, currentDivision.params]);
 
   useEffect(() => {
-    dispatch(getAllJobReportsAPI(currentPageSize, currentPageIndex, keyword, selectionRange,currentDivision.params));
+    dispatch(getAllJobReportsAPI(currentPageSize, currentPageIndex, keyword, dateFilterRange, currentDivision.params));
     dispatch(setCurrentPageIndex(0));
-  }, [selectionRange]);
+  }, [dateFilterRange]);
 
   useEffect(() => {
-    if(location?.state?.option?.search || location?.state?.option?.pageSize){
+    if(location?.state?.option?.search || location?.state?.option?.pageSize || location?.state?.option?.pageIndex || location?.state?.option?.dateFilterRange){
       dispatch(setKeyword(location.state.option.search));
-      dispatch(getAllJobReportsAPI(location.state.option.pageSize, currentPageIndex, location.state.option.search , selectionRange, currentDivision.params));
+      dispatch(setDateFilterRange(location.state.option.dateFilterRange));
+      dispatch(getAllJobReportsAPI(location.state.option.pageSize, location?.state?.option?.pageIndex, location.state.option.search , location.state.option.dateFilterRange, currentDivision.params));
       dispatch(setCurrentPageSize(location.state.option.pageSize));
-      dispatch(setCurrentPageIndex(0));
+      dispatch(setCurrentPageIndex(location?.state?.option?.pageIndex));
       window.history.replaceState({}, document.title)
     }
   }, [location]);
@@ -199,6 +203,8 @@ function JobReportsPage({ classes, theme }: any) {
       'state': {
         keyword,
         currentPageSize,
+        currentPageIndex,
+        dateFilterRange
       }
     });
   };
@@ -207,8 +213,10 @@ function JobReportsPage({ classes, theme }: any) {
 
   function Toolbar() {
     return  <BCDateRangePicker
-      range={selectionRange}
-      onChange={setSelectionRange}
+      range={dateFilterRange}
+      onChange={(range: Range | null) => {
+        dispatch(setDateFilterRange(range));
+      }}
       showClearButton={true}
       title={'Filter by Job Date...'}
       classes={{button: classes.noLeftMargin}}
@@ -246,7 +254,7 @@ function JobReportsPage({ classes, theme }: any) {
               <BCTableContainer
                 columns={columns}
                 // currentPage={currentPage}
-                initialMsg={'There are no Job Report List'}
+                initialMsg={'Nothing Here Yet'}
                 isLoading={loading}
                 onRowClick={handleRowClick}
                 search
@@ -265,16 +273,20 @@ function JobReportsPage({ classes, theme }: any) {
                   {
                     dispatch(setCurrentPageIndex(num));
                     if(apiCall)
-                      dispatch(getAllJobReportsAPI(currentPageSize, num, keyword, selectionRange, currentDivision.params))
+                      dispatch(getAllJobReportsAPI(currentPageSize, num, keyword, dateFilterRange, currentDivision.params))
                   }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => {
                   dispatch(setCurrentPageSize(num));
-                  dispatch(getAllJobReportsAPI(num || currentPageSize, currentPageIndex, keyword, selectionRange, currentDivision.params))
+                  dispatch(getAllJobReportsAPI(num || currentPageSize, currentPageIndex, keyword, dateFilterRange, currentDivision.params))
                 }}
                 setKeywordFunction={(query: string) => {
                   dispatch(setKeyword(query));
-                  dispatch(getAllJobReportsAPI(currentPageSize, currentPageIndex,query, selectionRange, currentDivision.params))
+                  dispatch(getAllJobReportsAPI(currentPageSize, currentPageIndex,query, dateFilterRange, currentDivision.params))
+                }}
+                setDateFilterRangeFunction={(range: Range) => {
+                  dispatch(setDateFilterRange(range));
+                  dispatch(getAllJobReportsAPI(currentPageSize, currentPageIndex, keyword, range, currentDivision.params))
                 }}
               />
             </div>

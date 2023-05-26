@@ -111,3 +111,10 @@ export const updateCustomerAction = (customers: any, callback?: any) => {
     }
   };
 };
+
+export const setKeyword = (keyword: string) => {
+  return {
+    'payload': keyword,
+    'type': types.SET_CUSTOMERS_SEARCH_KEYWORD
+  };
+};

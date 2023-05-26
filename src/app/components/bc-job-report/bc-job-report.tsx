@@ -86,13 +86,15 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
   });
 
   const handleBackButtonClick = () => {
-    if(location?.state?.keyword || location?.state?.currentPageSize){
+    if(location?.state?.keyword || location?.state?.currentPageSize || location?.state?.dateFilterRange){
       history.push({
         'pathname': currentDivision.urlParams ?  `/main/customers/job-reports/${currentDivision.urlParams}` : `/main/customers/job-reports`,
         'state': {
           'option': {
             search: location?.state?.keyword || '',
+            pageIndex: location?.state?.currentPageIndex || 0,
             pageSize: location?.state?.currentPageSize || 10,
+            dateFilterRange: location?.state?.dateFilterRange || null,
           },
         }
 
@@ -117,13 +119,15 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
       history.push({
         'pathname': `/main/customers/${job.customer._id}/job-equipment-info/reports`
       });
-    } else if(location?.state?.keyword || location?.state?.currentPageSize){
+    } else if(location?.state?.keyword || location?.state?.currentPageSize || location?.state?.dateFilterRange){
       history.push({
         'pathname': currentDivision.urlParams ?  `/main/customers/job-reports/${currentDivision.urlParams}` : `/main/customers/job-reports`,
         'state': {
           'option': {
             search: location?.state?.keyword || '',
             pageSize: location?.state?.currentPageSize || 10,
+            pageIndex: location?.state?.pageIndex || 0,
+            dateFilterRange: location?.state?.dateFilterRange || null,
           },
         }
 
