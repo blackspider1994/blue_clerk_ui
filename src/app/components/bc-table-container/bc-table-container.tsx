@@ -22,7 +22,7 @@ function BCTableContainer({
   search,
   searchPlaceholder = 'Search Customers...',
   pagination = true,
-  initialMsg = 'No records found!',
+  initialMsg = 'Nothing Here Yet',
   isPageSaveEnabled,
   setPage,
   currentPage,
