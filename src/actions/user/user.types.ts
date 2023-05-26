@@ -60,6 +60,7 @@ export interface CompanyProfileOtherState {
   inputError: {[k: string]: boolean};
   serverError: any;
   isLoading: boolean;
+  isLocationLoading: boolean;
 }
 export interface CompanyProfileRes {
   status?: number;
@@ -103,7 +104,8 @@ export const initialCompanyProfileState: CompanyProfileStateType = {
   locations: [],
   inputError: {},
   serverError: null,
-  isLoading: false
+  isLoading: false,
+  isLocationLoading: false,
 };
 
 
@@ -118,5 +120,6 @@ export enum CompanyProfileActonType {
   SET_LOCATIONS = 'SET_LOCATIONS',
   SET_SELECTED_LOCATION = 'SET_SELECTED_LOCATIONS',
   UPDATE_LOCATION = 'UPDATE_LOCATION',
-  ADD_LOCATION = 'ADD_LOCATION '
+  ADD_LOCATION = 'ADD_LOCATION ',
+  SET_LOCATIONS_LOADING = "SET_LOCATIONS_LOADING"
 }

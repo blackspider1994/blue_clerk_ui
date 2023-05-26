@@ -186,6 +186,14 @@ function BCCompanyLocationModal({
         assignedEmployees: oldAssignedEmployee,
       };
 
+      //Update the billing addres if address has changed
+      if (FormikValues.isAddressAsBillingAddress) {
+        params.billingStreet = FormikValues.street;
+        params.billingCity = FormikValues.city;
+        params.billingState = FormikValues.state?.name || '';
+        params.billingZipCode = FormikValues.zipCode
+      }
+
       Geocode.setApiKey(Config.REACT_APP_GOOGLE_KEY);
 
       if (params.state ||  params.zipCode) {

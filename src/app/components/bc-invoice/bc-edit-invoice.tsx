@@ -529,6 +529,12 @@ function BCEditInvoice({
   const [totalAmount, setTotalAmount] = useState(invoiceData.total || 0);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+  const [billingAddress, setBillingAddress] = useState({
+    street: invoiceData?.company?.address?.street,
+    city: invoiceData?.company?.address?.city,
+    state: invoiceData?.company?.address?.state,
+    zipCode: invoiceData?.company?.address?.zipCode,
+  });
 
   const [options, setOptions] =  React.useState(['Save and Continue', 'Save and Send', 'Save as Draft']);
 
@@ -648,22 +654,24 @@ function BCEditInvoice({
     return invoiceData.createdAt?.split('T')[0];
   }
 
-  let billingAddress = {
-    street: invoiceData?.company?.address?.street,
-    city: invoiceData?.company?.address?.city,
-    state: invoiceData?.company?.address?.state,
-    zipCode: invoiceData?.company?.address?.zipCode,
-  };
-
   useEffect(()=>{
     if (invoiceData.locations?.length && currentDivision.data?.locationId) {
       let filteredLocation = invoiceData.locations.find((res: any) => res._id === currentDivision.data?.locationId);
       if (filteredLocation) {
-        billingAddress.street =  filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.street : filteredLocation?.billingAddress?.street;
-        billingAddress.city = filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.city : filteredLocation?.billingAddress?.city;
-        billingAddress.state = filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.state : filteredLocation?.billingAddress?.state;
-        billingAddress.zipCode = filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.zipCode : filteredLocation?.billingAddress?.zipCode;
+        setBillingAddress({
+          street :  filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.street : filteredLocation?.billingAddress?.street,
+          city : filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.city : filteredLocation?.billingAddress?.city,
+          state : filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.state : filteredLocation?.billingAddress?.state,
+          zipCode : filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.zipCode : filteredLocation?.billingAddress?.zipCode,
+        })
       }
+    }else{
+      setBillingAddress({
+        street : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.street ?? '' : invoiceData?.companyLocation?.billingAddress?.street ?? '') : invoiceData?.company?.address?.street,
+        city : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.city ?? '' : invoiceData?.companyLocation?.billingAddress?.city ?? '') : invoiceData?.company?.address?.city,
+        state : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.state ?? '' : invoiceData?.companyLocation?.billingAddress?.state ?? '') : invoiceData?.company?.address?.state,
+        zipCode : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.zipCode ?? '' : invoiceData?.companyLocation?.billingAddress?.zipCode ?? '') : invoiceData?.company?.address?.zipCode,
+      })
     }
   },[currentDivision])
 

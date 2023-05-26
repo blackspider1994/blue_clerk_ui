@@ -355,9 +355,12 @@ function BCJobModal({
         : job.ticket.customer;
     dispatch(getInventory());
     let divisionParams: DivisionParams = {};
-    if (currentDivision.data?.name != "All") {
-      divisionParams = {workType: currentDivision.data?.workTypeId, companyLocation: currentDivision.data?.locationId};
-    }
+    if (jobValue?.ticket && currentDivision.isDivisionFeatureActivated) {
+      divisionParams = {
+        workType: jobValue?.ticket?.workType, 
+        companyLocation: jobValue?.ticket?.companyLocation
+      };
+    }  
     
     dispatch(getEmployeesForJobAction(divisionParams));
     dispatch(getVendors(divisionParams));

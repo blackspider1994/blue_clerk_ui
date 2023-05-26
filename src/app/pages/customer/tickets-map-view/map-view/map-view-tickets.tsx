@@ -179,10 +179,6 @@ function MapViewTicketsScreen({
             setIsLoading(false);
             setAllTickets([...tempRefTicket.current]);
           }
-          console.log(tempRefTicket.current);
-          console.log(count);
-          console.log(total);
-          
           
           if (count === total) {
             socket.close();
