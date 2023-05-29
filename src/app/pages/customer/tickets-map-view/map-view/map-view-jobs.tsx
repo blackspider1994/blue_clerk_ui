@@ -157,7 +157,7 @@ function MapViewJobsScreen({ classes, selectedDate, filter: filterJobs }: Props)
             list={filteredJobs}
             streamingTickets={streamingTickets}
             selected={selected}
-            coordinates={coordinates}
+            coordinates={currentDivision.data?.address?.coordinates || coordinates}
             dispatchUnselectTicket={dispatchUnselectTicket}
             openModalHandler={openModalHandler}
           />

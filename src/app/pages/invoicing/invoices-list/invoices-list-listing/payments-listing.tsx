@@ -154,6 +154,15 @@ function InvoicingPaymentListing({ classes, theme }: any) {
     />
   }
 
+  const rowTooltip = (row: any) => {
+    let rowData = row.original;
+    if (currentDivision.isDivisionFeatureActivated && currentDivision.data?.name == "All" && (rowData.companyLocation?.name || rowData.workType?.title)) {
+      return `${rowData.companyLocation?.name}  ${rowData.isMainLocation ? "(Main) " : ""}- ${rowData.workType?.title}`
+    }else{
+      return ""
+    }
+  }
+
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -165,6 +174,7 @@ function InvoicingPaymentListing({ classes, theme }: any) {
         tableData={filteredPayments}
         toolbarPositionLeft={true}
         toolbar={Toolbar()}
+        rowTooltip={rowTooltip}
         // manualPagination
         // fetchFunction={(num: number, isPrev:boolean, isNext:boolean, query :string) =>
         //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, selectionRange))

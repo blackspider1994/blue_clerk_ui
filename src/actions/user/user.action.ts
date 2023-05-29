@@ -49,8 +49,10 @@ export const getCompanyProfileAction = (companyId: string) => {
 
 export const getCompanyLocationsAction = () => {
   return async (dispatch: any) => {
+    dispatch({ type: CompanyProfileActonType.SET_LOCATIONS_LOADING, payload: true });
     const {status, message, companyLocations} = await getCompanyLocations();
     if (status === 1) {
+      dispatch({ type: CompanyProfileActonType.SET_LOCATIONS_LOADING, payload: false });
       dispatch({type: CompanyProfileActonType.SET_LOCATIONS, payload: companyLocations});
     } else {
       dispatch(error(message));

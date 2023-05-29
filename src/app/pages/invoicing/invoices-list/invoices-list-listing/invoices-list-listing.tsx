@@ -378,6 +378,15 @@ function InvoicingListListing({ classes, theme }: any) {
     </>
   }
 
+  const rowTooltip = (row: any) => {
+    let rowData = row.original;
+    if (currentDivision.isDivisionFeatureActivated && currentDivision.data?.name == "All" && (rowData.companyLocation?.name || rowData.workType?.title)) {
+      return `${rowData.companyLocation?.name}  ${rowData.isMainLocation ? "(Main) " : ""}- ${rowData.workType?.title}`
+    }else{
+      return ""
+    }
+  }
+
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -402,6 +411,7 @@ function InvoicingListListing({ classes, theme }: any) {
         setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentPageSize(num))}
         setKeywordFunction={(query: string) => dispatch(setKeyword(query))}
         disableInitialSearch={location?.state?.tab !== 1}
+        rowTooltip={rowTooltip}
       />
     </DataContainer>
   );

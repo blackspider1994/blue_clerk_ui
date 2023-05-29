@@ -179,10 +179,6 @@ function MapViewTicketsScreen({
             setIsLoading(false);
             setAllTickets([...tempRefTicket.current]);
           }
-          console.log(tempRefTicket.current);
-          console.log(count);
-          console.log(total);
-          
           
           if (count === total) {
             socket.close();
@@ -285,7 +281,7 @@ function MapViewTicketsScreen({
           isTicket={true}
           streamingTickets={streamingTickets}
           selected={selected}
-          coordinates={coordinates}
+          coordinates={currentDivision.data?.address?.coordinates || coordinates}
           tickets={tickets}
           dispatchUnselectTicket={dispatchUnselectTicket}
           openModalHandler={openModalHandler}

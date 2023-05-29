@@ -79,6 +79,7 @@ function CompanyProfilePage({ classes }: any) {
   const [location, setLocation] = useState<CompanyLocation| null>(null);
   const [curTab, setCurTab] = useState(0);
   const { user } = useSelector((state: any) => state.auth);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const handleTabChange = (newValue: number) => {
     setCurTab(newValue);
@@ -94,6 +95,9 @@ function CompanyProfilePage({ classes }: any) {
 
   useEffect(()=> {
     if (user._id && profileState.locations?.length) dispatch(getDivision(user._id))
+    if(!profileState.isLoading && !profileState.isLocationLoading){
+     setLoading(false); 
+    }
   }, [profileState])
   const handleUpdateCompanyProfile = async (values: any) => {
     const {
@@ -199,7 +203,7 @@ function CompanyProfilePage({ classes }: any) {
     <MainContainer>
       <PageContainer>
         {
-          profileState.isLoading ? (
+          loading ? (
               <BCCircularLoader/>
             ) :
             <div>

@@ -234,7 +234,7 @@ function PayrollInvoices({classes}: Props) {
     <BCTableContainer
       columns={columns}
       currentPage={currentPage}
-      initialMsg={isFiltered ? 'No records found!' : 'Please filter to view report'}
+      initialMsg={isFiltered ? 'Nothing Here Yet' : 'Please filter to view report'}
       search
       searchPlaceholder = 'Search Invoices...'
       isLoading={loading}

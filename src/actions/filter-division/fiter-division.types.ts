@@ -15,10 +15,23 @@ export interface ICurrentDivision{
 }
 
 export interface IDivision{
+    address?: IDivisionAddress;
     locationId?: string;
     workTypeId?: string;
     name?: string;
     employeeId?: string;
+}
+
+export interface IDivisionAddress {
+    coordinates?: {
+        lat: number;
+        lng: number;
+    };
+    street?: string;
+    unit?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
 }
 
 export interface ISelectedDivision{

@@ -22,7 +22,7 @@ function BCTableContainer({
   search,
   searchPlaceholder = 'Search Customers...',
   pagination = true,
-  initialMsg = 'No records found!',
+  initialMsg = 'Nothing Here Yet',
   isPageSaveEnabled,
   setPage,
   currentPage,
@@ -44,6 +44,7 @@ function BCTableContainer({
   setCurrentPageSizeFunction = () => {},
   setKeywordFunction = () => {},
   disableInitialSearch = false,
+  rowTooltip
 }: any) {
   const location = useLocation<any>();
   const history = useHistory();
@@ -216,6 +217,7 @@ function BCTableContainer({
               setCurrentPageIndexFunction={setCurrentPageIndexFunction}
               currentPageSize={currentPageSize}
               setCurrentPageSizeFunction={setCurrentPageSizeFunction}
+              rowTooltip={rowTooltip}
             />
         }
       </Grid>

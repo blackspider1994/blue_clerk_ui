@@ -6,6 +6,8 @@ export const CompanyProfileReducer: Reducer<any> = (state = initialCompanyProfil
   switch (action.type) {
     case CompanyProfileActonType.LOADING:
       return { ...state, isLoading: action.payload }
+    case CompanyProfileActonType.SET_LOCATIONS_LOADING:
+      return { ...state, isLocationLoading: action.payload }
     case CompanyProfileActonType.ONCHANGE: {
       const { id, value, inputError } = action.payload
 
@@ -29,7 +31,7 @@ export const CompanyProfileReducer: Reducer<any> = (state = initialCompanyProfil
         paymentTerm: paymentTerm,
         companyAdmin: admin
       }
-      return { ...newState, locations: state.locations, inputError: {}, serverError: null }
+      return { ...newState, locations: state.locations, inputError: {}, serverError: null, isLocationLoading: state.isLocationLoading }
     }
     case CompanyProfileActonType.ON_UPDATE_ERROR:
       return {

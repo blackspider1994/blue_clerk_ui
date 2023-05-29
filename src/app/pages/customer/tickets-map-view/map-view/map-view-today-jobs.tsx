@@ -140,7 +140,7 @@ function MapViewTodayJobsScreen({ classes, filter: filterJobs }: Props) {
             showPins
             streamingTickets={streamingTickets}
             selected={selected}
-            coordinates={coordinates}
+            coordinates={currentDivision.data?.address?.coordinates || coordinates}
             dispatchUnselectTicket={dispatchUnselectTicket}
             openModalHandler={openModalHandler}
           />

@@ -285,7 +285,7 @@ function PastPayments({ classes }: Props) {
       currentPage={currentPage}
       isLoading={loading}
       //onRowClick={handleRowClick}
-      initialMsg={isFiltered ? 'No records found!' : 'Please select a vendor'}
+      initialMsg={isFiltered ? 'Nothing Here Yet' : 'Please select a vendor'}
       search
       searchPlaceholder='Search...'
       setPage={setCurrentPage}

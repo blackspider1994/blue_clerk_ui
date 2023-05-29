@@ -140,39 +140,23 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
   };
 
   const generateInvoice = async () => {
-        //To ensure that all tickets are detected by the division, and check if the user has activated the division feature.
-        if ((currentDivision.isDivisionFeatureActivated && (currentDivision.data?.locationId || currentDivision.data?.locationId)) || !divisions.data?.length) {
-          const invoiceObj: {
-            jobId: string;
-            customerId: string;
-            customerContactId?: string;
-            customerPO?: string;
-            workType?: string;
-            companyLocation?: string;
-          } = {
-            'jobId': job._id,
-            'customerId': job.customer._id,
-          };
-
-
-          if (currentDivision.data?.locationId) {
-            invoiceObj.companyLocation = currentDivision.data?.locationId;
-          }
-
-          if (currentDivision.data?.workTypeId) {
-            invoiceObj.workType = currentDivision.data?.workTypeId;
-          }
-      
-          if(job?.customerContactId?._id) {
-            invoiceObj.customerContactId = job.customerContactId._id;
-          }
-          if(job?.customerPO) {
-            invoiceObj.customerPO = job.customerPO;
-          }
-          generateInvoiceHandler(invoiceObj)
-        }else{
-          dispatch(warning("Please select a division before creating a ticket."));
+        const invoiceObj: {
+          jobId: string;
+          customerId: string;
+          customerContactId?: string;
+          customerPO?: string;
+        } = {
+          'jobId': job._id,
+          'customerId': job.customer._id,
+        };
+    
+        if(job?.customerContactId?._id) {
+          invoiceObj.customerContactId = job.customerContactId._id;
         }
+        if(job?.customerPO) {
+          invoiceObj.customerPO = job.customerPO;
+        }
+        generateInvoiceHandler(invoiceObj)
   };
 
   const showInvoice = () => {

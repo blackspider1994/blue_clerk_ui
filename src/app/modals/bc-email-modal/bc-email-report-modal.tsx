@@ -107,8 +107,8 @@ function EmailReportModal({ classes, reportData, reportName }: any) {
         subject: values.subject,
         message: values.message,
         copyToMyself: values.sendToMe,
-        workType: currentDivision.data?.workTypeId,
-        companyLocation: currentDivision.data?.locationId,
+        workType: currentDivision.data?.workTypeId ? JSON.stringify([currentDivision.data?.workTypeId]) : null,
+        companyLocation: currentDivision.data?.locationId ? JSON.stringify([currentDivision.data?.locationId]) : null,
       }
       try {
         setLoading(true);

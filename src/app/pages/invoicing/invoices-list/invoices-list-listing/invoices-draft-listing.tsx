@@ -112,6 +112,15 @@ function InvoicingDraftListing({ classes, theme }: any) {
 
   const handleRowClick = (event: any, row: any) => showInvoiceDetail(row.original._id);
 
+  const rowTooltip = (row: any) => {
+    let rowData = row.original;
+    if (currentDivision.isDivisionFeatureActivated && currentDivision.data?.name == "All" && (rowData.companyLocation?.name || rowData.workType?.title)) {
+      return `${rowData.companyLocation?.name}  ${rowData.isMainLocation ? "(Main) " : ""}- ${rowData.workType?.title}`
+    }else{
+      return ""
+    }
+  }
+
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -134,6 +143,7 @@ function InvoicingDraftListing({ classes, theme }: any) {
         setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentDraftPageSize(num))}
         setKeywordFunction={(query: string) => dispatch(setDraftKeyword(query))}
         disableInitialSearch={location?.state?.tab !== 2}
+        rowTooltip={rowTooltip}
       />
     </DataContainer>
   );

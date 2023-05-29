@@ -2,7 +2,7 @@ import { useFormik } from "formik";
 import styles from "./bc-company-location-assign-modal.styles";
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, TextField, Typography, withStyles } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { Autocomplete } from "@material-ui/lab";
+import { Autocomplete, createFilterOptions } from "@material-ui/lab";
 import { useDispatch, useSelector } from 'react-redux';
 import styled from "styled-components";
 import * as CONSTANTS from '../../../constants';
@@ -63,7 +63,12 @@ function BCCompanyLocationAssignModal({
           let assignedEmployees = companyLocation.assignedEmployees.map(res => res.employee._id);
           filteredEmployees = employees?.filter((employee: any) => !assignedEmployees.includes(employee._id) || employee._id == formData?.employee._id);
         }
-        setAssigneeList(filteredEmployees.map((res: any) => { return { _id: res._id, name: res.profile?.displayName } }));
+        setAssigneeList(filteredEmployees.map((res: any) => { 
+          return { 
+            _id: res._id, 
+            name: res.profile?.displayName, 
+            filter: res.profile?.displayName + res.auth?.email
+          } }));
       } catch (error) { }
     }
   }, [employees])
@@ -76,7 +81,12 @@ function BCCompanyLocationAssignModal({
           let assignedVendors = companyLocation.assignedVendors.map(res => res.vendor._id);
           filteredVendors = filteredVendors?.filter((vendor: any) => vendor.contractor?._id == formData?.vendor?._id || !assignedVendors.includes(vendor.contractor?._id));
         }
-        setAssigneeList(filteredVendors.map((res: any) => { return { _id: res?.contractor?._id, name: res?.contractor?.info?.displayName ? res?.contractor?.info?.displayName : res?.contractor?.info?.companyName } }));
+        setAssigneeList(filteredVendors.map((res: any) => { 
+          return { 
+              _id: res?.contractor?._id, 
+              name: res?.contractor?.info?.displayName ? res?.contractor?.info?.displayName : res?.contractor?.info?.companyName,
+              filter: (res?.contractor?.info?.displayName ? res?.contractor?.info?.displayName : res?.contractor?.info?.companyName) + res?.contractor?.info?.companyEmail
+            } }));
       } catch (error) { }
     }
   }, [vendors])
@@ -164,6 +174,11 @@ function BCCompanyLocationAssignModal({
   };
 
 
+  const assigneeFilterOptions = createFilterOptions({
+    stringify: (option: any) => option.filter
+  });
+
+
   return (
     <DataContainer>
       <form onSubmit={FormikSubmit}>
@@ -228,6 +243,7 @@ function BCCompanyLocationAssignModal({
                     return `${option?.name || ''}`
                   }}
                   id={'tags-standard'}
+                  filterOptions={assigneeFilterOptions}
                   onChange={(ev: any, newValue: any) => changeField("assignee", newValue)}
                   options={assigneeList}
                   renderInput={(params) => (

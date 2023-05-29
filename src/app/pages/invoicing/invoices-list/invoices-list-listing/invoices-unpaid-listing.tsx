@@ -212,6 +212,15 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
     />
   }
 
+  const rowTooltip = (row: any) => {
+    let rowData = row.original;
+    if (currentDivision.isDivisionFeatureActivated && currentDivision.data?.name == "All" && (rowData.companyLocation?.name || rowData.workType?.title)) {
+      return `${rowData.companyLocation?.name}  ${rowData.isMainLocation ? "(Main) " : ""}- ${rowData.workType?.title}`
+    }else{
+      return ""
+    }
+  }
+  
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -236,6 +245,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
         setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentUnpaidPageSize(num))}
         setKeywordFunction={(query: string) => dispatch(setUnpaidKeyword(query))}
         disableInitialSearch={location?.state?.tab !== 0}
+        rowTooltip={rowTooltip}
       />
     </DataContainer>
   );

@@ -41,7 +41,7 @@ function TabVendorsGrid({ classes, companyLocation}: {classes: any, companyLocat
       'sortable': true
     },
     {
-      'Header': 'Phone',
+      'Header': 'Email',
       'accessor': 'vendor.info.companyEmail',
       'className': 'font-bold',
       'sortable': true

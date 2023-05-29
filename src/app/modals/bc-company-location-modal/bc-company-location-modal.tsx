@@ -46,6 +46,9 @@ import AutoComplete from "../../components/bc-autocomplete/bc-autocomplete_2";
 import { Autocomplete, createFilterOptions } from '@material-ui/lab';
 import { getWorkType } from 'actions/work-type/work-type.action';
 import { getContractors } from 'actions/payroll/payroll.action';
+import Geocode from "react-geocode";
+import Config from "../../../config";
+
 const companyLocationSchema = Yup.object().shape({
   locationName: Yup.string().required('Required'),
   contactEmail: Yup.string().matches(emailRegExp, 'Email address is not valid'),
@@ -79,7 +82,11 @@ interface API_PARAMS {
   assignedEmployees?: {
     employeeId: string,
     workTypes: string[]
-  }[]
+  }[];
+  coordinates?: {
+    lat: number,
+    lng: number
+  }
 }
 
 
@@ -123,7 +130,7 @@ function BCCompanyLocationModal({
       billingZipCode: companyLocation?.billingAddress?.zipCode ?? '',
       emailSender: companyLocation?.billingAddress?.emailSender ?? '',
     },
-    onSubmit: (values: any, { setSubmitting }: any) => {
+    onSubmit: async (values: any, { setSubmitting }: any) => {
       let workTypes = FormikValues.workTypes.map(res => res._id);
       let oldAssignedVendors: any[] = [];
       let oldAssignedEmployee: any[] = [];
@@ -178,6 +185,23 @@ function BCCompanyLocationModal({
         assignedVendors: oldAssignedVendors,
         assignedEmployees: oldAssignedEmployee,
       };
+
+      //Update the billing addres if address has changed
+      if (FormikValues.isAddressAsBillingAddress) {
+        params.billingStreet = FormikValues.street;
+        params.billingCity = FormikValues.city;
+        params.billingState = FormikValues.state?.name || '';
+        params.billingZipCode = FormikValues.zipCode
+      }
+
+      Geocode.setApiKey(Config.REACT_APP_GOOGLE_KEY);
+
+      if (params.state ||  params.zipCode) {
+        const address = `${params.street} ${params.city} ${params.state} ${params.zipCode} USA`;
+        const mapResponse = await Geocode.fromAddress(address);
+        const {lat, lng} = mapResponse?.results[0]?.geometry?.location || {};
+        params.coordinates = {lat, lng};
+      }
 
       Object.entries(params).forEach(([key, value]) => {
         if (typeof value === 'string' && value === '') {
