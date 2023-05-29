@@ -217,6 +217,12 @@ function BCJobModal({
     {_id: 1, name: 'Contractor'},
   ];
 
+  const timeRangeOptions = [
+    {name: 'N/A', index: 0}, 
+    {name: 'AM', index: 1}, 
+    {name: 'PM', index: 2}, 
+  ];
+
   /**
    * Handle task's items change
    */
@@ -488,6 +494,7 @@ function BCJobModal({
         ticket?.customerContact?._id || ticket.customerContact || '',
       customerPO: jobValue.customerPO || ticket.customerPO,
       images: jobValue?.images?.length ? jobValue.images : ticket.images || [],
+      scheduleTimeAMPM: timeRangeOptions[jobValue?.scheduleTimeAMPM || 0],
       isHomeOccupied: jobValue?.isHomeOccupied || ticket?.isHomeOccupied || jobValue.ticket?.isHomeOccupied,
       homeOwnerId: jobValue?.homeOwner || ticket?.homeOwner?._id || jobValue.ticket?.homeOwner?._id || '',
     },
@@ -496,15 +503,16 @@ function BCJobModal({
     validateOnBlur: false,
     onSubmit: (values: any, {setSubmitting}: any) => {
       const tempData = {...values};
+      tempData.scheduleTimeAMPM = tempData.scheduleTimeAMPM?.index || 0;
       tempData.scheduleDate = moment(values.scheduleDate).format('YYYY-MM-DD');
       tempData.customerId = customer?._id; 
 
       if (values.scheduledStartTime){
-        // format local time as UTC without adjusting the time
+        // format local time as UTC without time adjustments (i.e. no timezone conversion)
         tempData.scheduledStartTime = moment(values.scheduledStartTime).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       }
       if (values.scheduledEndTime){
-        // format local time as UTC without adjusting the time
+        // format local time as UTC without time adjustments (i.e. no timezone conversion)
         tempData.scheduledEndTime = moment(values.scheduledEndTime).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       }
 
@@ -821,7 +829,7 @@ function BCJobModal({
               ? job.customer.profile.displayName
               : displayName}</Typography>
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <Typography variant={'caption'} className={'previewCaption'}>due
               date</Typography>
             <Typography variant={'h6'}
@@ -857,6 +865,7 @@ function BCJobModal({
               minDateMessage={form?.errors?.scheduledStartTime || ''}
               value={FormikValues.scheduledStartTime}
               errorText={FormikErrors.scheduledStartTime}
+              disabled={FormikValues.scheduleTimeAMPM?.index !== 0 ? true : false}
             />
           </Grid>
           <Grid item xs={2}>
@@ -864,7 +873,7 @@ function BCJobModal({
               time</Typography>
             <BCDateTimePicker
               dateFormat={'HH:mm:ss'}
-              disablePast={!job._id}
+              disablePast={!job._id }
               handleChange={(e: any) =>
                 dateChangeHandler(e, 'scheduledEndTime')
               }
@@ -874,9 +883,33 @@ function BCJobModal({
               placeholder={'End Time'}
               value={FormikValues.scheduledEndTime}
               errorText={FormikErrors.scheduledEndTime}
+              disabled={FormikValues.scheduleTimeAMPM?.index !== 0 ? true : false}
             />
           </Grid>
-          {/*          {headerError &&
+          <Grid item xs={1}>
+            <Typography variant={'caption'} className={'previewCaption'}>AM/PM</Typography>
+            <Autocomplete
+                disableClearable={true}
+                defaultValue={timeRangeOptions[0]}
+                disabled={FormikValues.scheduledStartTime || FormikValues.scheduledEndTime ? true : false}
+                getOptionLabel={(option) =>
+                  option.name ? option.name : ''
+                }
+                id={'tags-standard'}
+                options={timeRangeOptions}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant={'outlined'}
+                  />
+                )}
+                value={FormikValues.scheduleTimeAMPM} 
+                onChange={(ev: any, newValue: any) =>
+                  setFieldValue('scheduleTimeAMPM', newValue)
+                }
+              />
+          </Grid>
+{/*          {headerError &&
           <span style={{position: 'absolute', bottom: 0, right: 50, color: '#F44336', fontSize: 12}}>{headerError}</span>
           }*/}
         </Grid>

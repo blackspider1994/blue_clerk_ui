@@ -104,6 +104,7 @@ export const getAllJobsAPI = (pageSize = 10, currentPageIndex = 0, status = '-1'
                 jobType : currentItem
               }
             });
+            // Jobs data to be sent on List Page
             return {
               ...tempTask, 
               technician : tempJob.technicianObj[index],
