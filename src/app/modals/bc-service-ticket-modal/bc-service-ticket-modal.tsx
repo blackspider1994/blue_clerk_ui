@@ -600,11 +600,11 @@ function BCServiceTicketModal(
       setFieldValue('customerLastName', filteredHomeOwners[0].profile.lastName);
       setFormDataEmail({
         ...formDataEmail,
-        value: filteredHomeOwners[0].info?.email
+        value: filteredHomeOwners[0].info?.email || ''
       });
       setFormDataPhone({
         ...formDataPhone,
-        value: filteredHomeOwners[0].contact?.phone
+        value: filteredHomeOwners[0].contact?.phone || ''
       });
       setHomeOwnerId(filteredHomeOwners[0]._id); 
       setHomeOccupied(true);
