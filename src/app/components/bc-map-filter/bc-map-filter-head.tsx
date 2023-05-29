@@ -93,6 +93,9 @@ function BCMapFilterHead({
         'contact': null,
         'jobStatus': [-1],
         'isHomeOccupied': false,
+        'filterAMJobs': false,
+        'filterPMJobs': false,
+        'filterAllDayJobs': false,
       });
     }
   }

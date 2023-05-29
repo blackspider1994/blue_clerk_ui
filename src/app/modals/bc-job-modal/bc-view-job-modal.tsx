@@ -166,6 +166,11 @@ function BCViewJobModal({
   // Format time
   const startTime = job.scheduledStartTime ? formatTime(job.scheduledStartTime) : 'N/A';
   const endTime = job.scheduledEndTime ? formatTime(job.scheduledEndTime) : 'N/A';
+  const scheduleTimeAMPM = job.scheduleTimeAMPM ? 
+    job.scheduleTimeAMPM === 1 ? 'AM' :
+      job.scheduleTimeAMPM === 2 ? 'PM' :
+        job.scheduleTimeAMPM === 3 ? 'All day' : 'N/A'
+  : 'N/A';
   const canEdit = [0, 4, 6].indexOf(job.status) >= 0;
   let jobImages = job?.images?.length ? [...job.images] : [];
   jobImages = job?.technicianImages?.length ? [...jobImages, ...job.technicianImages] : jobImages;
@@ -285,6 +290,10 @@ function BCViewJobModal({
         <Grid item xs className={classNames({[classes.editButtonPadding]: canEdit})}>
           <Typography variant={'caption'} className={'previewCaption'}>close time</Typography>
           <Typography variant={'h6'} className={'previewTextTitle'}>{endTime}</Typography>
+        </Grid>
+        <Grid item xs className={classNames({[classes.editButtonPadding]: canEdit})}>
+          <Typography variant={'caption'} className={'previewCaption'}>time range</Typography>
+          <Typography variant={'h6'} className={'previewTextTitle'}>{scheduleTimeAMPM}</Typography>
         </Grid>
       </Grid>
       <div className={'modalDataContainer'}>

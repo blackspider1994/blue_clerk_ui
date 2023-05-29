@@ -38,6 +38,9 @@ function BCMapFilter({
       contact: currentFilter.contact,
       jobStatus: currentFilter.jobStatus || [-1],
       isHomeOccupied: currentFilter.isHomeOccupied || false,
+      filterAMJobs: currentFilter.filterAMJobs || false,
+      filterPMJobs: currentFilter.filterPMJobs || false,
+      filterAllDayJobs: currentFilter.filterAllDayJobs || false
     },
     onSubmit
   });
@@ -250,7 +253,7 @@ function BCMapFilter({
             </FormGroup>
             }
             <FormGroup>
-            <FormControlLabel
+              <FormControlLabel
                 classes={{label: classes.checkboxLabel}}
                 control={
                   <Checkbox
@@ -266,6 +269,55 @@ function BCMapFilter({
                 label={`ONLY OCCUPIED HOUSES`}
               />
             </FormGroup>
+            {filterType === 'job' ?
+            <div>
+              <FormGroup><span>Time of the day:</span></FormGroup>
+              <FormControlLabel
+                classes={{label: classes.checkboxLabel}}
+                control={
+                  <Checkbox
+                    color={'primary'}
+                    checked={form.values.filterAMJobs}
+                    name="filterAMJobs"
+                    classes={{root: classes.checkboxInput}}
+                    onChange={(e) => {
+                      setFieldValue('filterAMJobs', !form.values.filterAMJobs);
+                    }}
+                  />
+                }
+                label={'AM'}
+              />
+              <FormControlLabel
+                classes={{label: classes.checkboxLabel}}
+                control={
+                  <Checkbox
+                    color={'primary'}
+                    checked={form.values.filterPMJobs}
+                    name="filterPMJobs"
+                    classes={{root: classes.checkboxInput}}
+                    onChange={(e) => {
+                      setFieldValue('filterPMJobs', !form.values.filterPMJobs);
+                    }}
+                  />
+                }
+                label={'PM'}
+              />
+              <FormControlLabel
+                classes={{label: classes.checkboxLabel}}
+                control={
+                  <Checkbox
+                    color={'primary'}
+                    checked={form.values.filterAllDayJobs}
+                    name="filterAllDayJobs"
+                    classes={{root: classes.checkboxInput}}
+                    onChange={(e) => {
+                      setFieldValue('filterAllDayJobs', !form.values.filterAllDayJobs);
+                    }}
+                  />
+                }
+                label={'All day'}
+              /> 
+            </div> : ""}
           </Grid>
           <Grid
             item

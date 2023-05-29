@@ -57,6 +57,14 @@ function MapViewTodayJobsScreen({ classes, filter: filterJobs }: Props) {
         filter = filter && job.isHomeOccupied === true;
       }
 
+      if(filterJobs.filterAMJobs || filterJobs.filterPMJobs || filterJobs.filterAllDayJobs) {
+        const timeFilter = 
+          (filterJobs.filterAMJobs === true && job.scheduleTimeAMPM === 1) || 
+          (filterJobs.filterPMJobs === true && job.scheduleTimeAMPM === 2) || 
+          (filterJobs.filterAllDayJobs === true && ![1, 2].includes(job.scheduleTimeAMPM));
+        filter = filter && timeFilter;
+      }
+
       if (filterJobs.customerNames) {
         filter = filter && (job.customer._id === filterJobs.customerNames._id);
         if (filterJobs.contact) {

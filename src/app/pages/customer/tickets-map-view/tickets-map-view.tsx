@@ -42,6 +42,9 @@ export  interface FilterJobs {
   contact?: any,
   jobStatus: number[],
   isHomeOccupied?: boolean,
+  filterAMJobs?: boolean,
+  filterPMJobs?: boolean,
+  filterAllDayJobs?: boolean,
 }
 
 export  interface FilterRoutes {
@@ -127,6 +130,9 @@ function TicketsWithMapView({ classes }: any) {
     'contact': null,
     'jobStatus': [-1],
     'isHomeOccupied': false,
+    'filterAMJobs': false,
+    'filterPMJobs': false,
+    'filterAllDayJobs': false,
   });
 
   const [filterJobs, setFilterJobs] = useState<FilterJobs>({
@@ -135,6 +141,9 @@ function TicketsWithMapView({ classes }: any) {
     'contact': null,
     'jobStatus': [0],
     'isHomeOccupied': false,
+    'filterAMJobs': false,
+    'filterPMJobs': false,
+    'filterAllDayJobs': false,
   });
 
   const [filterRoutes, setFilterRoutes] = useState<FilterRoutes>({

@@ -107,6 +107,25 @@ function BCMapMarker({
     }
   }
 
+  const calculateMarkerBorder = (ticket : any) : string => {
+    if(!isTicket && ticket?.jobId) {
+      if(ticket?.scheduleTimeAMPM !== 0) {
+        switch(ticket?.scheduleTimeAMPM) {
+          case 1: return '3px solid #f5e642'; 
+          case 2: return '3px solid #f2a2c1';
+          default: return '3px solid black';
+        }
+      }
+      return '3px solid black'
+    }
+    else if(isTicket && ticket?.jobId) {
+      return `3px solid ${technicianColor}`
+    }
+    else {
+      return ticket?.isHomeOccupied ? '3px solid #db4b02' : 'none';
+    }
+  }
+
   const openCreateJobModal = () => {
     const modalDataAction = {
       'data': {
@@ -327,7 +346,7 @@ function BCMapMarker({
     <span
       id={id}
       style={{
-        border: isTicket && ticket.jobId ? `3px solid ${technicianColor}` : 'none',
+        border: calculateMarkerBorder(ticket),
         borderRadius: '50%',
         width: 25,
         height: 25,
