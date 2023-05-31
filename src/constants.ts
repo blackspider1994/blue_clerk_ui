@@ -132,6 +132,7 @@ export const modalTypes = {
   'EDIT_BILLING_ADDRESS': 'edit-billing-address',
   'DIVISION_CONFIRM_MODAL': 'division-confirm-modal',
   'DIVISION_WARNING_MODAL': 'division-warning-modal',
+  'BILLING_ADDRESS_WARNING_MODAL': 'billing-address-warning-modal',
 };
 
 export const rejectionReason = [

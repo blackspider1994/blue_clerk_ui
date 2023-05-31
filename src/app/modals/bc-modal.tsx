@@ -80,6 +80,7 @@ import BCSetDisplayNameModal
   from "./bc-set-display-name-modal/bc-set-display-name-modal";
 import BcDivisionConfirmModal from './bc-division-confirm-modal/bc-division-confirm-modal';
 import BcDivisionWarningModal from './bc-division-warning-modal/bc-division-warning-modal';
+import BcBillingAddressWarning from './bc-billing-address-warning-modal/bc-billing-address-warning';
 
 const BCTermsContent = React.lazy(() => import('../components/bc-terms-content/bc-terms-content'));
 
@@ -861,6 +862,17 @@ function BCModal() {
             'maxWidth': 'sm'
           });
           setComponent(<BcDivisionWarningModal
+            action={data.action}
+          />);
+          break;
+        case modalTypes.BILLING_ADDRESS_WARNING_MODAL:
+          setModalOptions({
+            'disableBackdropClick': true,
+            'disableEscapeKeyDown': true,
+            'fullWidth': true,
+            'maxWidth': 'sm'
+          });
+          setComponent(<BcBillingAddressWarning
             action={data.action}
           />);
           break;

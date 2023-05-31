@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useDispatch } from 'react-redux';
 import styled from "styled-components";
 import * as CONSTANTS from '../../../constants';
-import { closeModalAction, setModalDataAction } from "actions/bc-modal/bc-modal.action";
+import { closeModalAction, openModalAction, setModalDataAction } from "actions/bc-modal/bc-modal.action";
 import { UpdateCompanyLocationBillingAddressAction } from "actions/user/user.action";
 import { CompanyLocation } from "actions/user/user.types";
 import { allStates } from "utils/constants";
@@ -64,12 +64,26 @@ function BCCompanyLocationBillingAddressModal({
         emailSender: FormikValues.emailSender
       };
 
-      dispatch(UpdateCompanyLocationBillingAddressAction(payload, (status) => {
-        if (status) closeModal();
-        else {
-          setSubmitting(false);
-        }
-      }))
+      const action = () => {
+        dispatch(UpdateCompanyLocationBillingAddressAction(payload, (status) => {
+          if (status) closeModal();
+          else {
+            setSubmitting(false);
+          }
+        }))
+      }
+
+
+      dispatch(setModalDataAction({
+        'data': {
+          'action': action
+        },
+        'type': CONSTANTS.modalTypes.BILLING_ADDRESS_WARNING_MODAL
+      }));
+      setTimeout(() => {
+        dispatch(openModalAction());
+      }, 200);
+
     },
     validationSchema: billingAddressSchema
   })
