@@ -33,7 +33,7 @@ import EmailReportModal from './bc-email-modal/bc-email-report-modal';
 import CloseIcon from '@material-ui/icons/Close';
 import {
   closeModalAction,
-  setModalDataAction
+  setModalDataAction,
 } from 'actions/bc-modal/bc-modal.action';
 import { modalTypes } from '../../constants';
 import { Dialog, DialogTitle, IconButton, Typography } from '@material-ui/core';
@@ -51,32 +51,34 @@ import BCInvoiceEditModal from './bc-invoice-item-modal/bc-invoice-item-modal';
 import BCDiscountEditModal from './bc-discount-modal/bc-discount-modal';
 import BCSalesTaxModal from './bc-sales-tax-modal/bc-sales-tax-modal';
 import BcPaymentTermsModal from './bc-payment-terms-modal/bc-payment-terms-modal';
-import BcPaymentRecordModal from "./bc-payment-record-modal/bc-payment-record-modal";
-import BcPaymentHistoryModal from "./bc-payment-record-modal/bc-payment-history-modal";
+import BcPaymentRecordModal from './bc-payment-record-modal/bc-payment-record-modal';
+import BcPaymentHistoryModal from './bc-payment-record-modal/bc-payment-history-modal';
 import BCEditTiersModal from './bc-edit-tiers-modal/bc-edit-tiers.modal';
-import BcUpdatePaymentTermsModal from "./bc-update-payment-terms-modal/bc-update-payment-terms-modal";
-import BCQbDisconnectModal from "./bc-integration-modal/bc-disconnect-modal";
-import BCRescheduleJobModal from "./bc-job-modal/bc-reschedule-job-modal";
-import BcEditCommissionModal from "./bc-edit-commission-modal/bc-edit-commission-modal";
-import BcViewCommissionHistoryModal from "./bc-edit-commission-modal/bc-view-commission-history-modal";
-import BcPayrollPaymentRecordModal from "./bc-payroll-payment-modal/bc-payroll-payment-record-modal";
-import BcPayrollPaymentDetailModal from "./bc-payroll-payment-modal/bc-payroll-payment-detail-modal";
+import BcUpdatePaymentTermsModal from './bc-update-payment-terms-modal/bc-update-payment-terms-modal';
+import BCQbDisconnectModal from './bc-integration-modal/bc-disconnect-modal';
+import BCRescheduleJobModal from './bc-job-modal/bc-reschedule-job-modal';
+import BcEditCommissionModal from './bc-edit-commission-modal/bc-edit-commission-modal';
+import BcViewCommissionHistoryModal from './bc-edit-commission-modal/bc-view-commission-history-modal';
+import BcPayrollPaymentRecordModal from './bc-payroll-payment-modal/bc-payroll-payment-record-modal';
+import BcPayrollPaymentDetailModal from './bc-payroll-payment-modal/bc-payroll-payment-detail-modal';
 import BCEditInvoiceNumber from './bc-edit-invoice-number/bc-edit-invoice-number';
-import BcWarningModal from "./bc-warning-modal/bc-warning-modal";
+import BcWarningModal from './bc-warning-modal/bc-warning-modal';
 import BCSendInvoicesModal from './bc-send-invoices-modal/bc-send-invoices-modal';
 import BCBulkPaymentModal from './bc-bulk-payment-modal/bc-bulk-payment-modal';
 import BCEditBulkPaymentModal from './bc-bulk-payment-modal/bc-edit-bulk-payment-modal';
-import BcBulkPaymentHistoryModal from "./bc-bulk-payment-modal/bc-bulk-payment-history-modal";
-import BCCompanyLocationModal from "./bc-company-location-modal/bc-company-location-modal";
-import BCCustomizeRevenueReportModal from "./bc-customize-revenue-report-modal/bc-customize-revenue-report-modal";
-import BCMemorizeReportModal from "./bc-memorize-report-modal/bc-memorize-report-modal";
-import BcRecordSyncStatusModal from "./bc-record-sync-modal/bc-record-sync-modal";
-import BCAdvanceFilterInvoiceModal from "./bc-advance-filter-invoice-modal/bc-advance-filter-invoice-modal";
-import BcArReportModal from "./bc-ar-report-modal/bc-ar-report-modal";
+import BcBulkPaymentHistoryModal from './bc-bulk-payment-modal/bc-bulk-payment-history-modal';
+import BCCompanyLocationModal from './bc-company-location-modal/bc-company-location-modal';
+import BCCustomizeRevenueReportModal from './bc-customize-revenue-report-modal/bc-customize-revenue-report-modal';
+import BCMemorizeReportModal from './bc-memorize-report-modal/bc-memorize-report-modal';
+import BcRecordSyncStatusModal from './bc-record-sync-modal/bc-record-sync-modal';
+import BCAdvanceFilterInvoiceModal from './bc-advance-filter-invoice-modal/bc-advance-filter-invoice-modal';
+import BcArReportModal from './bc-ar-report-modal/bc-ar-report-modal';
 
-const BCTermsContent = React.lazy(() => import('../components/bc-terms-content/bc-terms-content'));
+const BCTermsContent = React.lazy(
+  () => import('../components/bc-terms-content/bc-terms-content')
+);
 
-interface BCModal { }
+interface BCModal {}
 
 interface RootState {
   modal: {
@@ -528,7 +530,7 @@ function BCModal() {
           disableBackdropClick: true,
           disableEscapeKeyDown: true,
           fullWidth: true,
-          maxWidth: 'md',
+          maxWidth: 'xl',
         });
         setComponent(<BCInvoiceEditModal item={data.item} />);
         break;
@@ -537,7 +539,7 @@ function BCModal() {
           disableBackdropClick: true,
           disableEscapeKeyDown: true,
           fullWidth: true,
-          maxWidth: 'md',
+          maxWidth: 'xl',
         });
         setComponent(<BCInvoiceEditModal item={data.item} />);
         break;
@@ -935,5 +937,4 @@ function BCModal() {
 }
 
 export default BCModal;
-
 

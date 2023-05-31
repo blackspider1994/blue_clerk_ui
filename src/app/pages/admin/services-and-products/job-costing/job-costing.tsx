@@ -1,14 +1,19 @@
 import BCTableContainer from 'app/components/bc-table-container/bc-table-container';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import styles from './setup.styles';
+import styles from './job-costing.styles';
 import { withStyles } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllDiscountItemsAPI } from 'api/discount.api';
 
+import {
+  openModalAction,
+  setModalDataAction,
+} from 'actions/bc-modal/bc-modal.action';
+import { modalTypes } from '../../../../../constants';
 import { getAllSalesTaxAPI } from 'api/tax.api';
 import { CSButton } from '../../../../../helpers/custom';
-import { addTierApi, updateTier } from 'api/items.api';
+import { addJobCostingApi, updateJobCosting } from 'api/items.api';
 import {
   error as SnackBarError,
   success,
@@ -24,8 +29,8 @@ interface Props {
 
 function AdminSetupPage({ classes }: Props) {
   const dispatch = useDispatch();
-  const { loading: tiersLoading, error: tiersError, tiers } = useSelector(
-    ({ invoiceItemsTiers }: any) => invoiceItemsTiers
+  const { loading, error: tiersError, costingList } = useSelector(
+    ({ InvoiceJobCosting }: any) => InvoiceJobCosting
   );
   const [updating, setUpdating] = useState(false);
 
@@ -42,7 +47,7 @@ function AdminSetupPage({ classes }: Props) {
           }}
           variant={'contained'}
         >
-          {'Add tier'}
+          {'Add job cost'}
         </CSButton>
       </>
     );
@@ -50,7 +55,7 @@ function AdminSetupPage({ classes }: Props) {
 
   const addTier = async () => {
     setUpdating(true);
-    const response = await addTierApi().catch((err) => {
+    const response = await addJobCostingApi().catch((err) => {
       dispatch(SnackBarError(err.message));
       setUpdating(false);
     });
@@ -63,7 +68,7 @@ function AdminSetupPage({ classes }: Props) {
 
   const handleClick = async (tier: any) => {
     const { _id, isActive, name } = tier;
-    const result = await updateTier({
+    const result = await updateJobCosting({
       itemTierId: _id,
       isActive: isActive ? '0' : '1',
       name,
@@ -79,13 +84,33 @@ function AdminSetupPage({ classes }: Props) {
     }
   };
 
+  const renderAdd = () => {
+    dispatch(
+      setModalDataAction({
+        data: {
+          discountItem: {
+            name: '',
+            description: '',
+            tax: 0,
+            charges: 0,
+          },
+          modalTitle: 'Add New Discount',
+        },
+        type: modalTypes.ADD_DISCOUNT_MODAL,
+      })
+    );
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
+  };
+
   const columns: any = [
     {
       Cell({ row }: any) {
         return (
           <>
             <div style={{ fontSize: 14, lineHeight: '16px', marginBottom: 7 }}>
-              TIER {row.original?.tier?.name}
+              JOB COST {row.original?.tier?.name}
             </div>
           </>
         );
@@ -124,15 +149,6 @@ function AdminSetupPage({ classes }: Props) {
     },
   ];
 
-  // <Button
-  //   color={tier.isActive ? 'secondary' : 'primary'}
-  //   onClick={() => handleClick(tier)}
-  //   size={'small'}
-  //   variant={'contained'}
-  // >
-  //   {tier.isActive ? 'Deactivate' : 'Activate'}
-  // </Button>;
-
   useEffect(() => {
     dispatch(getAllDiscountItemsAPI());
     dispatch(getAllSalesTaxAPI());
@@ -144,9 +160,9 @@ function AdminSetupPage({ classes }: Props) {
       <PageContainer>
         <BCTableContainer
           columns={columns}
-          isLoading={tiersLoading}
+          isLoading={loading}
           isPageSaveEnabled
-          tableData={tiers}
+          tableData={costingList}
           toolbar={Toolbar()}
         />
       </PageContainer>

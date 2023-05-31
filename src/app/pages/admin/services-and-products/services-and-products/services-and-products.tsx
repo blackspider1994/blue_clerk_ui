@@ -59,6 +59,10 @@ function AdminServiceAndProductsPage({ classes }: Props) {
     ({ invoiceItemsTiers }: any) => invoiceItemsTiers
   );
   const activeTiers = tiers.filter(({ tier }: any) => tier.isActive);
+  const costingList = useSelector(
+    ({ InvoiceJobCosting }: any) => InvoiceJobCosting.costingList
+  );
+  const activeJobCosts = costingList.filter(({ tier }: any) => tier.isActive);
 
   const handleTierChange = (id: number, value: string, tierId: string) => {
     const newItems: any = [...localItems];
@@ -200,6 +204,13 @@ function AdminServiceAndProductsPage({ classes }: Props) {
             isJobType: true,
             tax: 0,
             tiers: activeTiers.reduce(
+              (total: any, currentValue: any) => ({
+                ...total,
+                [currentValue.tier._id]: currentValue,
+              }),
+              {}
+            ),
+            costing: activeJobCosts.reduce(
               (total: any, currentValue: any) => ({
                 ...total,
                 [currentValue.tier._id]: currentValue,

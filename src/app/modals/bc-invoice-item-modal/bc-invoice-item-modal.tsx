@@ -80,7 +80,17 @@ interface ModalProps {
 }
 
 function BCInvoiceEditModal({ item, classes }: ModalProps) {
-  const { _id, name, isFixed, isJobType, description, tax, tiers } = item;
+  console.log('item', item);
+  const {
+    _id,
+    name,
+    isFixed,
+    isJobType,
+    description,
+    tax,
+    tiers,
+    costing,
+  } = item;
   const { itemObj, error, loadingObj } = useSelector(
     ({ invoiceItems }: RootState) => invoiceItems
   );
@@ -107,13 +117,19 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         typeof tiers[tier_id].charge !== 'undefined'
           ? `${tiers[tier_id].charge}`
           : '',
-      cost:
-        tiers[tier_id].cost !== null &&
-        typeof tiers[tier_id].cost !== 'undefined'
-          ? `${tiers[tier_id].cost}`
-          : '',
     }))
     .filter((tier) => tier.isActive);
+
+  console.log('costing', costing);
+  const activeJobCosts = Object.keys(costing).map((tier_id) => ({
+    ...costing[tier_id].tier,
+    charge:
+      costing[tier_id].charge !== null &&
+      typeof costing[tier_id].charge !== 'undefined'
+        ? `${costing[tier_id].charge}`
+        : '',
+  }));
+  // .filter((tier) => tier.isActive);
 
   const formik = useFormik({
     initialValues: {
@@ -130,6 +146,13 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         }),
         {}
       ),
+      costing: activeJobCosts.reduce(
+        (total, currentValue) => ({
+          ...total,
+          [currentValue._id]: currentValue,
+        }),
+        {}
+      ),
     },
     onSubmit: async (values) => {
       setIsSubmitting(true);
@@ -140,7 +163,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
       }
       // dispatch(updateInvoiceItem.fetch(values));
       const tiers: {
-        ['string']: { _id: string; charge: string; cost: string };
+        ['string']: { _id: string; charge: string };
       } = values.tiers;
       const tierArr = Object.values(tiers).map((tier) => ({
         tierId: tier._id,
@@ -151,12 +174,18 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         )
           ? parseFloat(tier.charge).toFixed(2)
           : null,
-        cost: !(
-          typeof tier.cost === 'undefined' ||
-          tier.cost === null ||
-          tier.cost === ''
+      }));
+      const costing: {
+        ['string']: { _id: string; charge: string };
+      } = values.costing;
+      const costingArr = Object.values(costing).map((tier) => ({
+        tierId: tier._id,
+        charge: !(
+          typeof tier.charge === 'undefined' ||
+          tier.charge === null ||
+          tier.charge === ''
         )
-          ? parseFloat(tier.cost).toFixed(2)
+          ? parseFloat(tier.charge).toFixed(2)
           : null,
       }));
 
@@ -176,7 +205,10 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         isJobType: values.isJobType,
         tax: values.tax,
         tiers: tierArr,
+        costing: costingArr,
       };
+      console.log('itemObject , ', itemObject);
+      // return;
       let response;
       if (isAdd) {
         response = await addItem(itemObject).catch((err: { message: any }) => {
@@ -501,14 +533,14 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                   </Typography>
                 </Grid>
                 <Grid container>
-                  {activeTiers.map((tier) => (
+                  {activeJobCosts.map((jobCost) => (
                     <Grid
                       item
                       xs={12}
                       sm={4}
                       container
                       alignItems="center"
-                      key={tier.name}
+                      key={jobCost.name}
                     >
                       <Grid
                         style={{
@@ -517,13 +549,13 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                           fontWeight: 500,
                         }}
                       >
-                        TIER {tier.name} COST
+                        JOB COSTING {jobCost.name}
                       </Grid>
                       <FormControl>
                         <BCInput
                           onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                             formik.setFieldValue(
-                              `tiers.${tier._id}.cost`,
+                              `costing.${jobCost._id}.charge`,
                               replaceAmountToDecimal(e.target.value)
                             );
                           }}
@@ -533,12 +565,12 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                             const amount = e.target.value;
                             if (!validateDecimalAmount(amount)) return;
                             formik.setFieldValue(
-                              `tiers.${tier._id}.cost`,
+                              `costing.${jobCost._id}.charge`,
                               amount
                             );
                           }}
-                          name={`tiers.${tier._id}.cost`}
-                          value={`${formik.values.tiers[tier._id].cost}`}
+                          name={`costing.${jobCost._id}.charge`}
+                          value={`${formik.values.costing[jobCost._id].charge}`}
                           margin={'none'}
                           inputProps={{
                             style: {
