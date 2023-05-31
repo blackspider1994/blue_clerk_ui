@@ -221,8 +221,8 @@ function BCAdminHeader({
         if (divisionList[0]) {
           dispatch(setCurrentDivision(divisionList[0]));
           dispatch(setDivisionParams({
-            companyLocation: JSON.stringify(divisionList[0].name != "All" ? [divisionList[0].locationId] : divisionList[0].locationId),
-            workType: JSON.stringify(divisionList[0].name != "All" ? [divisionList[0].workTypeId] : divisionList[0].workTypeId)
+            companyLocation: divisionList[0].name != "All" ? JSON.stringify(divisionList[0].locationId) : divisionList[0].locationId,
+            workType: divisionList[0].name != "All" ? JSON.stringify(divisionList[0].workTypeId) : divisionList[0].workTypeId,
           }));
         }
       }

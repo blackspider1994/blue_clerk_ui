@@ -66,7 +66,7 @@ export const getPayrollBalanceAPI = async (startDate: string|null, endDate: stri
     if (status === 1) {
       const data = [
         ...vendors.map((contractor: any) => {
-          const { commissionTotal, invoiceIds, jobIds, advancePaymentTotal, creditAvailable, creditUsedTotal, workType, companyLocation } = contractor;
+          const { commissionTotal, invoiceIds, advancePaymentTotal, creditAvailable, creditUsedTotal, workType, companyLocation } = contractor;
           return ({
             ...normalizeData(contractor.contractor, 'vendor'),
             commissionTotal: Math.round(commissionTotal * 100) / 100,

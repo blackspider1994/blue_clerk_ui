@@ -82,9 +82,6 @@ import BCSetDisplayNameModal
 import BcDivisionConfirmModal from './bc-division-confirm-modal/bc-division-confirm-modal';
 import BcDivisionWarningModal from './bc-division-warning-modal/bc-division-warning-modal';
 import BcBillingAddressWarning from './bc-billing-address-warning-modal/bc-billing-address-warning';
-import BcSelectDivisionModal from './bc-select-division-modal/bc-select-division-modal';
-import BcAddTicketDetailsModal
-  from "./bc-add-ticket-details-modal/bc-add-ticket-details-modal";
 
 const BCTermsContent = React.lazy(() => import('../components/bc-terms-content/bc-terms-content'));
 
@@ -895,28 +892,6 @@ function BCModal() {
             action={data.action}
           />);
           break;
-        case modalTypes.SELECT_DIVISION_MODAL:
-          setModalOptions({
-            'disableBackdropClick': true,
-            'disableEscapeKeyDown': true,
-            'fullWidth': true,
-            'showCloseIcon': false,
-            'maxWidth': 'sm'
-          });
-          setComponent(<BcSelectDivisionModal
-            user={data.user}
-          />);
-          break;
-      case modalTypes.TICKET_DETAILS_MODAL:
-        setModalOptions({
-          'disableBackdropClick': true,
-          'disableEscapeKeyDown': true,
-          'newDesign': true,
-          'fullWidth': true,
-          'maxWidth': 'lg'
-        });
-        setComponent(<BcAddTicketDetailsModal props={data}/>);
-        break;
       default:
         setComponent(null);
     }
