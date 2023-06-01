@@ -283,11 +283,11 @@ function BCAdminSidebar({
       'icon': <LocalAtmIcon/>,
       'link': '/main/invoicing/estimates'
     },
-    // {
-    //   'label': 'Brands',
-    //   'icon': <BrandingWatermarkIcon/>,
-    //   'link': '/main/admin/brands'
-    // },
+    {
+      'label': 'Brands',
+      'icon': <BrandingWatermarkIcon/>,
+      'link': '/main/admin/brands'
+    },
     {
       'label': 'Company Profile',
       'icon': <BusinessIcon/>,
@@ -298,16 +298,16 @@ function BCAdminSidebar({
       'icon': <SubtitlesIcon/>,
       'link': '/main/admin/employees'
     },
-    // {
-    //   'label': 'Equipment Type',
-    //   'icon': <BuildIcon/>,
-    //   'link': '/main/admin/equipment-type'
-    // },
-    // {
-    //   'label': 'Groups',
-    //   'icon': <GroupIcon/>,
-    //   'link': '/main/admin/groups'
-    // },
+    {
+      'label': 'Equipment Type',
+      'icon': <BuildIcon/>,
+      'link': '/main/admin/equipment-type'
+    },
+    {
+      'label': 'Groups',
+      'icon': <GroupIcon/>,
+      'link': '/main/admin/groups'
+    },
     {
       'label': 'Services & Products',
       'icon': <WorkIcon/>,
@@ -318,11 +318,11 @@ function BCAdminSidebar({
       'icon': <LibraryBooksIcon/>,
       'link': '/main/admin/invoicing'
     },
-    // {
-    //   'label': 'Job Types',
-    //   'icon': <WorkIcon/>,
-    //   'link': '/main/admin/job-types'
-    // },
+    {
+      'label': 'Job Types',
+      'icon': <WorkIcon/>,
+      'link': '/main/admin/job-types'
+    },
     {
       'label': 'Report Number',
       'icon': <ReportIcon/>,
