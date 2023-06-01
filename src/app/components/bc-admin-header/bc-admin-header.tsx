@@ -27,7 +27,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import LocationOn from '@material-ui/icons/LocationOn';
 import { useDispatch, useSelector } from "react-redux";
 import { CompanyProfileStateType } from "actions/user/user.types";
-import { callSelectDivisionModal, setCurrentDivision, setDivisionParams, setIsDivisionFeatureActivated } from "actions/filter-division/filter-division.action";
+import { setCurrentDivision, setDivisionParams, setIsDivisionFeatureActivated } from "actions/filter-division/filter-division.action";
 import { ICurrentDivision, IDivision, ISelectedDivision } from "actions/filter-division/fiter-division.types";
 import { modalTypes } from '../../../constants';
 import { getDivision, refreshDivision } from "actions/division/division.action";
@@ -221,15 +221,14 @@ function BCAdminHeader({
         if (divisionList[0]) {
           dispatch(setCurrentDivision(divisionList[0]));
           dispatch(setDivisionParams({
-            companyLocation: divisionList[0].name != "All" ? JSON.stringify(divisionList[0].locationId) : divisionList[0].locationId,
-            workType: divisionList[0].name != "All" ? JSON.stringify(divisionList[0].workTypeId) : divisionList[0].workTypeId,
+            companyLocation: JSON.stringify(divisionList[0].name != "All" ? [divisionList[0].locationId] : divisionList[0].locationId),
+            workType: JSON.stringify(divisionList[0].name != "All" ? [divisionList[0].workTypeId] : divisionList[0].workTypeId)
           }));
         }
       }
 
         //Call Select Division Modal
         if (user && currentDivision.openSelectDivisionModal && divisionList.length > 1) {
-          dispatch(callSelectDivisionModal(false));
           dispatch(setModalDataAction({
             'data': {
               'user': user
