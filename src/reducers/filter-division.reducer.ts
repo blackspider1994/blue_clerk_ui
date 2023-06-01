@@ -6,7 +6,8 @@ const initialSelectedDivision: ISelectedDivision = {
   'data': {},
   'params': {},
   "isDivisionFeatureActivated": true,
-  "urlParams": ""
+  "urlParams": "",
+  "openSelectDivisionModal": false
 };
 
 export const FilterDivisionReducer: Reducer<any> = (state = initialSelectedDivision, action) => {
@@ -30,6 +31,11 @@ export const FilterDivisionReducer: Reducer<any> = (state = initialSelectedDivis
       return {
         ...state,
         urlParams: action.payload
+      }
+    case types.CALL_SELECT_DIVISION_MODAL:
+      return {
+        ...state,
+        openSelectDivisionModal: action.payload
       }
     default:
       return state;

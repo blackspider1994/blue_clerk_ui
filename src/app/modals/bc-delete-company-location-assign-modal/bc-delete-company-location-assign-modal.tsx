@@ -8,6 +8,8 @@ import { closeModalAction, setModalDataAction } from "actions/bc-modal/bc-modal.
 import WarningIcon from "@material-ui/icons/Warning";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
+import { setFlagUnsignedVendors } from "actions/vendor/vendor.action";
+import { refreshDivision } from "actions/division/division.action";
 
 interface API_PARAMS {
   companyLocationId?: string;
@@ -74,6 +76,8 @@ function BCDeleteCompanyLocationAssignModal({
         if (status) {
           dispatch(closeModalAction());
           dispatch(success("Assignment deleted successfully"));
+          dispatch(setFlagUnsignedVendors({assignedVendorsIncluded: true}));
+          dispatch(refreshDivision(true));
         }else{
           setSubmitting(false);
         }

@@ -882,6 +882,7 @@ function BCModal() {
             'disableBackdropClick': true,
             'disableEscapeKeyDown': true,
             'fullWidth': true,
+            'showCloseIcon': false,
             'maxWidth': 'sm'
           });
           setComponent(<BcSelectDivisionModal

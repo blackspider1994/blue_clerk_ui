@@ -47,7 +47,7 @@ function BCBillingAddressWarningModal({classes, action}: Props):JSX.Element {
           </Grid>
           <Grid item>
             <div style={{fontWeight: 'bold',  width: 430, fontSize: '18px', textAlign: 'center'}}>
-              Do you want to change the billing address for all invoices previously made, all invoices starting now.
+              Do you want to change the billing address for all invoices previously made and for all invoices starting now?
             </div>
           </Grid>
         </Grid>
@@ -63,7 +63,7 @@ function BCBillingAddressWarningModal({classes, action}: Props):JSX.Element {
           disabled={isSubmitting}
           onClick={onSubmit}
           variant={'contained'}
-        >{'Update'}</Button>
+        >Update</Button>
       </DialogActions>
     </DataContainer>
   )

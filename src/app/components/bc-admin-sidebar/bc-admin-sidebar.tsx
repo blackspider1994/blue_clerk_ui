@@ -342,7 +342,7 @@ function BCAdminSidebar({
       'label': 'Vendors',
       'icon': <StorefrontIcon/>,
       'link': '/main/admin/vendors',
-      'flag': currentDivision.isDivisionFeatureActivated && vendors.data?.length > 0 && vendors.data?.length != vendors.assignedVendors?.length
+      'flag': currentDivision.isDivisionFeatureActivated && vendors.unsignedVendorsFlag 
     },
     {
       'label': 'Payroll',

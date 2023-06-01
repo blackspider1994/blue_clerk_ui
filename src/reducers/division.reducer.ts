@@ -2,7 +2,7 @@ import { DivisionActionType, DivisionState } from '../actions/division/division.
 import { Reducer } from 'redux';
 
 const initialDivision: DivisionState = {
-   loading: false,
+   loading: true,
    data: [],
    refresh: true,
 }
@@ -15,12 +15,6 @@ export const DivisionReducer: Reducer<any> = (state = initialDivision, action) =
             loading: true,
             data: initialDivision,
          };
-      case DivisionActionType.SUCCESS:
-         return {
-            ...state,
-            loading: false,
-            data: [...action?.payload],
-         }
       case DivisionActionType.SET:
          return {
             ...state,

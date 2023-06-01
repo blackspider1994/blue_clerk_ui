@@ -10,8 +10,6 @@ import { io } from 'socket.io-client';
 import { pushNotification } from 'actions/notifications/notifications.action';
 import { setMessageRead, setNewMessage } from 'actions/chat/bc-chat.action';
 import { RootState } from 'reducers';
-import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
-import { modalTypes } from './constants';
 
 const LoginPage = React.lazy(() => import('./app/pages/auth/login/login'));
 const SignUpPage = React.lazy(() => import('./app/pages/auth/signup/signup'));
@@ -66,17 +64,6 @@ function App() {
       setTimeout(() => {
         setLoading(false);
       }, 100);
-
-      console.log(user)
-      dispatch(setModalDataAction({
-        'data': {
-          'user': user
-        },
-        'type': modalTypes.SELECT_DIVISION_MODAL
-      }));
-      setTimeout(() => {
-        dispatch(openModalAction());
-      }, 200);
     } else {
       setIsAuthenticated(false);
       setTimeout(() => {
