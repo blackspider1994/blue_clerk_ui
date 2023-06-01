@@ -283,16 +283,11 @@ function BCAdminSidebar({
       'icon': <LocalAtmIcon/>,
       'link': '/main/invoicing/estimates'
     },
-    {
-      'label': 'Billing',
-      'icon': <MonetizationOnIcon/>,
-      'link': '/main/admin/billing'
-    },
-    {
-      'label': 'Brands',
-      'icon': <BrandingWatermarkIcon/>,
-      'link': '/main/admin/brands'
-    },
+    // {
+    //   'label': 'Brands',
+    //   'icon': <BrandingWatermarkIcon/>,
+    //   'link': '/main/admin/brands'
+    // },
     {
       'label': 'Company Profile',
       'icon': <BusinessIcon/>,
@@ -303,16 +298,16 @@ function BCAdminSidebar({
       'icon': <SubtitlesIcon/>,
       'link': '/main/admin/employees'
     },
-    {
-      'label': 'Equipment Type',
-      'icon': <BuildIcon/>,
-      'link': '/main/admin/equipment-type'
-    },
-    {
-      'label': 'Groups',
-      'icon': <GroupIcon/>,
-      'link': '/main/admin/groups'
-    },
+    // {
+    //   'label': 'Equipment Type',
+    //   'icon': <BuildIcon/>,
+    //   'link': '/main/admin/equipment-type'
+    // },
+    // {
+    //   'label': 'Groups',
+    //   'icon': <GroupIcon/>,
+    //   'link': '/main/admin/groups'
+    // },
     {
       'label': 'Services & Products',
       'icon': <WorkIcon/>,
@@ -342,7 +337,7 @@ function BCAdminSidebar({
       'label': 'Vendors',
       'icon': <StorefrontIcon/>,
       'link': '/main/admin/vendors',
-      'flag': currentDivision.isDivisionFeatureActivated && vendors.data?.length > 0 && vendors.data?.length != vendors.assignedVendors?.length
+      'flag': currentDivision.isDivisionFeatureActivated && vendors.unsignedVendorsFlag 
     },
     {
       'label': 'Payroll',
@@ -353,6 +348,11 @@ function BCAdminSidebar({
       'label': 'Integrations',
       'icon': <SettingsApplicationsIcon/>,
       'link': '/main/admin/integrations'
+    },
+    {
+      'label': 'Billing',
+      'icon': <MonetizationOnIcon/>,
+      'link': '/main/admin/billing'
     },
     {
       'label': 'Groups',
