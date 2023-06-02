@@ -47,7 +47,7 @@ function AdminSetupPage({ classes }: Props) {
           }}
           variant={'contained'}
         >
-          {'Add job cost'}
+          {'Add'}
         </CSButton>
       </>
     );

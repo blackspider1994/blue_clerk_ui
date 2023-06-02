@@ -2,8 +2,7 @@ import BCTabs from '../../../components/bc-tab/bc-tab';
 import BCBackButton from 'app/components/bc-back-button/bc-back-button';
 import ServicesAndProducts from './services-and-products/services-and-products';
 import Discounts from './discounts/discounts';
-import Setup from './setup/setup';
-import JobCosting from './job-costing/job-costing';
+import Setup from './setup';
 import SwipeableViews from 'react-swipeable-views';
 import styles from './services-and-products-list.styles';
 import { useDispatch } from 'react-redux';
@@ -47,8 +46,7 @@ function AdminServicesAndProductsPage({ classes }: any) {
   const views = [
     { label: 'Services & Products', Component: ServicesAndProducts },
     { label: 'Discounts', Component: Discounts },
-    { label: 'Tier Setup', Component: Setup },
-    { label: 'Costs', Component: JobCosting },
+    { label: 'Setup', Component: Setup },
   ];
 
   return (

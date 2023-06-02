@@ -42,7 +42,7 @@ function AdminSetupPage({ classes }: Props) {
           }}
           variant={'contained'}
         >
-          {'Add tier'}
+          {'Add'}
         </CSButton>
       </>
     );

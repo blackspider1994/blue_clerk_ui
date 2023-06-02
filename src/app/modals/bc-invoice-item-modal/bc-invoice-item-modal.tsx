@@ -49,7 +49,7 @@ const EditItemValidation = yup.object().shape({
   tax: yup.string().required(),
 });
 
-const StyledInput = withStyles((theme: Theme) =>
+export const StyledInput = withStyles((theme: Theme) =>
   createStyles({
     root: {
       marginTop: 10,
@@ -267,195 +267,162 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
       <form onSubmit={formik.handleSubmit}>
         <DialogContent classes={{ root: classes.dialogContent }}>
           <Grid container alignItems={'center'}>
-            <Grid
-              item
-              xs={12}
-              sm={3}
-              container
-              alignItems={'center'}
-              justify={window.innerWidth < 600 ? 'flex-start' : 'flex-end'}
-              style={{ padding: '0 7px' }}
-            >
-              <span style={{ color: '#4F4F4F', fontWeight: 500 }}>
-                ITEM NAME
-              </span>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={9}
-              alignItems="center"
-              style={{ padding: '0 7px' }}
-            >
-              <BCInput
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                handleChange={formik.handleChange}
-                helperText={formik.touched.name && formik.errors.name}
-                name={'name'}
-                value={formik.values.name}
-                margin={'none'}
-                inputProps={{
-                  style: {
-                    padding: '12px 14px',
-                  },
-                }}
-                InputProps={{
-                  style: {
-                    borderRadius: 8,
-                    marginTop: 10,
-                  },
-                }}
-              />
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={3}
-              container
-              alignItems={'center'}
-              justify={window.innerWidth < 600 ? 'flex-start' : 'flex-end'}
-              style={{ padding: '0 7px' }}
-            >
-              <span
-                style={{ color: '#4F4F4F', fontWeight: 500, marginTop: 20 }}
-              >
-                DESCRIPTION
-              </span>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={9}
-              alignItems="center"
-              style={{ padding: '0 7px' }}
-            >
-              <BCInput
-                error={
-                  formik.touched.description &&
-                  Boolean(formik.errors.description)
-                }
-                handleChange={formik.handleChange}
-                helperText={
-                  formik.touched.description && formik.errors.description
-                }
-                name={'description'}
-                value={formik.values.description}
-                multiline
-                margin={'none'}
-                inputProps={{
-                  style: {
-                    padding: '12px 14px',
-                  },
-                }}
-                InputProps={{
-                  style: {
-                    borderRadius: 8,
-                    marginTop: 10,
-                  },
-                }}
-              />
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={3}
-              container
-              alignItems={'center'}
-              justify={window.innerWidth < 600 ? 'flex-start' : 'flex-end'}
-              style={{ padding: '0 7px' }}
-            />
-            <Grid
-              item
-              xs={12}
-              sm={9}
-              alignItems="center"
-              style={{ padding: '0 7px' }}
-            >
-              <FormControlLabel
-                classes={{ label: classes.checkboxLabel }}
-                control={
-                  <Checkbox
-                    color={'primary'}
-                    checked={formik.values.isJobType}
-                    onChange={formik.handleChange}
-                    name="isJobType"
-                    classes={{ root: classes.checkboxInput }}
-                  />
-                }
-                label={`This Item is also a Job Type`}
-              />
-            </Grid>
-            <Grid container>
+            <Grid item xs={12} sm={9}>
               <Grid
                 item
                 xs={12}
-                sm={3}
-                container
-                alignItems={'center'}
-                justify={window.innerWidth < 600 ? 'flex-start' : 'flex-end'}
-                style={{ padding: '0 7px' }}
+                alignItems="center"
+                style={{ display: 'flex' }}
               >
-                <span
+                <div
+                  style={{ color: '#4F4F4F', fontWeight: 500, minWidth: '15%' }}
+                >
+                  ITEM NAME
+                </div>
+                <BCInput
+                  error={formik.touched.name && Boolean(formik.errors.name)}
+                  handleChange={formik.handleChange}
+                  helperText={formik.touched.name && formik.errors.name}
+                  name={'name'}
+                  value={formik.values.name}
+                  margin={'none'}
+                  inputProps={{
+                    style: {
+                      padding: '12px 14px',
+                    },
+                  }}
+                  InputProps={{
+                    style: {
+                      borderRadius: 8,
+                      marginTop: 10,
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                alignItems="center"
+                style={{ display: 'flex' }}
+              >
+                <div
+                  style={{ color: '#4F4F4F', fontWeight: 500, minWidth: '15%' }}
+                >
+                  DESCRIPTION
+                </div>
+                <BCInput
+                  error={
+                    formik.touched.description &&
+                    Boolean(formik.errors.description)
+                  }
+                  handleChange={formik.handleChange}
+                  helperText={
+                    formik.touched.description && formik.errors.description
+                  }
+                  name={'description'}
+                  value={formik.values.description}
+                  multiline
+                  margin={'none'}
+                  inputProps={{
+                    style: {
+                      padding: '12px 14px',
+                    },
+                  }}
+                  InputProps={{
+                    style: {
+                      borderRadius: 8,
+                      marginTop: 10,
+                    },
+                  }}
+                />
+              </Grid>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Grid container>
+                <Grid
+                  item
+                  xs={12}
+                  alignItems="center"
                   style={{
-                    color: '#4F4F4F',
-                    fontWeight: 500,
-                    whiteSpace: 'nowrap',
+                    display: 'flex',
                   }}
                 >
-                  CHARGE TYPE
-                </span>
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                sm={2}
-                alignItems="center"
-                style={{ padding: '0 7px' }}
-              >
-                <Select
-                  error={
-                    formik.touched.isFixed && Boolean(formik.errors.isFixed)
-                  }
-                  input={<StyledInput />}
-                  name={'isFixed'}
-                  onChange={formik.handleChange}
-                  value={formik.values.isFixed}
-                >
-                  <MenuItem value={'true'}>{'Fixed'}</MenuItem>
-                  <MenuItem value={'false'}>{'Hourly'}</MenuItem>
-                  <MenuItem value={'%'}>{'Percentage(%)'}</MenuItem>
-                </Select>
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                sm={3}
-                container
-                alignItems={'center'}
-                justify={window.innerWidth < 600 ? 'flex-start' : 'flex-end'}
-                style={{ padding: '0 7px' }}
-              >
-                <span style={{ color: '#4F4F4F', fontWeight: 500 }}>TAX</span>
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                sm={3}
-                alignItems="center"
-                style={{ padding: '0 7px' }}
-              >
-                <FormControl>
-                  <Select
-                    error={formik.touched.tax && Boolean(formik.errors.tax)}
-                    input={<StyledInput />}
-                    name={'tax'}
-                    onChange={formik.handleChange}
-                    value={formik.values.tax}
+                  <div
+                    style={{
+                      color: '#4F4F4F',
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap',
+                      padding: '0 7px',
+                      minWidth: '15%',
+                    }}
                   >
-                    <MenuItem value={1}>{'Yes'}</MenuItem>
-                    <MenuItem value={0}>{'No'}</MenuItem>
+                    CHARGE TYPE
+                  </div>
+                  <Select
+                    error={
+                      formik.touched.isFixed && Boolean(formik.errors.isFixed)
+                    }
+                    input={<StyledInput />}
+                    name={'isFixed'}
+                    onChange={formik.handleChange}
+                    value={formik.values.isFixed}
+                  >
+                    <MenuItem value={'true'}>{'Fixed'}</MenuItem>
+                    <MenuItem value={'false'}>{'Hourly'}</MenuItem>
+                    <MenuItem value={'%'}>{'Percentage(%)'}</MenuItem>
                   </Select>
-                </FormControl>
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  alignItems="center"
+                  style={{
+                    display: 'flex',
+                  }}
+                >
+                  <div
+                    style={{
+                      color: '#4F4F4F',
+                      fontWeight: 500,
+                      padding: '0 7px',
+                      minWidth: '37%',
+                    }}
+                  >
+                    TAX
+                  </div>
+                  <FormControl>
+                    <Select
+                      error={formik.touched.tax && Boolean(formik.errors.tax)}
+                      input={<StyledInput />}
+                      name={'tax'}
+                      onChange={formik.handleChange}
+                      value={formik.values.tax}
+                    >
+                      <MenuItem value={1}>{'Yes'}</MenuItem>
+                      <MenuItem value={0}>{'No'}</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  alignItems="center"
+                  style={{ padding: '0 7px' }}
+                >
+                  <FormControlLabel
+                    classes={{ label: classes.checkboxLabel }}
+                    control={
+                      <Checkbox
+                        color={'primary'}
+                        checked={formik.values.isJobType}
+                        onChange={formik.handleChange}
+                        name="isJobType"
+                        classes={{ root: classes.checkboxInput }}
+                      />
+                    }
+                    label={`This Item is also a Job Type`}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid container className="pricing">
