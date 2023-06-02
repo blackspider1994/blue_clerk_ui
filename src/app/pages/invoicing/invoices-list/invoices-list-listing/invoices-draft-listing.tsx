@@ -80,8 +80,8 @@ function InvoicingDraftListing({ classes, theme }: any) {
     dispatch(getAllDraftInvoicesAPI(undefined, undefined, undefined, undefined, undefined,currentDivision.params));
     return () => {
       dispatch(setDraftKeyword(''));
-      dispatch(setCurrentDraftPageSize(currentPageIndex));
-      dispatch(setCurrentDraftPageIndex(currentPageSize));
+      dispatch(setCurrentDraftPageSize(currentPageSize));
+      dispatch(setCurrentDraftPageIndex(currentPageIndex));
     }
   }, [currentDivision.params]);
 

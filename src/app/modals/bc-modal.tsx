@@ -90,6 +90,8 @@ interface RootState {
     open: boolean;
     data: any;
     type: string;
+    // Flag to force refresh on modal
+    refresh: boolean;
   };
 }
 
@@ -103,6 +105,7 @@ function BCModal() {
   const open = useSelector(({ modal }: RootState) => modal.open);
   const data = useSelector(({ modal }: RootState) => modal.data);
   const type = useSelector(({ modal }: RootState) => modal.type);
+  const refresh = useSelector(({ modal }: RootState) => modal.refresh);
 
   useEffect(() => {
     switch (type) {
@@ -776,7 +779,7 @@ function BCModal() {
           'fullWidth': true,
           'maxWidth': 'xl'
         });
-        setComponent(<BCAdvanceFilterInvoiceModal handleFilterSubmit={data.handleFilterSubmit} formFilter={data.formFilter} />);
+        setComponent(<BCAdvanceFilterInvoiceModal handleFilterSubmit={data.handleFilterSubmit} formFilter={data.formFilter} loading={data.loading}/>);
         break;
       case modalTypes.MEMORIZE_REPORT_MODAL:
         setModalOptions({
@@ -867,7 +870,7 @@ function BCModal() {
       default:
         setComponent(null);
     }
-  }, [type]);
+  }, [type, refresh]);
 
   const handleClose = () => {
     dispatch(closeModalAction());

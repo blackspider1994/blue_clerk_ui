@@ -30,7 +30,6 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
   const dispatch = useDispatch();
   const history = useHistory();
   const location = useLocation<any>();
-  const callUnpaidInvoicesCount = useRef(0);
 
   const unpaidInvoices = useSelector(getSortedInvoices)
   const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword } = useSelector(
@@ -163,7 +162,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
 
   useEffect(() => {
     if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
-      dispatch(getUnpaidInvoicesAPI(currentPageSize, undefined, undefined, keyword, selectionRange, callUnpaidInvoicesCount.current === 0, currentDivision.params));
+      dispatch(getUnpaidInvoicesAPI(currentPageSize, undefined, undefined, keyword, selectionRange, false, currentDivision.params));
       dispatch(setCurrentUnpaidPageIndex(0));
       return () => {
         dispatch(setUnpaidKeyword(''));
