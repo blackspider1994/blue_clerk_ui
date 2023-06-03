@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { Autocomplete } from "@material-ui/lab";
 import { IDivision } from "actions/filter-division/fiter-division.types";
 import { setCurrentDivision, setDivisionParams } from "actions/filter-division/filter-division.action";
+import LogoPng from '../../../assets/img/logo_blue.png';
 
 interface Props {
   classes: any;
@@ -49,11 +50,23 @@ function BCSelectDivisionModal({classes, user}: Props):JSX.Element {
           justify={'flex-start'}
           alignItems={'flex-start'}
         >
+          <Grid 
+            container
+            xs={12}
+            justify={'center'}
+            alignItems={'center'}   
+        >
+            <img
+              alt={'logo-blue'}
+              className={classes.logoimg}
+              src={LogoPng}
+            />
+          </Grid>
           <Grid item>
             <div style={{fontWeight: 'bold',  width: 430, fontSize: '18px', textAlign: 'left'}}>
-              Welcome {user?.profile?.displayName}
+              Welcome, {user?.profile?.displayName}
             </div>
-            <small>Please select your desired view</small>
+            <span>Please select what you would like to view</span>
           </Grid>
           <Grid container direction={'row'} spacing={1} className={classes.inputState}>
               <Grid item xs={12}>

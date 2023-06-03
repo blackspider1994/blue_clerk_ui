@@ -6,7 +6,8 @@ export default (theme: Theme): any => ({
     'padding': '15px 24px !important'
   },
   dialogContent: {
-    'padding': '8px 24px !important'
+    'margin-top': '-35px',
+    'padding': '0px 24px !important'
   },
   submitButton: {
     color: CONSTANTS.PRIMARY_WHITE,
@@ -26,5 +27,8 @@ export default (theme: Theme): any => ({
     '&& .MuiAutocomplete-inputRoot': {
       padding:"1.5px",
     },
+  },
+  'logoimg': {
+    'width': '17%'
   },
 });
