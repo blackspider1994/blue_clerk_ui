@@ -8,10 +8,11 @@ import styled from "styled-components";
 import * as CONSTANTS from '../../../constants';
 import { closeModalAction, setModalDataAction } from "actions/bc-modal/bc-modal.action";
 import { getEmployees } from "actions/employee/employee.action";
-import { getVendors } from "actions/vendor/vendor.action";
+import { getVendors, setFlagUnsignedVendors } from "actions/vendor/vendor.action";
 import * as Yup from "yup";
 import { UpdateCompanyLocationAssignmentsAction } from "actions/user/user.action";
 import { CompanyLocation } from "actions/user/user.types";
+import { refreshDivision } from "actions/division/division.action";
 
 interface API_PARAMS {
   companyLocationId?: string;
@@ -148,8 +149,11 @@ function BCCompanyLocationAssignModal({
       }
 
       dispatch(UpdateCompanyLocationAssignmentsAction(payload, (status) => {
-        if (status) closeModal();
-        else {
+        if (status) {
+          closeModal()
+          dispatch(setFlagUnsignedVendors({assignedVendorsIncluded: true}));
+          dispatch(refreshDivision(true));
+        } else {
           setSubmitting(false);
         }
       }))

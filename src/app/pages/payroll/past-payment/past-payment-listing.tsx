@@ -23,6 +23,7 @@ import { getAllPaymentsAPI } from '../../../../api/payment.api'
 import {
   getContractorPayments,
   getContractors,
+  refreshContractorPayment,
   setContractorPayments
 } from "../../../../actions/payroll/payroll.action";
 import {
@@ -50,7 +51,7 @@ function PastPayments({ classes }: Props) {
   const location = useLocation<any>();
   const locationState = location.state;
   const prevPage = locationState && locationState.prevPage ? locationState.prevPage : null;
-  const { loading, payments, contractors } = useSelector((state: any) => state.payroll);
+  const { loading, payments, contractors, refresh } = useSelector((state: any) => state.payroll);
 
   const [filteredPayments, setFilteredPayments] = useState<ContractorPayment[]>([]);
   const [currentPage, setCurrentPage] = useState({
@@ -74,8 +75,12 @@ function PastPayments({ classes }: Props) {
       if (cont) {
         dispatch(getContractorPayments({ id: cont._id, type: cont.type },currentDivision.params));
       }
+
+      if (refresh) {
+        dispatch(refreshContractorPayment(false));
+      }
     }
-  }, [selectedIDs, contractors,currentDivision.isDivisionFeatureActivated, currentDivision.params]);
+  }, [selectedIDs,refresh, contractors,currentDivision.isDivisionFeatureActivated, currentDivision.params]);
 
   useEffect(() => {
     dispatch(setPayments(sortArrByDate(payments, 'createdAt')))

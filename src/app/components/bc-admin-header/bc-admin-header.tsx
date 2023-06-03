@@ -28,10 +28,11 @@ import LocationOn from '@material-ui/icons/LocationOn';
 import { useDispatch, useSelector } from "react-redux";
 import { CompanyProfileStateType } from "actions/user/user.types";
 import { setCurrentDivision, setDivisionParams, setIsDivisionFeatureActivated } from "actions/filter-division/filter-division.action";
-import { ICurrentDivision, ISelectedDivision } from "actions/filter-division/fiter-division.types";
+import { ICurrentDivision, IDivision, ISelectedDivision } from "actions/filter-division/fiter-division.types";
+import { modalTypes } from '../../../constants';
 import { getDivision, refreshDivision } from "actions/division/division.action";
 import { openModalAction, setModalDataAction } from "actions/bc-modal/bc-modal.action";
-import { getVendors } from "actions/vendor/vendor.action";
+import { setFlagUnsignedVendors } from "actions/vendor/vendor.action";
 
 interface Props {
   classes: any;
@@ -172,14 +173,14 @@ function BCAdminHeader({
   const [selectedDivision, setSelectedDivision] = useState<number>(0);
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
   const divisions = useSelector((state: any) => state.divisions);
-  const divisionList = divisions.data;
+  const divisionList = divisions.data as IDivision[];
   const vendors = useSelector((state: any) => state.vendors);
 
 
   useEffect(() => {
     initialLoad()
     if (user?._id && divisions.refresh) {
-      dispatch(getVendors({assignedVendorsIncluded: true}));
+      dispatch(setFlagUnsignedVendors({assignedVendorsIncluded: true}));
       dispatch(getDivision(user?._id));
     }
   }, []);
@@ -190,6 +191,7 @@ function BCAdminHeader({
       let selectedDivision = divisionList.findIndex((res: any) => {
         return res.workTypeId == workType && res.locationId == companyLocation
       });
+
       if (selectedDivision > -1) {
         if (selectedDivision) {
           setSelectedDivision(selectedDivision);
@@ -202,18 +204,59 @@ function BCAdminHeader({
           }
           
         }
+      }else if(user?.currentLocation){
+        let divisionIdx = divisionList?.findIndex((res) => {
+          return res.key == user.currentLocation.key
+        })
+        if (divisionIdx < 0) divisionIdx = 0;
+
+        let userDivision = divisionList[divisionIdx]
+        dispatch(setCurrentDivision(userDivision));
+        dispatch(setDivisionParams({
+          companyLocation: JSON.stringify(userDivision?.name != "All" ? [userDivision?.locationId] : userDivision?.locationId),
+          workType: JSON.stringify(userDivision?.name != "All" ? [userDivision?.workTypeId] : userDivision?.workTypeId)
+        }));
+        setSelectedDivision(divisionIdx)
       }else{
         setSelectedDivision(0);
         if (divisionList[0]) {
           dispatch(setCurrentDivision(divisionList[0]));
           dispatch(setDivisionParams({
-            companyLocation: JSON.stringify(divisionList[0].locationId),
-            workType: JSON.stringify(divisionList[0].workTypeId),
+            companyLocation: JSON.stringify(divisionList[0].name != "All" ? [divisionList[0].locationId] : divisionList[0].locationId),
+            workType: JSON.stringify(divisionList[0].name != "All" ? [divisionList[0].workTypeId] : divisionList[0].workTypeId)
           }));
         }
       }
+
+        //Call Select Division Modal
+        if (user && currentDivision.openSelectDivisionModal && divisionList.length > 1) {
+          dispatch(setModalDataAction({
+            'data': {
+              'user': user
+            },
+            'type': modalTypes.SELECT_DIVISION_MODAL
+          }));
+          setTimeout(() => {
+            dispatch(openModalAction());
+          }, 200);
+        }
     }
   }, [divisionList]);
+
+  useEffect(() => {
+    if (currentDivision.data){
+      if(currentDivision.data?.key != divisionList?.[selectedDivision]?.key) {
+        let divisionIdx = divisionList?.findIndex((res) => {
+          return res.key == currentDivision.data?.key
+        })
+        setSelectedDivision(divisionIdx || 0)
+      }
+
+      //Set the division to local storage and the division is automatically set.
+      let userStorage = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem('user', JSON.stringify({...userStorage, currentLocation: currentDivision.data}));   
+    }
+  }, [currentDivision.data])
 
   const notificationPopover = notificationOpen ? 'notification-popper' : undefined;
 
@@ -279,8 +322,8 @@ function BCAdminHeader({
     {
       'label': ' Admin',
       'link': '/main/admin',
-      'flag':  currentDivision.isDivisionFeatureActivated && vendors.data?.length > 0 && vendors.data?.length != vendors.assignedVendors?.length
-    },
+      'flag':  currentDivision.isDivisionFeatureActivated && vendors.unsignedVendorsFlag 
+    }
   ];
 
   const handleLocationChange = (params: any) => {

@@ -24,7 +24,9 @@ export const getVendors = (filter?: any) => {
   return async (dispatch: any) => {
     const data = await getCompanyContracts(filter);
     dispatch(setVendors(data.vendor));
-    dispatch(setAssignedVendors(data.assignedVendors));
+    if (filter?.assignedVendorsIncluded) {
+      dispatch(setAssignedVendors(data.assignedVendors));
+    }
   };
 };
 
@@ -55,6 +57,13 @@ export const setAssignedVendors = (vendors: any) => {
   return {
     'type': VendorActionType.SET_ASSIGNED_VENDORS,
     'payload': vendors
+  };
+};
+
+export const setUnsignedVendorsFlag = (flag: boolean) => {
+  return {
+    'type': VendorActionType.SET_UNSIGNED_VENDORS_FLAG,
+    'payload': flag
   };
 };
 
@@ -96,4 +105,10 @@ export const setVendorDisplayName = ({
   }
 }
 
-
+export const setFlagUnsignedVendors = (filter?: any) => {
+  return async (dispatch: any) => {
+    const data = await getCompanyContracts(filter);
+    const flag = data.vendor?.length > 0 && data.vendor?.length != data.assignedVendors?.length;
+    dispatch(setUnsignedVendorsFlag(flag));
+  };
+};

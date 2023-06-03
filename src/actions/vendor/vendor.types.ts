@@ -34,6 +34,7 @@ export interface VendorsState {
   readonly vendorObj?: Vendor | {}
   readonly vendorPayments?: any[]
   readonly assignedVendors?: string[]
+  readonly unsignedVendorsFlag?: boolean
 }
 
 export enum VendorActionType {
@@ -47,6 +48,7 @@ export enum VendorActionType {
   DELETE_SINGLE_VENDOR_PAYMENT = 'deleteSingleVendorPayment',
   SET_VENDOR_DISPLAY_NAME = 'setVendorDisplayName',
   SET_ASSIGNED_VENDORS = 'setAssignedVendors',
+  SET_UNSIGNED_VENDORS_FLAG = 'setUnsignedVendorsFlag',
 }
 
 export const vendorStatusToNumber:any = {
