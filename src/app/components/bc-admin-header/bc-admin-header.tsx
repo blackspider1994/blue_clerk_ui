@@ -27,7 +27,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import LocationOn from '@material-ui/icons/LocationOn';
 import { useDispatch, useSelector } from "react-redux";
 import { CompanyProfileStateType } from "actions/user/user.types";
-import { setCurrentDivision, setDivisionParams, setIsDivisionFeatureActivated } from "actions/filter-division/filter-division.action";
+import { callSelectDivisionModal, setCurrentDivision, setDivisionParams, setIsDivisionFeatureActivated } from "actions/filter-division/filter-division.action";
 import { ICurrentDivision, IDivision, ISelectedDivision } from "actions/filter-division/fiter-division.types";
 import { modalTypes } from '../../../constants';
 import { getDivision, refreshDivision } from "actions/division/division.action";
@@ -230,6 +230,7 @@ function BCAdminHeader({
 
         //Call Select Division Modal
         if (user && currentDivision.openSelectDivisionModal && divisionList.length > 1) {
+          dispatch(callSelectDivisionModal(false));
           dispatch(setModalDataAction({
             'data': {
               'user': user
