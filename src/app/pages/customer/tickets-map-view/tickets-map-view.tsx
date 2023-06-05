@@ -28,6 +28,7 @@ import { getContacts } from 'api/contacts.api';
 import {getEmployeesForJobAction} from "../../../../actions/employees-for-job/employees-for-job.action";
 import {getVendors} from "../../../../actions/vendor/vendor.action";
 import preloader from '../../../../assets/img/preloader/loading-icon2.gif';
+import {AM_COLOR, PM_COLOR} from "../../../../constants";
 
 export  interface FilterTickets {
   jobId?: string | null,
@@ -197,6 +198,39 @@ function TicketsWithMapView({ classes }: any) {
             </ListItem>
           )
         })}
+        <ListItem key="allDayJobs">
+          <span style={{
+            height: "20px",
+            width: "20px",
+            backgroundColor: "ffffff",
+            borderRadius: "50%",
+            display: "inline-block", 
+            border: "3px solid black"
+          }}></span>
+          <ListItemText style={{color: "black", marginLeft: 15}} primary="All day jobs"/>
+        </ListItem>
+        <ListItem key="amColor">
+          <span style={{
+            height: "20px",
+            width: "20px",
+            backgroundColor: "ffffff",
+            borderRadius: "50%",
+            display: "inline-block", 
+            border: `3px solid ${AM_COLOR}`
+          }}></span>
+          <ListItemText style={{color: AM_COLOR, marginLeft: 15}} primary="AM jobs"/>
+        </ListItem>
+        <ListItem key="pmJobs">
+          <span style={{
+            height: "20px",
+            width: "20px",
+            backgroundColor: "ffffff",
+            borderRadius: "50%",
+            display: "inline-block", 
+            border: `3px solid ${PM_COLOR}`
+          }}></span>
+          <ListItemText style={{color: PM_COLOR, marginLeft: 15}} primary="PM jobs"/>
+        </ListItem>
       </List>
     </Dialog>
   }

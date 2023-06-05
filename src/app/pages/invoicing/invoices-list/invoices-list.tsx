@@ -36,6 +36,7 @@ function InvoiceList({ classes }: any) {
   const handleTabChange = (newValue: number) => {
     setCurTab(newValue);
     if (visibleTabs.indexOf(newValue) === -1) setVisibleTabs([...visibleTabs, newValue]);
+    history.replace({...history.location, state: {...history.location.state, tab: newValue}})
   };
 
   const openCreateInvoicePage = () => {

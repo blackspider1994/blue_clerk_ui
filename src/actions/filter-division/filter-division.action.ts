@@ -35,3 +35,10 @@ export const setDivisionUrlParams = (value:string) => {
         type: types.SET_DIVISION_URL_PARAMS
     }
 }
+
+export const callSelectDivisionModal = (value:boolean) => {
+    return {
+        payload: value,
+        type: types.CALL_SELECT_DIVISION_MODAL
+    }
+}

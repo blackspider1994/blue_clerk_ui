@@ -9,7 +9,7 @@ import {ReactComponent as IconPending} from "../../../assets/img/icons/map/icon-
 import {ReactComponent as IconJobRequest} from "../../../assets/img/icons/map/icon-job-request.svg";
 import {ReactComponent as IconOpenServiceTicket} from "../../../assets/img/icons/map/icon-open-service-ticket.svg";
 
-import {modalTypes} from "../../../constants";
+import {AM_COLOR, NON_OCCUPIED_GREY, OCCUPIED_GREEN, OCCUPIED_ORANGE, PM_COLOR, modalTypes} from "../../../constants";
 import {Button, IconButton} from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import InfoIcon from "@material-ui/icons/InfoOutlined";
@@ -111,8 +111,8 @@ function BCMapMarker({
     if(!isTicket && ticket?.jobId) {
       if(ticket?.scheduleTimeAMPM !== 0) {
         switch(ticket?.scheduleTimeAMPM) {
-          case 1: return '3px solid #f5e642'; 
-          case 2: return '3px solid #f2a2c1';
+          case 1: return `3px solid ${AM_COLOR}`; 
+          case 2: return `3px solid ${PM_COLOR}`;
           default: return '3px solid black';
         }
       }
@@ -122,7 +122,7 @@ function BCMapMarker({
       return `3px solid ${technicianColor}`
     }
     else {
-      return ticket?.isHomeOccupied ? '3px solid #db4b02' : 'none';
+      return ticket?.isHomeOccupied ? `3px solid ${OCCUPIED_ORANGE}` : 'none';
     }
   }
 
@@ -368,8 +368,27 @@ function BCMapMarker({
         </IconButton>
       </div>
       <div className={'title-container'}>
-        <CustomIcon />
+          <CustomIcon style={{
+            border: calculateMarkerBorder(ticket),
+            borderRadius: '50%',
+            width: 20,
+            height: 20,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}/>
         <span>{title}</span>
+        <span style={{
+            marginLeft: 5,
+            marginTop: 5,
+            height: "10px",
+            width: "10px",
+            backgroundColor: ticket.isHomeOccupied ? OCCUPIED_GREEN : NON_OCCUPIED_GREY,
+            borderRadius: "50%",
+            display: "flex", 
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}></span>
       </div>
       <span className={'company'}>
         {ticket.jobLocation && ticket.jobLocation.name ? ticket.jobLocation.name : ` `}

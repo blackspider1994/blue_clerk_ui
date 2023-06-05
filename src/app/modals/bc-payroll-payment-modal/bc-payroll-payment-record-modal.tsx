@@ -95,6 +95,8 @@ function BcPayrollPaymentRecordModal({
         offset: new Date().getTimezoneOffset() / 60,
         paidAt: formatDateYMD(FormikValues.paymentDate),
         note: FormikValues.notes,
+        companyLocation: payroll.companyLocation,
+        workType: payroll.workType,
       }
 
       if (FormikValues.referenceNumber)
@@ -107,16 +109,7 @@ function BcPayrollPaymentRecordModal({
         params.startDate = formatDateYMD(dateRange.startDate);
         params.endDate = formatDateYMD(dateRange.endDate);
       }
-
-      //add division and location field
-      if (currentDivision.data?.locationId) {
-        params.companyLocation = currentDivision.data?.locationId;
-      }
       
-      if (currentDivision.data?.workTypeId) {
-        params.workType = currentDivision.data?.workTypeId;
-      }
-
       try {
         if (payment) {
           params.paymentId = payment._id;
@@ -396,6 +389,8 @@ function BcPayrollPaymentRecordModal({
         paidAt: formatDateYMD(FormikValuesAdvance.paymentDate),
         appliedAt: formatDateYMD(FormikValuesAdvance.appliedAt),
         note: FormikValuesAdvance.notes,
+        companyLocation: payroll.companyLocation,
+        workType: payroll.workType,
       }
 
       if (FormikValuesAdvance.referenceNumber)
@@ -403,16 +398,6 @@ function BcPayrollPaymentRecordModal({
 
       if (FormikValuesAdvance.paymentMethod >= 0)
         params.paymentType = PAYMENT_TYPES.filter((type) => type._id == FormikValuesAdvance.paymentMethod)[0].name;
-
-
-      //add division and location field
-      if (currentDivision.data?.locationId) {
-        params.companyLocation = currentDivision.data?.locationId;
-      }
-      
-      if (currentDivision.data?.workTypeId) {
-        params.workType = currentDivision.data?.workTypeId;
-      }
 
       try {
         if (advancePayment) {
@@ -422,6 +407,7 @@ function BcPayrollPaymentRecordModal({
             setSentAdvance(true);
             dispatch(updateContractorPayment(response.payment));
             dispatch(updateVendorPayment(response.payment));
+            dispatch(refreshContractorPayment(true));
           } else {
             dispatch(error(response.message))
           }

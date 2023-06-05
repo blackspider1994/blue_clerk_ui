@@ -25,7 +25,7 @@ import {ReactComponent as IconIncomplete} from "../../../assets/img/icons/map/ic
 import {ReactComponent as IconPending} from "../../../assets/img/icons/map/icon-pending.svg";
 import {ReactComponent as IconJobRequest} from "../../../assets/img/icons/map/icon-job-request.svg";
 import {ReactComponent as IconOpenServiceTicket} from "../../../assets/img/icons/map/icon-open-service-ticket.svg";
-import { PRIMARY_ORANGE } from "../../../constants";
+import { AM_COLOR, OCCUPIED_ORANGE, PM_COLOR } from "../../../constants";
 interface BCMapWithMarkerListProps {
   reactAppGoogleKeyFromConfig: string;
   list: any;
@@ -87,21 +87,21 @@ const calculateColor = (cluster:any) => {
   if(cluster.properties?.includeTicket){
     return '#2477FF'
   }
-  return cluster.properties?.isHomeOccupied ? '#db4b02' : 'rgb(130,130,130)'
+  return cluster.properties?.isHomeOccupied ? OCCUPIED_ORANGE : 'rgb(130,130,130)'
 }
 const calculateBorder = (cluster:any) => {
   if(cluster.properties?.includeJob){
     if(cluster.properties?.scheduleTimeAMPM !== 0) {
       switch(cluster.properties?.scheduleTimeAMPM) {
-        case 1: return '3px solid #f5e642'; 
-        case 2: return '3px solid #f2a2c1';
+        case 1: return `3px solid ${AM_COLOR}`; 
+        case 2: return `3px solid ${PM_COLOR}`;
         default: return '3px solid black';
       }
     }
     return '3px solid black'
   }
   if(cluster.properties?.includeTicket){
-    return cluster.properties?.isHomeOccupied ? '3px solid #db4b02' : '3px solid #2477FF';
+    return cluster.properties?.isHomeOccupied ? `3px solid ${OCCUPIED_ORANGE}` : '3px solid #2477FF';
   }
   if(cluster.properties?.includeRequest){
     return '3px solid #970505'
@@ -110,11 +110,11 @@ const calculateBorder = (cluster:any) => {
 }
 
 const calculateMarkerBorder = (ticket : any, isTicket : boolean, technicianColor : string) : string => {
-  if(!isTicket && ticket.jobId) {
+  if(!isTicket && ticket.jobId?.length > 0) {
     if(ticket?.scheduleTimeAMPM !== 0) {
       switch(ticket?.scheduleTimeAMPM) {
-        case 1: return '3px solid #f5e642'; 
-        case 2: return '3px solid #f2a2c1';
+        case 1: return `3px solid ${AM_COLOR}`; 
+        case 2: return `3px solid ${PM_COLOR}`;
         default: return '3px solid black';
       }
     }
@@ -124,7 +124,7 @@ const calculateMarkerBorder = (ticket : any, isTicket : boolean, technicianColor
     return `3px solid ${technicianColor}`;
   }
   else {
-    return ticket?.isHomeOccupied ? '3px solid #db4b02' : 'none';
+    return ticket?.isHomeOccupied ? `3px solid ${OCCUPIED_ORANGE}` : 'none';
   }
 }
 
@@ -356,7 +356,7 @@ function BCMapWithMarkerWithList({
                   <CustomIcon
                     style={{
                       marginRight: 5,
-                      border: calculateMarkerBorder(datum, isTicket, technicianColor),
+                      border: calculateMarkerBorder(datum.ticket, isTicket, technicianColor),
                       borderRadius: '50%',
                       width: 25,
                       height: 25,

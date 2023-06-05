@@ -80,6 +80,8 @@ import BCSetDisplayNameModal
   from "./bc-set-display-name-modal/bc-set-display-name-modal";
 import BcDivisionConfirmModal from './bc-division-confirm-modal/bc-division-confirm-modal';
 import BcDivisionWarningModal from './bc-division-warning-modal/bc-division-warning-modal';
+import BcBillingAddressWarning from './bc-billing-address-warning-modal/bc-billing-address-warning';
+import BcSelectDivisionModal from './bc-select-division-modal/bc-select-division-modal';
 
 const BCTermsContent = React.lazy(() => import('../components/bc-terms-content/bc-terms-content'));
 
@@ -90,6 +92,8 @@ interface RootState {
     open: boolean;
     data: any;
     type: string;
+    // Flag to force refresh on modal
+    refresh: boolean;
   };
 }
 
@@ -103,6 +107,7 @@ function BCModal() {
   const open = useSelector(({ modal }: RootState) => modal.open);
   const data = useSelector(({ modal }: RootState) => modal.data);
   const type = useSelector(({ modal }: RootState) => modal.type);
+  const refresh = useSelector(({ modal }: RootState) => modal.refresh);
 
   useEffect(() => {
     switch (type) {
@@ -776,7 +781,7 @@ function BCModal() {
           'fullWidth': true,
           'maxWidth': 'xl'
         });
-        setComponent(<BCAdvanceFilterInvoiceModal handleFilterSubmit={data.handleFilterSubmit} formFilter={data.formFilter} />);
+        setComponent(<BCAdvanceFilterInvoiceModal handleFilterSubmit={data.handleFilterSubmit} formFilter={data.formFilter} loading={data.loading}/>);
         break;
       case modalTypes.MEMORIZE_REPORT_MODAL:
         setModalOptions({
@@ -864,10 +869,33 @@ function BCModal() {
             action={data.action}
           />);
           break;
+        case modalTypes.BILLING_ADDRESS_WARNING_MODAL:
+          setModalOptions({
+            'disableBackdropClick': true,
+            'disableEscapeKeyDown': true,
+            'fullWidth': true,
+            'maxWidth': 'sm'
+          });
+          setComponent(<BcBillingAddressWarning
+            action={data.action}
+          />);
+          break;
+        case modalTypes.SELECT_DIVISION_MODAL:
+          setModalOptions({
+            'disableBackdropClick': true,
+            'disableEscapeKeyDown': true,
+            'fullWidth': true,
+            'showCloseIcon': false,
+            'maxWidth': 'sm'
+          });
+          setComponent(<BcSelectDivisionModal
+            user={data.user}
+          />);
+          break;
       default:
         setComponent(null);
     }
-  }, [type]);
+  }, [type, refresh]);
 
   const handleClose = () => {
     dispatch(closeModalAction());

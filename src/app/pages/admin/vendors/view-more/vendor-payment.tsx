@@ -106,12 +106,16 @@ function VendorPayment({classes}: Props) {
   }
 
   const calculateDefaultRange = () => {
-    const paymentDates = vendorPayments.map((payment: any) =>  (new Date(payment.paidAt)).getTime());
-    const newRange = {
-      startDate: new Date(Math.min(...paymentDates)),
-      endDate: new Date(Math.max(...paymentDates)),
+    const paymentDates = vendorPayments?.map((payment: any) =>  (new Date(payment.paidAt)).getTime());
+    if (paymentDates) {
+      const newRange = {
+        startDate: new Date(Math.min(...paymentDates)),
+        endDate: new Date(Math.max(...paymentDates)),
+      }
+      return newRange;
+    }else{
+      return null
     }
-    return newRange;
   }
 
   useEffect(() => {
@@ -186,7 +190,7 @@ function VendorPayment({classes}: Props) {
   ];
 
   function renderDateRangePicker () {
-    return vendorPayments.length > 0 ? (
+    return vendorPayments?.length > 0 ? (
       <BCDateRangePicker
         range={selectionRange}
         onChange={setSelectionRange}

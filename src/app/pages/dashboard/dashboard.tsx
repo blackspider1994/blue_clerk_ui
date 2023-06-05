@@ -138,13 +138,15 @@ function DashboardPage({ classes }: any): JSX.Element {
   ];
 
   useEffect(() => {
-    dispatch(loadingVendors());
-    let divisionParams: DivisionParams = {};
-    if (currentDivision.data?.name != "All") {
-      divisionParams = {workType: currentDivision.data?.workTypeId, companyLocation: currentDivision.data?.locationId};
+    if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+      dispatch(loadingVendors());
+      let divisionParams: any = {};
+      if (currentDivision.data?.name != "All") {
+        divisionParams = {workType: currentDivision.data?.workTypeId, companyLocation: currentDivision.data?.locationId};
+      }
+      dispatch(getVendors(divisionParams));
     }
-    dispatch(getVendors(divisionParams));
-  }, [currentDivision.data]);
+  }, [currentDivision.isDivisionFeatureActivated, currentDivision.data]);
   
   const openVendorModal = () => {
     dispatch(setModalDataAction({

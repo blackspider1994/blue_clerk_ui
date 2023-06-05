@@ -91,12 +91,7 @@ function Payroll({ classes }: Props) {
     event.stopPropagation();
     switch (id) {
       case 0:
-        //To ensure that all tickets are detected by the division, and check if the user has activated the division feature.
-        if ((currentDivision.isDivisionFeatureActivated && currentDivision.data?.name != "All") || !currentDivision.isDivisionFeatureActivated) {
-            recordPayment(row);
-        }else{
-            dispatch(warning("Please select a division before recording a payment."))
-        }
+        recordPayment(row);
         break;
       case 1:
         const contractorName = row.vendor.replace(/[\/ ]/g, '');

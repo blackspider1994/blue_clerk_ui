@@ -18,6 +18,13 @@ export const GRAY3 = '#828282';
 export const GRAY4 = '#BDBDBD';
 export const GRAY5 = '#E0E0E0';
 export const GRAY6 = '#F2F2F2';
+// AM/PM feature colors
+export const AM_COLOR = '#fba306';
+export const PM_COLOR = '#0d5892';
+// Home owner colors
+export const OCCUPIED_ORANGE = '#db4b02';
+export const OCCUPIED_GREEN = '#44d62c';
+export const NON_OCCUPIED_GREY = '#c0c0c0';
 
 // export const PRIMARY_GREEN = 'rgb(77, 189, 116)';
 export const PRIMARY_GREEN = '#50AE55';
@@ -132,6 +139,8 @@ export const modalTypes = {
   'EDIT_BILLING_ADDRESS': 'edit-billing-address',
   'DIVISION_CONFIRM_MODAL': 'division-confirm-modal',
   'DIVISION_WARNING_MODAL': 'division-warning-modal',
+  'SELECT_DIVISION_MODAL': 'select-division-modal',
+  'BILLING_ADDRESS_WARNING_MODAL': 'billing-address-warning-modal',
 };
 
 export const rejectionReason = [

@@ -2,8 +2,8 @@ import BCTableContainer from '../../../../components/bc-table-container/bc-table
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import styled from 'styled-components';
 import styles from './../invoices-list.styles';
-import {withStyles, Button, Tooltip, Badge} from "@material-ui/core";
-import React, {useEffect, useState} from 'react';
+import { withStyles, Button, Tooltip, Badge, Dialog, DialogTitle, DialogContent, DialogActions } from "@material-ui/core";
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TableFilterService from 'utils/table-filter';
 import { MailOutlineOutlined, VolumeMute } from '@material-ui/icons';
@@ -14,10 +14,10 @@ import {
 } from 'helpers/format';
 import BCQbSyncStatus from "../../../../components/bc-qb-sync-status/bc-qb-sync-status";
 import { useCustomStyles } from "../../../../../helpers/custom";
-import {openModalAction, setModalDataAction} from "../../../../../actions/bc-modal/bc-modal.action";
-import {modalTypes} from "../../../../../constants";
+import { closeModalAction, openModalAction, setModalDataAction } from "../../../../../actions/bc-modal/bc-modal.action";
+import { modalTypes } from "../../../../../constants";
 import BCMenuButton from "../../../../components/bc-menu-button";
-import {info} from "../../../../../actions/snackbar/snackbar.action";
+import { info } from "../../../../../actions/snackbar/snackbar.action";
 // import BCDateRangePicker
 //   , {Range} from "../../../../components/bc-date-range-picker/bc-date-range-picker";
 import { getAllInvoicesAPI } from 'api/invoicing.api';
@@ -39,9 +39,10 @@ function InvoicingListListing({ classes, theme }: any) {
   const history = useHistory();
   const location = useLocation<any>();
   const invoiceList = useSelector(getFilteredList);
-  const customStyles = useCustomStyles()
+  const customStyles = useCustomStyles();
+
   // const isLoading = useSelector((state: any) => state?.invoiceList?.loading);
-  const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword} = useSelector(
+  const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword } = useSelector(
     ({ invoiceList }: any) => ({
       loading: invoiceList.loading,
       prevCursor: invoiceList.prevCursor,
@@ -53,14 +54,17 @@ function InvoicingListListing({ classes, theme }: any) {
     })
   );
   // const [selectionRange, setSelectionRange] = useState<Range | null>(null);
-  
+
   const [fetchInvoices, setFetchInvoices] = useState(false);
   const [lastNextCursor, setLastNextCursor] = useState<string | undefined>(location?.state?.option?.lastNextCursor)
   const [lastPrevCursor, setLastPrevCursor] = useState<string | undefined>(location?.state?.option?.lastPrevCursor)
 
-  const advanceFilterInvoiceData: any = useSelector(({advanceFilterInvoiceState}: any) => advanceFilterInvoiceState);
+  const advanceFilterInvoiceData: any = useSelector(({ advanceFilterInvoiceState }: any) => advanceFilterInvoiceState);
 
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
+  // Indicate if the data was not found using the advance filter
+  const [dataNotFoundOnFilter, setDataNotFoundOnFilter] = useState(false)
 
   const HtmlTooltip = withStyles((theme) => ({
     tooltip: {
@@ -73,7 +77,7 @@ function InvoicingListListing({ classes, theme }: any) {
 
   const columns: any = [
     {
-      Cell({row}: any) {
+      Cell({ row }: any) {
         return <span>{row.original.invoiceId?.substring(8)}</span>
       },
       'Header': 'Invoice ID',
@@ -83,7 +87,7 @@ function InvoicingListListing({ classes, theme }: any) {
     },
     {
       'Header': 'Job ID',
-      Cell({row}: any) {
+      Cell({ row }: any) {
         return <span>{row.original.job?.jobId?.substring(5)}</span>
       },
       'className': 'font-bold',
@@ -127,30 +131,32 @@ function InvoicingListListing({ classes, theme }: any) {
       'sortable': true,
       'width': 20
     },
-    { Cell({ row }: any) {
-      const { status = '' } = row.original;
-      const textStatus = status.split('_').join(' ').toLowerCase();
-      return (
-        <div className={customStyles.centerContainer}>
-          <BCMenuButton status={status}  handleClick={(e, id) => handleMenuButtonClick(e, id, row.original)}/>
-        </div>
-      )
-    },
-    'Header': 'Payment Status',
-    'accessor': 'paid',
-    'className': 'font-bold',
-    'sortable': true,
+    {
+      Cell({ row }: any) {
+        const { status = '' } = row.original;
+        const textStatus = status.split('_').join(' ').toLowerCase();
+        return (
+          <div className={customStyles.centerContainer}>
+            <BCMenuButton status={status} handleClick={(e, id) => handleMenuButtonClick(e, id, row.original)} />
+          </div>
+        )
+      },
+      'Header': 'Payment Status',
+      'accessor': 'paid',
+      'className': 'font-bold',
+      'sortable': true,
       'width': 10
     },
-    { Cell({ row }: any) {
-      return row.original.lastEmailSent
-        ? formatDateMMMDDYYYY(row.original.lastEmailSent, true)
-        : 'N/A';
-    },
-    'Header': 'Email Send Date ',
-    'accessor': 'lastEmailSent',
-    'className': 'font-bold',
-    'sortable': true
+    {
+      Cell({ row }: any) {
+        return row.original.lastEmailSent
+          ? formatDateMMMDDYYYY(row.original.lastEmailSent, true)
+          : 'N/A';
+      },
+      'Header': 'Email Send Date ',
+      'accessor': 'lastEmailSent',
+      'className': 'font-bold',
+      'sortable': true
     },
     {
       'Header': 'Invoice Date',
@@ -161,7 +167,7 @@ function InvoicingListListing({ classes, theme }: any) {
     {
       Cell({ row }: any) {
         return (
-          <BCQbSyncStatus data={row.original}/>
+          <BCQbSyncStatus data={row.original} />
         );
       },
       //'Header': 'Integrations',
@@ -173,19 +179,19 @@ function InvoicingListListing({ classes, theme }: any) {
       Cell({ row }: any) {
         // return <div className={customStyles.centerContainer}>
         return <EmailInvoiceButton
-            Component={<Button
-              variant="contained"
-              classes={{
-                'root': classes.emailButton
-              }}
-              color="primary"
-              size="small">
-              <MailOutlineOutlined
-                className={customStyles.iconBtn}
-              />
-            </Button>}
-            invoice={row.original}
-          />;
+          Component={<Button
+            variant="contained"
+            classes={{
+              'root': classes.emailButton
+            }}
+            color="primary"
+            size="small">
+            <MailOutlineOutlined
+              className={customStyles.iconBtn}
+            />
+          </Button>}
+          invoice={row.original}
+        />;
         // </div>;
       },
       'Header': 'Actions',
@@ -198,7 +204,7 @@ function InvoicingListListing({ classes, theme }: any) {
   useEffect(() => {
     // dispatch(getInvoicingList());
     // dispatch(loadingInvoicingList());
-    dispatch(getAllInvoicesAPI(undefined, undefined, undefined, undefined, advanceFilterInvoiceData,undefined,undefined,undefined,currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined, undefined, undefined, undefined, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params));
     return () => {
       dispatch(setKeyword(''));
       dispatch(setCurrentPageIndex(currentPageIndex));
@@ -212,25 +218,25 @@ function InvoicingListListing({ classes, theme }: any) {
   // }, [selectionRange]);
 
   useEffect(() => {
-    if(fetchInvoices){
-      dispatch(getAllInvoicesAPI(currentPageSize, undefined, undefined, keyword, advanceFilterInvoiceData, undefined,undefined,undefined,currentDivision.params));
+    if (fetchInvoices) {
+      dispatch(getAllInvoicesAPI(currentPageSize, undefined, undefined, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params));
       dispatch(setCurrentPageIndex(0));
     }
     setFetchInvoices(false);
   }, [fetchInvoices]);
 
   useEffect(() => {
-    if(location?.state?.tab === 1 && (location?.state?.option?.search || location?.state?.option?.pageSize || location?.state?.option?.lastPrevCursor
-      || location?.state?.option?.lastNextCursor || location?.state?.option?.currentPageIndex)){
+    if (location?.state?.tab === 1 && (location?.state?.option?.search || location?.state?.option?.pageSize || location?.state?.option?.lastPrevCursor
+      || location?.state?.option?.lastNextCursor || location?.state?.option?.currentPageIndex)) {
       dispatch(setKeyword(location.state.option.search));
-      dispatch(getAllInvoicesAPI(location.state.option.pageSize, location?.state?.option?.lastPrevCursor, location?.state?.option?.lastNextCursor, location.state.option.search , advanceFilterInvoiceData,undefined,undefined,undefined,currentDivision.params));
+      dispatch(getAllInvoicesAPI(location.state.option.pageSize, location?.state?.option?.lastPrevCursor, location?.state?.option?.lastNextCursor, location.state.option.search, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params));
       dispatch(setCurrentPageSize(location.state.option.pageSize));
       dispatch(setCurrentPageIndex(location?.state?.option?.currentPageIndex || 0));
       window.history.replaceState({}, document.title)
     }
   }, [location]);
 
-  const showInvoiceDetail = (id:string) => {
+  const showInvoiceDetail = (id: string) => {
     history.push({
       'pathname': `/main/invoicing/view/${id}`,
       'state': {
@@ -239,12 +245,12 @@ function InvoicingListListing({ classes, theme }: any) {
         tab: 1,
         currentPageIndex,
         lastNextCursor,
-        lastPrevCursor, 
+        lastPrevCursor,
       }
     });
   };
 
-  const handleMenuButtonClick = (event: any, id: number, row:any) => {
+  const handleMenuButtonClick = (event: any, id: number, row: any) => {
     event.stopPropagation();
     switch (id) {
       case 0:
@@ -288,18 +294,47 @@ function InvoicingListListing({ classes, theme }: any) {
 
   const handleRowClick = (event: any, row: any) => showInvoiceDetail(row.original._id);
 
-  const handleFilterSubmit = (data: any) => {
-    setFetchInvoices(true);
+  /**
+   * Receive the event modal closed on the modal(Nothing found)
+   */
+  const handleCloseModalNotDataFound = () => {
+    setDataNotFoundOnFilter(false)
+  }
+
+  /**
+   * Receive the event when the modal filter is sumited by the user
+   * @param data 
+   */
+  const handleFilterSubmit = async (data: any) => {
+    dataModalFilter.data.loading = true;
+    dataModalFilter.refresh = true;
+    dispatch(setModalDataAction(dataModalFilter));
+    const { total } = await (getAllInvoicesAPI(currentPageSize, undefined, undefined, keyword, data, undefined, undefined, undefined, currentDivision.params))(dispatch);
+    if (total === 0 || total === undefined) {
+      dataModalFilter.data.loading = false;
+      dataModalFilter.refresh = false;
+      dispatch(setModalDataAction(dataModalFilter));
+      setDataNotFoundOnFilter(true);
+    } else {
+      dispatch(closeModalAction());
+    }
+
+  }
+
+  // Data used by modal filter
+  const dataModalFilter = {
+    data: {
+      modalTitle: 'Filter Invoices',
+      handleFilterSubmit,
+      loading: false
+    },
+    type: modalTypes.ADVANCE_FILTER_INVOICE_MODAL,
+    refresh: false
   }
 
   const handleOpenFilter = () => {
-    dispatch(setModalDataAction({
-      'data': {
-        modalTitle: 'Filter Invoices',
-        handleFilterSubmit,
-      },
-      'type': modalTypes.ADVANCE_FILTER_INVOICE_MODAL
-    }));
+    dataModalFilter.data.loading = false;
+    dispatch(setModalDataAction(dataModalFilter));
     setTimeout(() => {
       dispatch(openModalAction());
     }, 200);
@@ -365,6 +400,31 @@ function InvoicingListListing({ classes, theme }: any) {
     )
   }
 
+  // Dialog to be showed whent the filter modal doesn't return data
+  const DialogNotData = ({ open, handleClose }: { open: boolean, handleClose: () => void }) => {
+    return (
+      <Dialog
+        open={open}
+        onClose={() => handleClose()}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        fullWidth={true}
+        maxWidth="xs"
+      >
+        <DialogTitle >
+          {"Nothing found"}
+        </DialogTitle>
+        <DialogContent>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleClose()} autoFocus>
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
   function Toolbar() {
     return <>
       {/* <BCDateRangePicker
@@ -382,7 +442,7 @@ function InvoicingListListing({ classes, theme }: any) {
     let rowData = row.original;
     if (currentDivision.isDivisionFeatureActivated && currentDivision.data?.name == "All" && (rowData.companyLocation?.name || rowData.workType?.title)) {
       return `${rowData.companyLocation?.name}  ${rowData.isMainLocation ? "(Main) " : ""}- ${rowData.workType?.title}`
-    }else{
+    } else {
       return ""
     }
   }
@@ -399,10 +459,10 @@ function InvoicingListListing({ classes, theme }: any) {
         toolbarPositionLeft={true}
         toolbar={Toolbar()}
         manualPagination
-        fetchFunction={(num: number, isPrev:boolean, isNext:boolean, query :string) =>{
+        fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
           setLastPrevCursor(isPrev ? prevCursor : undefined)
           setLastNextCursor(isNext ? nextCursor : undefined)
-          dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData,undefined,undefined,undefined,currentDivision.params))
+          dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
         }}
         total={total}
         currentPageIndex={currentPageIndex}
@@ -413,6 +473,7 @@ function InvoicingListListing({ classes, theme }: any) {
         disableInitialSearch={location?.state?.tab !== 1}
         rowTooltip={rowTooltip}
       />
+      {DialogNotData({ open: dataNotFoundOnFilter, handleClose: handleCloseModalNotDataFound })}
     </DataContainer>
   );
 }
