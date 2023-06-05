@@ -28,8 +28,8 @@ export default function EmailInvoiceButton({ invoice, Component, showLoader = tr
     emailToSend = invoice?.customerContactId?.email || customer?.info?.email
     customerName = invoice?.customerContactId?.name || customer?.profile?.displayName
   } else {
-    emailToSend = invoice?.contactsObj?.length ? invoice?.contactsObj[0]?.email : customer?.info?.email
-    customerName = invoice?.contactsObj?.length ? invoice?.contactsObj[0]?.name : customer?.profile?.displayName
+    emailToSend = invoice?.customerContactId ? invoice?.customerContactId?.email : customer?.info?.email
+    customerName = invoice?.customerContactId ? invoice?.customerContactId?.name : customer?.profile?.displayName
   }
   
 
