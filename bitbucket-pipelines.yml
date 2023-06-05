@@ -44,6 +44,38 @@ pipelines:
               AWS_DEFAULT_REGION: 'us-east-1'
               DISTRIBUTION_ID: 'E18B11G7D9D3CU'
 
+    release:
+    - step:
+        name: Build
+        caches:
+          - node
+        script:
+          - unset CI
+          - yarn install
+          - yarn add env-cmd
+          - yarn build:release
+        artifacts:
+          - build/**
+    - step:
+        name: pushing to s3
+        deployment: production
+        script:
+          - pipe: atlassian/aws-s3-deploy:0.4.5
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: 'us-east-1'
+              S3_BUCKET: 'blueclerk-react-release-deployment'
+              LOCAL_PATH: 'build'
+              ACL: 'public-read'
+
+          - pipe: atlassian/aws-cloudfront-invalidate:0.1.1
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: 'us-east-1'
+              DISTRIBUTION_ID: 'E3C1TKHJG0Q26X'
+
     staging:
     - step:
         name: Build
