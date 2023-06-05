@@ -177,8 +177,8 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
     //cycle thru the array for individual objects
     for (let i = 0; i < selectedInvoices.length; i++) {
       const invoice = selectedInvoices[i];
-      if (invoice.contactsObj.length > 0) {
-        const email = invoice.contactsObj[0].email;
+      if (invoice?.customerContactId) {
+        const email = invoice.customerContactId?.email;
 
         //first check if email is in array
 
@@ -188,7 +188,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
           continue;
         } else {
-          const tempArray = selectedInvoices.filter(inv => inv.contactsObj[0]?.email === email);
+          const tempArray = selectedInvoices.filter(inv => inv.customerContactId?.email === email);
           const invoicesArray: any = []
           tempArray.map((inv) => {
             invoicesArray.push(inv._id)
@@ -228,7 +228,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
         } else {
 
           //filter to get those with empty contactObj's first
-          const contactlessInvoices = selectedInvoices.filter(inv => inv.contactsObj.length === 0 && inv.customer.info.email === email)
+          const contactlessInvoices = selectedInvoices.filter(inv => !inv.customerContactId && inv.customer.info.email === email)
           if (contactlessInvoices.length) {
             //get the id's
             const invoicesArray: any = []
@@ -392,24 +392,20 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
     {
       Cell({ row }: any) {
-        return row.original.contactsObj.length > 0
-          ? row.original.contactsObj[0]?.name
-          : 'N/A';
+         return row.original?.customerContactId?.name || 'N/A';
       },
       'Header': 'Contact',
-      'accessor': 'row.original.contactsObj[0]?.name',
+      'accessor': 'row.original.customerContactId?.name',
       'className': 'font-bold',
       'sortable': true
     },
 
     {
       Cell({ row }: any) {
-        return row.original.contactsObj.length > 0
-          ? row.original.contactsObj[0]?.email
-          : 'N/A';
+        return row.original?.customerContactId?.email || 'N/A';
       },
       'Header': 'Email',
-      'accessor': 'row.original.contactsObj[0]?.email',
+      'accessor': 'row.original.customerContactId?.email',
       'className': 'font-bold',
       'sortable': true
     },
