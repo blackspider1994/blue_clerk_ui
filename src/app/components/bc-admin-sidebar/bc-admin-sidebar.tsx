@@ -284,11 +284,6 @@ function BCAdminSidebar({
       'link': '/main/invoicing/estimates'
     },
     {
-      'label': 'Billing',
-      'icon': <MonetizationOnIcon/>,
-      'link': '/main/admin/billing'
-    },
-    {
       'label': 'Brands',
       'icon': <BrandingWatermarkIcon/>,
       'link': '/main/admin/brands'
@@ -323,11 +318,11 @@ function BCAdminSidebar({
       'icon': <LibraryBooksIcon/>,
       'link': '/main/admin/invoicing'
     },
-    // {
-    //   'label': 'Job Types',
-    //   'icon': <WorkIcon/>,
-    //   'link': '/main/admin/job-types'
-    // },
+    {
+      'label': 'Job Types',
+      'icon': <WorkIcon/>,
+      'link': '/main/admin/job-types'
+    },
     {
       'label': 'Report Number',
       'icon': <ReportIcon/>,
@@ -353,6 +348,11 @@ function BCAdminSidebar({
       'label': 'Integrations',
       'icon': <SettingsApplicationsIcon/>,
       'link': '/main/admin/integrations'
+    },
+    {
+      'label': 'Billing',
+      'icon': <MonetizationOnIcon/>,
+      'link': '/main/admin/billing'
     },
     {
       'label': 'Groups',
