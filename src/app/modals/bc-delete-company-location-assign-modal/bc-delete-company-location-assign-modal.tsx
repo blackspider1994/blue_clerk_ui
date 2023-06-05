@@ -74,7 +74,7 @@ function BCDeleteCompanyLocationAssignModal({
       
       dispatch(UpdateCompanyLocationAssignmentsAction(payload, (status) => {
         if (status) {
-          dispatch(closeModalAction());
+          closeModal();
           dispatch(success("Assignment deleted successfully"));
           dispatch(setFlagUnsignedVendors({assignedVendorsIncluded: true}));
           dispatch(refreshDivision(true));
@@ -99,7 +99,7 @@ function BCDeleteCompanyLocationAssignModal({
               </Grid>
               <Grid item>
                 <div style={{fontWeight: 'bold', fontSize: 25, width: 300, textAlign: 'center'}}>
-                  {`Are you sure you want to delete ${assignee?.employee?.profile?.displayName ?? "the data"}`}
+                  {`Are you sure you want to delete ${(assignee?.employee?.profile?.displayName ?? assignee?.vendor?.info?.companyName) || "the data"}`}
                 </div>
               </Grid>
             </Grid>
