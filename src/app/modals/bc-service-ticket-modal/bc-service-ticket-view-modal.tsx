@@ -131,7 +131,7 @@ function BCViewServiceTicketModal({
       },
     },
   ];
-
+  
   const scheduleDate = job?.dueDate;
 
   return (
@@ -183,40 +183,31 @@ function BCViewServiceTicketModal({
             <Typography variant={'h6'} className={classNames('previewText', 'description')}>{job.note || 'N/A'}</Typography>
           </Grid>
         </Grid>
+        <Grid container className={'modalContent'} justify={'space-around'}>
+          <Grid item xs>
+            <Typography variant={'caption'} className={'previewCaption'}>house is occupied</Typography>
+            <Typography variant={'h6'} className={'previewText'}>{job?.isHomeOccupied ? 'YES' : 'NO'}</Typography>
+          </Grid>
+        </Grid>
         { 
           job?.isHomeOccupied 
           ? (
-            <div>
-              <Grid container className={'modalContent'} justify={'space-around'}>
-                <Grid item xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>house is occupied</Typography>
-                  <Typography variant={'h6'} className={'previewText'}>{'YES'}</Typography>
-                </Grid>
-              </Grid>
-              <Grid container className={'modalContent'} justify={'space-around'}>
-                <Grid item xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>home owner name</Typography>
-                  <Typography variant={'h6'} className={'previewText'}>{job?.homeOwner?.profile?.firstName ||'N/A'}</Typography>
-                </Grid>
-                <Grid item xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>home owner email</Typography>
-                  <Typography variant={'h6'} className={'previewText'}>{job?.homeOwner?.info?.email || 'N/A'}</Typography>
-                </Grid>
-                <Grid item style={{width: '50%'}}>
-                  <Typography variant={'caption'} className={'previewCaption'}>home owner phone</Typography>
-                  <Typography variant={'h6'} className={classNames('previewText', 'description')}>{job?.homeOwner?.contact?.phone || 'N/A'}</Typography>
-                </Grid>
-              </Grid>
-            </div>
+                <Grid container className={'modalContent'} justify={'space-around'}>                
+                  <Grid item xs>
+                    <Typography variant={'caption'} className={'previewCaption'}>home owner name</Typography>
+                    <Typography variant={'h6'} className={'previewText'}>{job?.homeOwner?.profile?.displayName ||'N/A'}</Typography>
+                  </Grid>
+                  <Grid item xs>
+                    <Typography variant={'caption'} className={'previewCaption'}>home owner email</Typography>
+                    <Typography variant={'h6'} className={'previewText'}>{job?.homeOwner?.info?.email || 'N/A'}</Typography>
+                  </Grid>
+                  <Grid item style={{width: '50%'}}>
+                    <Typography variant={'caption'} className={'previewCaption'}>home owner phone</Typography>
+                    <Typography variant={'h6'} className={classNames('previewText', 'description')}>{job?.homeOwner?.contact?.phone || 'N/A'}</Typography>
+                  </Grid>
+                </Grid>  
             )
-          : (
-            <Grid container className={'modalContent'} justify={'space-around'}>
-              <Grid item xs>
-                <Typography variant={'caption'} className={'previewCaption'}>house is occupied</Typography>
-                <Typography variant={'h6'} className={'previewText'}>{'NO'}</Typography>
-              </Grid>
-            </Grid>
-            )
+          : <div />
         }
         <Grid container className={classNames('modalContent', classes.lastContent)} justify={'space-between'}>
           <Grid item style={{width: '30%'}}>
