@@ -28,7 +28,7 @@ import { DivisionParams } from 'app/models/division';
 export const getTodos = async (params = {}) => {
   let responseData;
   try {
-    const response: any = await request('/getJobs', 'POST', params, false);
+    const response: any = await requestApiV2('/getJobs', 'POST', params);
     responseData = response.data;
   } catch (err) {
     responseData = err.data;
