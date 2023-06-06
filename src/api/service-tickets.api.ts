@@ -2,6 +2,7 @@ import request from '../utils/http.service';
 import { refreshServiceTickets, setOpenServiceTicket, setOpenServiceTicketLoading, setServiceTicket, setServiceTicketLoading, setPreviousServiceTicketCursor, setNextServiceTicketCursor, setTotal} from 'actions/service-ticket/service-ticket.action';
 import moment from 'moment';
 import axios from 'axios';
+import { DivisionParams } from 'app/models/division';
 
 const compareByDate = (a: any, b: any) => {
   if (new Date(a.createdAt) > new Date(b.createdAt)) {
@@ -13,12 +14,12 @@ const compareByDate = (a: any, b: any) => {
   return 0;
 };
 
-export const getAllServiceTicketAPI =  (param?: {pageSize: 2020}) => {
+export const getAllServiceTicketAPI =  (param?: {pageSize: 2020}, division?: DivisionParams) => {
   const body = param || {pageSize: 2020};
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setServiceTicketLoading(true));
-      request(`/getServiceTickets`, 'post', body, false)
+      request(`/getServiceTickets`, 'post', body, false,undefined,undefined,undefined,division)
         .then((res: any) => {
           const tempJobs = res.data.serviceTickets?.filter((ticket: any) => ticket.status !== 1);
 
@@ -35,7 +36,7 @@ export const getAllServiceTicketAPI =  (param?: {pageSize: 2020}) => {
   };
 };
 let cancelTokenGetAllServiceTicketsAPI:any;
-export const getAllServiceTicketsAPI = (pageSize = 10, previousCursor = '', nextCursor = '', status = false, keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null) => {
+export const getAllServiceTicketsAPI = (pageSize = 10, previousCursor = '', nextCursor = '', status = false, keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null, division?: any) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setServiceTicketLoading(true));
@@ -68,7 +69,7 @@ export const getAllServiceTicketsAPI = (pageSize = 10, previousCursor = '', next
       
       cancelTokenGetAllServiceTicketsAPI = axios.CancelToken.source();
 
-      request(`/getServiceTickets`, 'post', optionObj, undefined, undefined, cancelTokenGetAllServiceTicketsAPI)
+      request(`/getServiceTickets`, 'post', optionObj, undefined, undefined, cancelTokenGetAllServiceTicketsAPI, undefined,division)
         .then((res: any) => {
           let tempServiceTickets = res.data.serviceTickets;
           tempServiceTickets = tempServiceTickets.map((tempServiceTicket: {createdAt:string})=>({
@@ -188,9 +189,9 @@ export const getServiceTicketDetail:any = (ticketId:string) => {
   });
 };
 
-export const getOpenServiceTicketsStream:any = (actionId: string) => {
+export const getOpenServiceTicketsStream:any = (actionId: string, division?: DivisionParams) => {
   return new Promise((resolve, reject) => {
-    request(`/getOpenServiceTicketsStream`, 'OPTIONS', {actionId, includeOpenJobRequest: true}, false)
+    request(`/getOpenServiceTicketsStream`, 'OPTIONS', {actionId, includeOpenJobRequest: true}, false,undefined,undefined,undefined,division)
       .then((res: any) => {
         return resolve(res.data);
       })

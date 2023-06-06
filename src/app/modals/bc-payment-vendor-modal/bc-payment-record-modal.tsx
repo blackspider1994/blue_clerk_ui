@@ -18,13 +18,13 @@ import {
 } from '@material-ui/core';
 import React, { useState } from 'react';
 import { closeModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import InputAdornment from "@material-ui/core/InputAdornment";
 import { error } from "../../../actions/snackbar/snackbar.action";
 import {modalTypes} from "../../../constants";
 import {formatCurrency} from "../../../helpers/format";
-
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 interface ApiProps {
   customerId: string,
   invoiceId?:string,
@@ -44,6 +44,7 @@ function BcPaymentVendorEditModal({
 }: any): JSX.Element {
   const [sent, setSent] = useState(false);
   const dispatch = useDispatch();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const paymentTypes = [
     {
@@ -127,7 +128,7 @@ function BcPaymentVendorEditModal({
         request = recordPayment;
       }
 
-      dispatch(request(params)).then((response: any) => {
+      dispatch(request(params,currentDivision.params)).then((response: any) => {
         if (response.status === 1) {
           setSent(true);
           setSubmitting(false);

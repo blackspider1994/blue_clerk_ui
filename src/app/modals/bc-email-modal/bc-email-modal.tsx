@@ -69,12 +69,15 @@ function EmailJobReportModal({ classes, data }: any) {
   const { sent, loading, error } = useSelector(({ email }: any) => email);
   const profileState: CompanyProfileStateType = useSelector(
     (state: any) => state.profile
-  );
+    );
+  const { user } = useSelector((state: any) => state.auth);
   const [customerContacts, setCustomerContacts] = useState<any[]>([]);
+  const [loadingCustomerContacts, setLoadingCustomerContacts] = useState<boolean>(false);
   const [invoiceToView, setInvoiceToView] = useState<any>({});
   const [invoiceInMultipleView, setInvoiceInMultipleView] = useState<number>(0);
   const [invoicesToSend, setInvoicesToSend] = useState<any[]>([]);
-  const [sendAllButtonState, setSendAllButtonState] = useState<string>("Send All")
+  const [sendAllButtonState, setSendAllButtonState] = useState<string>("Send All");
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState<boolean>(false);
   const dispatch = useDispatch();
   // data: {id, ids, customerEmail, customer, emailDefault, customerId, multiple, multipleInvoices}
 
@@ -97,6 +100,7 @@ function EmailJobReportModal({ classes, data }: any) {
       setInvoiceToView({
         id: data?.id,
         ids: data?.ids,
+        from: data?.from || user?.auth?.email,
         customerEmail: data?.customerEmail,
         customer: data?.customer,
         emailDefault: data?.emailDefault,
@@ -107,6 +111,7 @@ function EmailJobReportModal({ classes, data }: any) {
       setInvoiceToView({
         id: data?.multipleInvoices[0]?.id,
         ids: data?.multipleInvoices[0]?.ids,
+        from: data?.multipleInvoices[0]?.from || user?.auth?.email,
         customerEmail: data?.multipleInvoices[0]?.customerEmail,
         customer: data?.multipleInvoices[0]?.customer,
         emailDefault: data?.multipleInvoices[0]?.emailDefault,
@@ -117,6 +122,7 @@ function EmailJobReportModal({ classes, data }: any) {
 
   useEffect(() => {
     if (invoiceToView?.customerId ) {
+      setLoadingCustomerContacts(true);
       getCustomersContact(invoiceToView?.customerId)
         .then((res) => {
           if (res.status === 1) {
@@ -139,6 +145,7 @@ function EmailJobReportModal({ classes, data }: any) {
               }
             }
           }
+          setLoadingCustomerContacts(false);
         })
         .catch(() => {
           dispatch(
@@ -183,7 +190,7 @@ function EmailJobReportModal({ classes, data }: any) {
   const form = useFormik({
     enableReinitialize: true,
     initialValues: {
-      from: profileState.companyEmail,
+      from: invoiceToView?.from || user?.auth?.email,
       to: invoiceToView?.receipients || [{ email: invoiceToView.customerEmail }],
       subject: invoiceToView?.emailDefault?.subject,
       message: invoiceToView?.emailDefault?.message,
@@ -257,8 +264,8 @@ function EmailJobReportModal({ classes, data }: any) {
         emailDefault: tempEmailDefault,
         receipients:tempReceipients,
         customerId: data?.multipleInvoices[invoiceInMultipleView + 1]?.customerId,
+        from: data?.multipleInvoices[invoiceInMultipleView + 1]?.from || user?.auth?.email,
       });
-
     } else {
        setInvoiceToView({
         id: data?.multipleInvoices[invoiceInMultipleView + 1]?.id,
@@ -269,6 +276,7 @@ function EmailJobReportModal({ classes, data }: any) {
         emailDefault:
           data?.multipleInvoices[invoiceInMultipleView + 1]?.emailDefault,
         customerId: data?.multipleInvoices[invoiceInMultipleView + 1]?.customerId,
+        from: data?.multipleInvoices[invoiceInMultipleView + 1]?.from || user?.auth?.email,
       });
     }  
 
@@ -294,6 +302,7 @@ function EmailJobReportModal({ classes, data }: any) {
 
   const sendAll = () => {
     // setSendAllButtonState('Sending Invoices...')
+    setIsLoadingSubmit(true);
 
 
     const invoicesToSendClone = [...invoicesToSend];
@@ -343,6 +352,9 @@ function EmailJobReportModal({ classes, data }: any) {
     return setSendAllButtonState("Send All")
   };
 
+  useEffect(()=>{
+    if(!sent) setIsLoadingSubmit(false);
+  },[sent, error, loading])
   const slidePreviousInvoice = () => {
 
     
@@ -380,6 +392,7 @@ function EmailJobReportModal({ classes, data }: any) {
       emailDefault: tempEmailDefault,
       receipients:tempReceipients,
       customerId: data?.multipleInvoices[invoiceInMultipleView - 1]?.customerId,
+      from: data?.multipleInvoices[invoiceInMultipleView - 1]?.from,
     });
 
     setInvoiceInMultipleView(invoiceInMultipleView - 1);
@@ -658,7 +671,8 @@ function EmailJobReportModal({ classes, data }: any) {
                           color="primary"
                           type={'button'}
                           onClick={slidePreviousInvoice}
-                          variant={'outlined'}
+                          variant={'outlined'}  
+                          disabled={customerContacts.length ? loadingCustomerContacts : false}
                         >
                           Back
                         </Button>
@@ -704,6 +718,7 @@ function EmailJobReportModal({ classes, data }: any) {
                             onClick={slideNextInvoice}
                               variant={'outlined'}
                               endIcon={<ChevronRight />}
+                            disabled={customerContacts.length ? loadingCustomerContacts : false}
                           >
                             Next
                           </Button>
@@ -717,7 +732,7 @@ function EmailJobReportModal({ classes, data }: any) {
                             color="primary"
                             onClick={sendAll}
                             variant={'contained'}
-                            disabled={sendAllButtonState !== 'Send All'}
+                            disabled={isLoadingSubmit}
                           >
                             {sendAllButtonState}
                           </Button>

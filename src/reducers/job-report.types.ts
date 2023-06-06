@@ -13,6 +13,7 @@ export const types = {
   'SET_CURRENT_REPORTS_PAGE_INDEX': 'SET_CURRENT_REPORTS_PAGE_INDEX',
   'SET_CURRENT_REPORTS_PAGE_SIZE': 'SET_CURRENT_REPORTS_PAGE_SIZE',
   'SET_REPORT_SEARCH_KEYWORD': 'SET_REPORT_SEARCH_KEYWORD',
+  'SET_DATE_FILTER_RANGE': 'SET_DATE_FILTER_RANGE'
 };
 
 export interface JobReport {
@@ -142,6 +143,7 @@ export interface JobReportState {
   currentPageIndex: number;
   currentPageSize: number;
   keyword: string;
+  dateFilterRange: Range | null;
 }
 
 

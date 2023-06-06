@@ -93,6 +93,7 @@ function BCAdminLayout({
         showNotificationDetails={showNotificationDetails}
         openModalHandler={openModalHandler}
         jobRequests={jobRequests}
+        user={user}
       />
 
       <BCAdminSidebar

@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import styles from '../job-equipment-info.style';
 import { withStyles } from '@material-ui/core/styles';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { formatDate, convertMilitaryTime } from "helpers/format";
 import { openModalAction, setModalDataAction, } from "actions/bc-modal/bc-modal.action";
 import { modalTypes } from "../../../../../../constants";
@@ -16,6 +16,7 @@ import { getCustomerDetailAction, loadingSingleCustomers } from 'actions/custome
 import { Job } from 'actions/job/job.types';
 import {CSButtonSmall} from "../../../../../../helpers/custom";
 import BCJobStatus from "../../../../../components/bc-job-status";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface LocationStateTypes {
   customerName: string;
@@ -23,6 +24,7 @@ interface LocationStateTypes {
 }
 function CustomersJobEquipmentInfoJobsPage({ classes }: any) {
   const dispatch = useDispatch();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const { isLoading = true, jobs, refresh = true } = useSelector(
     ({ jobState }: any) => ({
@@ -62,6 +64,7 @@ function CustomersJobEquipmentInfoJobsPage({ classes }: any) {
     history.push({
       pathname: `/main/customers/${customerName}`,
       state: {
+        ...location,
         customerName,
         customerId,
         from: 1
@@ -272,8 +275,8 @@ function CustomersJobEquipmentInfoJobsPage({ classes }: any) {
   }, [jobs]);
 
   useEffect(() => {
-    if (refresh) {
-      dispatch(getAllJobsByCustomerAPI(undefined, customerObj._id || location.state?.customerId));
+    if ((refresh && !currentDivision.isDivisionFeatureActivated) || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+      dispatch(getAllJobsByCustomerAPI(undefined, customerObj._id || location.state?.customerId,currentDivision.params));
     }
 
     if (customerObj._id === '') {
@@ -282,20 +285,22 @@ function CustomersJobEquipmentInfoJobsPage({ classes }: any) {
       dispatch(loadingSingleCustomers());
       dispatch(getCustomerDetailAction({ customerId }));
     }
-  }, [refresh]);
+  }, [refresh, currentDivision.isDivisionFeatureActivated, currentDivision.params]);
 
   useEffect(() => {
-    if (!refresh) {
-      dispatch(getAllJobsByCustomerAPI(undefined, customerObj._id || location.state?.customerId));
+    if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+      if (!refresh) {
+        dispatch(getAllJobsByCustomerAPI(undefined, customerObj._id || location.state?.customerId,currentDivision.params));
+      }
+  
+      if (customerObj._id === '') {
+        const obj: any = location.state;
+        const customerId = obj.customerId;
+        dispatch(loadingSingleCustomers());
+        dispatch(getCustomerDetailAction({ customerId }));
+      }
     }
-
-    if (customerObj._id === '') {
-      const obj: any = location.state;
-      const customerId = obj.customerId;
-      dispatch(loadingSingleCustomers());
-      dispatch(getCustomerDetailAction({ customerId }));
-    }
-  }, []);
+  }, [currentDivision.isDivisionFeatureActivated, currentDivision.params]);
 
 
   // const handleRowClick = (event: any, row: any) => { };

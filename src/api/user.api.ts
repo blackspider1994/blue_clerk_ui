@@ -93,3 +93,33 @@ export const updateCompanyLocation = async (data: any) => {
   return responseData;
 }
 
+export const updateCompanyLocationAssignments = async (data: any) => {
+  let responseData;
+
+  try {
+    const response: any = await request("/updateCompanyLocationAssignments", "PUT", data, false);
+    responseData = response.data;
+  } catch (err) {
+    responseData = {
+      status: 0,
+      message: 'We are facing some issues, please try again.\''
+    };
+  }
+  return responseData;
+}
+
+export const updateCompanyLocationBillingAddress = async (data: any) => {
+  let responseData;
+
+  try {
+    const response: any = await request("/updateCompanyLocationBillingAddress", "PUT", data, false);
+    responseData = response.data;
+  } catch (err) {
+    responseData = {
+      status: 0,
+      message: 'We are facing some issues, please try again.\''
+    };
+  }
+  return responseData;
+}
+

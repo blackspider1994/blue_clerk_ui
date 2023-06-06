@@ -58,6 +58,7 @@ import {stringSortCaseInsensitive} from '../../../helpers/sort';
 import BCDragAndDrop from '../../components/bc-drag-drop/bc-drag-drop';
 import {createFilterOptions} from '@material-ui/lab/Autocomplete';
 import {useHistory} from 'react-router-dom';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 import { callCreateHomeOwner } from 'api/home-owner.api';
 import { getHomeOwnerAction, clearHomeOwnerStore } from 'actions/home-owner/home-owner.action';
 
@@ -115,6 +116,7 @@ function BCServiceTicketModal(
   const employeesForJob = [...data];
   const jobTypesInput = useRef<HTMLInputElement>(null);
   const history = useHistory();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const filter = createFilterOptions();
 
@@ -369,6 +371,15 @@ function BCServiceTicketModal(
         (image: any) => image instanceof File
       );
 
+      //add division and location field
+      if (currentDivision.data?.locationId) {
+        tempData.companyLocation = currentDivision.data?.locationId;
+      }
+      
+      if (currentDivision.data?.workTypeId) {
+        tempData.workType = currentDivision.data?.workTypeId;
+      }
+
       const editTicketObj = {...values, ticketId: ''};
       const updateHomeOccupationStatus = () => {
         if (jobSiteValue.isHomeOccupied === isHomeOccupied) return;
@@ -589,11 +600,11 @@ function BCServiceTicketModal(
       setFieldValue('customerLastName', filteredHomeOwners[0].profile.lastName);
       setFormDataEmail({
         ...formDataEmail,
-        value: filteredHomeOwners[0].info?.email
+        value: filteredHomeOwners[0].info?.email || ''
       });
       setFormDataPhone({
         ...formDataPhone,
-        value: filteredHomeOwners[0].contact?.phone
+        value: filteredHomeOwners[0].contact?.phone || ''
       });
       setHomeOwnerId(filteredHomeOwners[0]._id); 
       setHomeOccupied(true);

@@ -4,7 +4,7 @@ import {
   withStyles
 } from "@material-ui/core";
 import styles from './payroll.styles';
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation, useParams } from "react-router-dom";
 import BCTableContainer from "../../components/bc-table-container/bc-table-container";
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import BCMenuButton from "../../components/bc-menu-more";
@@ -23,6 +23,8 @@ import { HighlightOff } from "@material-ui/icons";
 import BCItemsFilter from "../../components/bc-items-filter/bc-items-filter";
 import { getPayrollBalance, refreshContractorPayment } from "../../../actions/payroll/payroll.action";
 import { Contractor } from "../../../actions/payroll/payroll.types";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import { warning } from 'actions/snackbar/snackbar.action';
 
 interface Props {
   classes: any;
@@ -35,6 +37,8 @@ const ITEMS = [
 ]
 
 function Payroll({ classes }: Props) {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
   const history = useHistory();
   const location = useLocation<any>();
@@ -51,15 +55,17 @@ function Payroll({ classes }: Props) {
   const [selectedIDs, setSelectedIDs] = useState<string[]>([]);
 
   useEffect(() => {
-    if (selectionRange) {
-      dispatch(getPayrollBalance(formatDateYMD(selectionRange.startDate), formatDateYMD(selectionRange.endDate)));
-    } else {
-      dispatch(getPayrollBalance());
+    if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+      if (selectionRange) {
+        dispatch(getPayrollBalance(formatDateYMD(selectionRange.startDate), formatDateYMD(selectionRange.endDate), currentDivision.params));
+      } else {
+        dispatch(getPayrollBalance(undefined, undefined,currentDivision.params));
+      }
+      if (refresh) {
+        dispatch(refreshContractorPayment(false));
+      }
     }
-    if (refresh) {
-      dispatch(refreshContractorPayment(false));
-    }
-  }, [selectionRange, refresh]);
+  }, [selectionRange, refresh, currentDivision.isDivisionFeatureActivated, currentDivision.params]);
 
   useEffect(() => {
     setTableData(selectedIDs.length > 0 ?
@@ -91,7 +97,7 @@ function Payroll({ classes }: Props) {
         const contractorName = row.vendor.replace(/[\/ ]/g, '');
         localStorage.setItem('nestedRouteKey', `${contractorName}`);
         history.push({
-          'pathname': `payroll/pastpayment/${contractorName}`,
+          'pathname': `/main/payroll/pastpayment/${contractorName}`,
           'state': {
             contractor: row,
             currentPage

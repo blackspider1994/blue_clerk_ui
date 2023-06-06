@@ -69,7 +69,7 @@ export default (theme: Theme): any => ({
       'height': '100%',
       'justifyContent': 'center',
       'textDecoration': 'none',
-      'display': 'block',
+      'display': 'flex',
       'padding': '10px',
     },
     'width': '100%',
@@ -211,5 +211,22 @@ export default (theme: Theme): any => ({
   },
   'bcHeaderToggleButton': {
     'backgroundColor': CONSTANTS.PRIMARY_GRAY,
+  },
+  'bcDropdownLocation': {
+    "display": "flex",
+    "align-items": "end",
+    "margin-right": "1rem",
+  },
+  "bcDropdownLocationIcon": {
+    "margin-right": "0.1rem"
+  },
+  "divisionList": {
+    "display": "flex",
+    "alignItems": "center"
+  },
+  "flagWarning": {
+    "color": "red",
+    "fontWeight": 'bold',
+    "marginRight": "3px"
   }
 });

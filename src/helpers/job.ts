@@ -1,4 +1,4 @@
-export function getVendor (job: any) {
+export function getVendor(job: any) {
   const {tasks} = job;
   let value = '';
   if (tasks) {
@@ -8,8 +8,12 @@ export function getVendor (job: any) {
       value = tasks[0].vendor.profile
         ? tasks[0].vendor.profile.displayName
         : tasks[0].vendor.info.companyName;
+    } else if (tasks[0].contractor) {
+      value = tasks[0].contractor.info.displayName
+        ? tasks[0].contractor.info.displayName
+        : tasks[0].contractor.info.companyName;
     } else if (tasks[0].technician) {
-      value =  tasks[0].technician.profile
+      value = tasks[0].technician.profile
         ? tasks[0].technician.profile.displayName
         : tasks[0].technician.info.companyName;
     }
@@ -34,7 +38,7 @@ export function getJobType(job: any) {
   return allTypes.length === 1 ? allTypes[0].toLowerCase() : 'multiple jobs';
 }
 
-export function getJobRequestDescription (jobRequest: any) {
+export function getJobRequestDescription(jobRequest: any) {
   const {requests, windows} = jobRequest;
   let value = '';
   if (requests.length > 0) {

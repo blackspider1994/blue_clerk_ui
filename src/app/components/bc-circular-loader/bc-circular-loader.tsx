@@ -7,7 +7,7 @@ function BCCircularLoader({ heightValue = '100vh', size= 50 }: any): JSX.Element
       'alignItems': 'center',
       'display': 'flex',
       'height': heightValue,
-      'justifyContent': 'center'
+      'justifyContent': 'center',
     }}>
       <CircularProgress size={size} />
     </div>

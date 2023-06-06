@@ -1,18 +1,20 @@
 import * as yup from 'yup';
-import BCDateTimePicker from 'app/components/bc-date-time-picker/bc-date-time-picker';
+import BCDateTimePicker
+  from 'app/components/bc-date-time-picker/bc-date-time-picker';
 import BCInput from 'app/components/bc-input/bc-input';
-import BCTableContainer from 'app/components/bc-table-container/bc-table-container';
-import { getInventory } from 'actions/inventory/inventory.action';
-import { refreshJobs } from 'actions/job/job.action';
+import BCTableContainer
+  from 'app/components/bc-table-container/bc-table-container';
+import {getInventory} from 'actions/inventory/inventory.action';
+import {refreshJobs} from 'actions/job/job.action';
 import {
   refreshServiceTickets,
   setTicket2JobID,
   setOpenServiceTicket,
   setOpenServiceTicketLoading,
 } from 'actions/service-ticket/service-ticket.action';
-import { refreshJobRequests } from 'actions/job-request/job-request.action';
+import {refreshJobRequests} from 'actions/job-request/job-request.action';
 import styles from './bc-job-modal.styles';
-import { useFormik } from 'formik';
+import {useFormik} from 'formik';
 import {
   Button,
   Chip,
@@ -24,7 +26,7 @@ import {
   FormControlLabel,
   Checkbox
 } from '@material-ui/core';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
   callCreateJobAPI,
   callEditJobAPI, callUpdateJobAPI,
@@ -34,7 +36,7 @@ import {
   closeModalAction,
   setModalDataAction,
 } from 'actions/bc-modal/bc-modal.action';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   convertMilitaryTime,
   formatDate,
@@ -43,9 +45,13 @@ import {
   shortenStringWithElipsis,
 } from 'helpers/format';
 import styled from 'styled-components';
-import { getEmployeesForJobAction } from 'actions/employees-for-job/employees-for-job.action';
-import { getVendors } from 'actions/vendor/vendor.action';
-import { markNotificationAsRead } from 'actions/notifications/notifications.action';
+import {
+  getEmployeesForJobAction
+} from 'actions/employees-for-job/employees-for-job.action';
+import {getVendors} from 'actions/vendor/vendor.action';
+import {
+  markNotificationAsRead
+} from 'actions/notifications/notifications.action';
 import {
   clearJobSiteStore,
   getJobSites,
@@ -54,20 +60,23 @@ import {
   getJobLocationsAction,
   setJobLocations,
 } from 'actions/job-location/job-location.action';
-import BCCircularLoader from 'app/components/bc-circular-loader/bc-circular-loader';
-import { getOpenServiceTickets } from 'api/service-tickets.api';
+import BCCircularLoader
+  from 'app/components/bc-circular-loader/bc-circular-loader';
+import {getOpenServiceTickets} from 'api/service-tickets.api';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {
   error,
   success,
 } from 'actions/snackbar/snackbar.action';
-import { getContacts } from 'api/contacts.api';
-import { modalTypes } from '../../../constants';
-import { stringSortCaseInsensitive } from '../../../helpers/sort';
+import {getContacts} from 'api/contacts.api';
+import {modalTypes} from '../../../constants';
+import {stringSortCaseInsensitive} from '../../../helpers/sort';
 import moment from 'moment';
 import BCDragAndDrop from "../../components/bc-drag-drop/bc-drag-drop";
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import { DivisionParams } from 'app/models/division';
 
 const initialTask = {
   employeeType: 0,
@@ -119,9 +128,13 @@ const getJobData = (ids: any, items: any) => {
   if (!ids) {
     return;
   }
-  return ids.map((id:string)=>{
-    const currentItem = items.filter((item: {jobType: string}) => item.jobType === id)[0];
-    return {_id:currentItem?.jobType, title:currentItem?.name, description:currentItem?.description}
+  return ids.map((id: string) => {
+    const currentItem = items.filter((item: { jobType: string }) => item.jobType === id)[0];
+    return {
+      _id: currentItem?.jobType,
+      title: currentItem?.name,
+      description: currentItem?.description
+    }
   })
   // return ids.map((id: string)=> jobTypes.filter((job: {_id:string}) => job._id === id)[0]).filter((jobType:string)=>jobType);
 };
@@ -149,29 +162,33 @@ const getJobTasks = (job: any, items: any) => {
 };
 
 function BCJobModal({
-  classes,
-  job = initialJobState,
-  detail = false,
-}: any): JSX.Element {
+                      classes,
+                      job = initialJobState,
+                      detail = false,
+                    }: any): JSX.Element {
   const dispatch = useDispatch();
   const [thumbs, setThumbs] = useState<any[]>([]);
   // Selected variable with useSelector from the store
-  const equipments = useSelector(({ inventory }: any) => inventory.data);
+  const equipments = useSelector(({inventory}: any) => inventory.data);
   const items = useSelector((state: any) => state.invoiceItems.items);
-  const { loading, data } = useSelector(
-    ({ employeesForJob }: any) => employeesForJob
+  const {loading, data} = useSelector(
+    ({employeesForJob}: any) => employeesForJob
   );
-  const vendorsList = useSelector(({ vendors }: any) =>
-    vendors.data.reduce((acc: any[],vendor: any) => {
+  const vendorsList = useSelector(({vendors}: any) =>
+    vendors.data.reduce((acc: any[], vendor: any) => {
       if (vendor.status === 1) acc.push(vendor.contractor);
       return acc;
     }, [])
   );
 
-  const {isLoading: jobTypesLoading, data: jobTypes} = useSelector((state: any) => state.jobTypes);
+  const {
+    isLoading: jobTypesLoading,
+    data: jobTypes
+  } = useSelector((state: any) => state.jobTypes);
   const jobLocations = useSelector((state: any) => state.jobLocations.data);
   const isLoading = useSelector((state: any) => state.jobLocations.loading);
   const jobSites = useSelector((state: any) => state.jobSites.data);
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
   const { contacts } = useSelector((state: any) => state.contacts);
   const openServiceTicketFilter = useSelector(
     (state: any) => state.serviceTicket.filterTicketState
@@ -185,19 +202,25 @@ function BCJobModal({
   const [contactValue, setContactValue] = useState<any>([]);
 
 
-  let { ticket = {} } = job;
+  let {ticket = {}} = job;
 
-  if(job.request){
+  if (job.request) {
     ticket = job.request;
     job.ticket = job.request;
   }
-  const { customer = {} } = ticket;
+  const {customer = {}} = ticket;
 
-  const { profile: { displayName = '' } = {} } = customer;
+  const {profile: {displayName = ''} = {}} = customer;
 
   const employeeTypes = [
     {_id: 0, name: 'Employee',},
     {_id: 1, name: 'Contractor'},
+  ];
+
+  const timeRangeOptions = [
+    {name: 'N/A', index: 0}, 
+    {name: 'AM', index: 1}, 
+    {name: 'PM', index: 2}, 
   ];
 
   /**
@@ -298,7 +321,7 @@ function BCJobModal({
     await setJobLocationValue(newValue);
 
     if (locationId !== '') {
-      await dispatch(getJobSites({ customerId, locationId }));
+      await dispatch(getJobSites({customerId, locationId}));
     } else {
       await dispatch(clearJobSiteStore());
     }
@@ -312,7 +335,7 @@ function BCJobModal({
     setFieldValue(fieldName, date);
     if (fieldName === 'scheduleDate') {
       delete FormikErrors.scheduleDate;
-    } else if(fieldName === 'scheduledStartTime' || fieldName === 'scheduledEndTime') {
+    } else if (fieldName === 'scheduledStartTime' || fieldName === 'scheduledEndTime') {
       delete FormikErrors.scheduledStartTime;
       delete FormikErrors.scheduledEndTime;
     }
@@ -337,8 +360,16 @@ function BCJobModal({
         ? job.ticket.customer?._id
         : job.ticket.customer;
     dispatch(getInventory());
-    dispatch(getEmployeesForJobAction());
-    dispatch(getVendors());
+    let divisionParams: DivisionParams = {};
+    if (jobValue?.ticket && currentDivision.isDivisionFeatureActivated) {
+      divisionParams = {
+        workType: jobValue?.ticket?.workType, 
+        companyLocation: jobValue?.ticket?.companyLocation
+      };
+    }  
+    
+    dispatch(getEmployeesForJobAction(divisionParams));
+    dispatch(getVendors(divisionParams));
     dispatch(getAllJobTypesAPI());
     dispatch(getJobLocationsAction({customerId: customerId}));
 
@@ -371,7 +402,7 @@ function BCJobModal({
         }
       }
       const activeJobLocations = jobLocations.filter((location: any) => location.isActive || location._id === jobLocation?._id);
-      if (activeJobLocations.length !== jobLocations.length) dispatch(setJobLocations(activeJobLocations)) ;
+      if (activeJobLocations.length !== jobLocations.length) dispatch(setJobLocations(activeJobLocations));
     }
   }, [jobLocations]);
 
@@ -406,12 +437,12 @@ function BCJobModal({
   useEffect(() => {
     if (job?.jobRescheduled) {
       dispatch(
-        markNotificationAsRead.fetch({ id: job?.jobRescheduled, isRead: true })
+        markNotificationAsRead.fetch({id: job?.jobRescheduled, isRead: true})
       );
     }
   }, [job?.jobRescheduled]);
 
-  const addEmptyTask =() => {
+  const addEmptyTask = () => {
     const tasks = [...FormikValues.tasks];
     tasks.push({...initialTask});
     setFieldValue('tasks', tasks);
@@ -451,42 +482,44 @@ function BCJobModal({
       jobLocationId: jobValue.jobLocation
         ? jobValue.jobLocation._id
         : jobValue.ticket.jobLocation
-        ? jobValue.ticket.jobLocation._id || jobValue.ticket.jobLocation
-        : '',
+          ? jobValue.ticket.jobLocation._id || jobValue.ticket.jobLocation
+          : '',
       jobSiteId: jobValue.jobSite
         ? jobValue.jobSite._id
         : jobValue.ticket.jobSite
-        ? jobValue.ticket.jobSite._id || jobValue.ticket.jobSite
-        : '',
+          ? jobValue.ticket.jobSite._id || jobValue.ticket.jobSite
+          : '',
       customerContactId: jobValue.customerContactId?._id || jobValue.customerContactId ||
         ticket?.customerContactId?._id || ticket.customerContactId ||
         ticket?.customerContact?._id || ticket.customerContact || '',
       customerPO: jobValue.customerPO || ticket.customerPO,
       images: jobValue?.images?.length ? jobValue.images : ticket.images || [],
+      scheduleTimeAMPM: timeRangeOptions[jobValue?.scheduleTimeAMPM || 0],
       isHomeOccupied: jobValue?.isHomeOccupied || ticket?.isHomeOccupied || jobValue.ticket?.isHomeOccupied,
       homeOwnerId: jobValue?.homeOwner || ticket?.homeOwner?._id || jobValue.ticket?.homeOwner?._id || '',
     },
     validateOnMount: false,
     validateOnChange: false,
     validateOnBlur: false,
-    onSubmit: (values: any, { setSubmitting }: any) => {
+    onSubmit: (values: any, {setSubmitting}: any) => {
       const tempData = {...values};
+      tempData.scheduleTimeAMPM = tempData.scheduleTimeAMPM?.index || 0;
       tempData.scheduleDate = moment(values.scheduleDate).format('YYYY-MM-DD');
       tempData.customerId = customer?._id; 
 
       if (values.scheduledStartTime){
-        // format local time as UTC without adjusting the time
+        // format local time as UTC without time adjustments (i.e. no timezone conversion)
         tempData.scheduledStartTime = moment(values.scheduledStartTime).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       }
       if (values.scheduledEndTime){
-        // format local time as UTC without adjusting the time
+        // format local time as UTC without time adjustments (i.e. no timezone conversion)
         tempData.scheduledEndTime = moment(values.scheduledEndTime).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       }
 
       if (values.customerContactId?._id) tempData.customerContactId = values.customerContactId?._id;
 
       const newImages = values.images.filter((image: any) => image instanceof File);
-      if(newImages.length > 0)
+      if (newImages.length > 0)
         tempData.images = newImages;
       else
         delete tempData.images;
@@ -502,14 +535,14 @@ function BCJobModal({
 
       tempData.tasks = tasks;
 
-      if(job.jobFromRequest || job.request){
+      if (job.jobFromRequest || job.request) {
         tempData.jobRequestId = tempData.ticketId;
         delete tempData.ticketId;
       }
 
       const requestObj = formatRequestObj(tempData)
 
-      const editJob = async(tempData: any) => {
+      const editJob = async (tempData: any) => {
         tempData.jobId = job._id;
         // if incomplete make pending
         if (job.status === 6) {
@@ -534,7 +567,7 @@ function BCJobModal({
           /*if (response.message === 'Job created successfully.' || response.message === 'Job edited successfully.') {
             await callEditTicketAPI(formatedTicketRequest);
           }*/
-          if(!job.jobFromMap && !job._id){
+          if (!job.jobFromMap && !job._id) {
             dispatch(refreshServiceTickets(true));
             dispatch(refreshJobRequests(true));
           }
@@ -598,7 +631,7 @@ function BCJobModal({
 
       if (scheduleDate === null) {
         errors['scheduleDate'] = 'Please select date';
-      } else if (moment().isAfter(scheduleDate, 'day')){
+      } else if (moment().isAfter(scheduleDate, 'day')) {
         errors['scheduleDate'] = 'Cannot select a date that has already passed';
       }
 
@@ -634,11 +667,11 @@ function BCJobModal({
     }, 200);
   };
 
-/*  const disabledChips = job?._id
-    ? job.tasks.length
-      ? job.tasks.map(({ jobType }: any) => jobType._id)
-      : [job.type._id]
-    : [];*/
+  /*  const disabledChips = job?._id
+      ? job.tasks.length
+        ? job.tasks.map(({ jobType }: any) => jobType._id)
+        : [job.type._id]
+      : [];*/
 
 
   useEffect(() => {
@@ -666,14 +699,14 @@ function BCJobModal({
   }, [FormikValues.images]);
 
   const readImage = (image: File) => {
-    return new Promise(function(resolve,reject){
+    return new Promise(function (resolve, reject) {
       let fr = new FileReader();
 
-      fr.onload = function(){
+      fr.onload = function () {
         resolve(fr.result);
       };
 
-      fr.onerror = function(){
+      fr.onerror = function () {
         reject(null);
       };
 
@@ -682,7 +715,7 @@ function BCJobModal({
   }
 
   if (isLoading) {
-    return <BCCircularLoader />;
+    return <BCCircularLoader/>;
   }
 
   function handleImageDrop(files: FileList) {
@@ -710,7 +743,7 @@ function BCJobModal({
           (employee: any) => employee._id === row.original.user
         )[0];
         const vendor = vendorsList.find((v: any) => v.admin._id === row.original.user);
-        const { displayName } = user?.profile || vendor?.admin.profile || '';
+        const {displayName} = user?.profile || vendor?.admin.profile || '';
         return <div>{displayName}</div>;
       },
     },
@@ -718,12 +751,12 @@ function BCJobModal({
       Header: 'Date',
       id: 'date',
       sortable: false,
-      Cell({ row }: any) {
+      Cell({row}: any) {
         const dataTime = moment(new Date(row.original.date)).format(
           'MM/DD/YYYY h:mm A'
         );
         return (
-          <div style={{ color: 'gray', fontStyle: 'italic' }}>
+          <div style={{color: 'gray', fontStyle: 'italic'}}>
             {`${dataTime}`}
           </div>
         );
@@ -733,7 +766,7 @@ function BCJobModal({
       Header: 'Notes',
       id: 'note',
       sortable: false,
-      Cell({ row }: { row:{ original: { note: string } } }) {
+      Cell({row}: { row: { original: { note: string } } }) {
         const [clipped, setClipped] = useState(true);
         const originalString = row.original.note;
         const clippedString = shortenStringWithElipsis(originalString, 50);
@@ -756,7 +789,8 @@ function BCJobModal({
                       </>
                     ) : (
                       <>
-                        {originalString.split(/((?:[a-zA-Z.,!]+ ){9})/g).map((v,i)=><div key={i}>{v}</div>)}
+                        {originalString.split(/((?:[a-zA-Z.,!]+ ){9})/g).map((v, i) =>
+                          <div key={i}>{v}</div>)}
                         <span
                           onClick={() => setClipped(!clipped)}
                           style={{fontWeight: 800, textDecoration: 'underline'}}
@@ -775,28 +809,36 @@ function BCJobModal({
   ];
 
   const filteredJobRescheduleHistory: any[] = job.track
-    ? job.track.filter((history: {action: string;}) => history.action.includes('rescheduling'))
+    ? job.track.filter((history: { action: string; }) => history.action.includes('rescheduling'))
     : []
 
   return (
     <DataContainer className={'new-modal-design'}>
       {job._id &&
-      <Typography variant={'caption'} className={'jobIdText'}>{job.jobId}</Typography>
+        <Typography variant={'caption'}
+                    className={'jobIdText'}>{job.jobId}</Typography>
       }
-        <form onSubmit={FormikSubmit}>
-        <Grid container className={'modalPreview'} justify={'space-between'} spacing={4}>
+      <form onSubmit={FormikSubmit}>
+        <Grid container className={'modalPreview'} justify={'space-between'}
+              spacing={4}>
           <Grid item xs={3}>
-            <Typography variant={'caption'} className={'previewCaption'}>customer</Typography>
-            <Typography variant={'h6'} className={'previewText'}>{job.customer.profile
+            <Typography variant={'caption'}
+                        className={'previewCaption'}>customer</Typography>
+            <Typography variant={'h6'}
+                        className={'previewText'}>{job.customer.profile
               ? job.customer.profile.displayName
               : displayName}</Typography>
           </Grid>
-          <Grid item xs={3}>
-            <Typography variant={'caption'} className={'previewCaption'}>due date</Typography>
-            <Typography variant={'h6'} className={'previewText'}>{FormikValues.dueDate}</Typography>
+          <Grid item xs={2}>
+            <Typography variant={'caption'} className={'previewCaption'}>due
+              date</Typography>
+            <Typography variant={'h6'}
+                        className={'previewText'}>{FormikValues.dueDate}</Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant={'caption'} className={'required previewCaption'}>schedule date</Typography>
+            <Typography variant={'caption'}
+                        className={'required previewCaption'}>schedule
+              date</Typography>
             <BCDateTimePicker
               disablePast={true}
               handleChange={(e: any) => dateChangeHandler(e, 'scheduleDate')}
@@ -809,7 +851,8 @@ function BCJobModal({
             />
           </Grid>
           <Grid item xs={2}>
-            <Typography variant={'caption'} className={'previewCaption'}>open time</Typography>
+            <Typography variant={'caption'} className={'previewCaption'}>open
+              time</Typography>
             <BCDateTimePicker
               dateFormat={'HH:mm:ss'}
               disablePast={!job._id}
@@ -822,13 +865,15 @@ function BCJobModal({
               minDateMessage={form?.errors?.scheduledStartTime || ''}
               value={FormikValues.scheduledStartTime}
               errorText={FormikErrors.scheduledStartTime}
+              disabled={FormikValues.scheduleTimeAMPM?.index !== 0 ? true : false}
             />
           </Grid>
           <Grid item xs={2}>
-            <Typography variant={'caption'} className={'previewCaption'}>close time</Typography>
+            <Typography variant={'caption'} className={'previewCaption'}>close
+              time</Typography>
             <BCDateTimePicker
               dateFormat={'HH:mm:ss'}
-              disablePast={!job._id}
+              disablePast={!job._id }
               handleChange={(e: any) =>
                 dateChangeHandler(e, 'scheduledEndTime')
               }
@@ -838,7 +883,31 @@ function BCJobModal({
               placeholder={'End Time'}
               value={FormikValues.scheduledEndTime}
               errorText={FormikErrors.scheduledEndTime}
+              disabled={FormikValues.scheduleTimeAMPM?.index !== 0 ? true : false}
             />
+          </Grid>
+          <Grid item xs={1}>
+            <Typography variant={'caption'} className={'previewCaption'}>AM/PM</Typography>
+            <Autocomplete
+                disableClearable={true}
+                defaultValue={timeRangeOptions[0]}
+                disabled={FormikValues.scheduledStartTime || FormikValues.scheduledEndTime ? true : false}
+                getOptionLabel={(option) =>
+                  option.name ? option.name : ''
+                }
+                id={'tags-standard'}
+                options={timeRangeOptions}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant={'outlined'}
+                  />
+                )}
+                value={FormikValues.scheduleTimeAMPM} 
+                onChange={(ev: any, newValue: any) =>
+                  setFieldValue('scheduleTimeAMPM', newValue)
+                }
+              />
           </Grid>
 {/*          {headerError &&
           <span style={{position: 'absolute', bottom: 0, right: 50, color: '#F44336', fontSize: 12}}>{headerError}</span>
@@ -846,9 +915,13 @@ function BCJobModal({
         </Grid>
         <div className={'modalDataContainer'}>
           {FormikValues.tasks.map((task: any, index) =>
-            <Grid container key={`Grid_${index}`} className={`modalContent ${classes.relative}`} justify={'space-between'} spacing={4}>
+            <Grid container key={`Grid_${index}`}
+                  className={`modalContent ${classes.relative}`}
+                  justify={'space-between'} spacing={4}>
               <Grid item xs>
-                <Typography variant={'caption'} className={' required previewCaption'}>technician type</Typography>
+                <Typography variant={'caption'}
+                            className={' required previewCaption'}>technician
+                  type</Typography>
                 <Autocomplete
                   getOptionLabel={(option) =>
                     option.name ? option.name : ''
@@ -869,26 +942,28 @@ function BCJobModal({
                 />
               </Grid>
               <Grid item xs>
-                <Typography variant={'caption'} className={' required previewCaption'}>{task.employeeType ? 'contractor' : 'technician'}</Typography>
+                <Typography variant={'caption'}
+                            className={' required previewCaption'}>{task.employeeType ? 'contractor' : 'technician'}</Typography>
                 {task.employeeType ?
                   <Autocomplete
-                    getOptionLabel={(option) =>
-                      option?.info?.companyName
-                        ? option.info.companyName
-                        : ''
+                    getOptionLabel={(option) => {
+                      return option?.info?.displayName ? option.info.displayName : option?.info?.companyName ? option.info.companyName : ''
+                    }
                     }
                     id={'tags-standard'}
                     onChange={(ev: any, newValue: any) => handleTaskChange('contractorId', newValue, index)}
                     options={
                       vendorsList && vendorsList.length !== 0
-                        ? vendorsList.sort((a: any, b: any) =>
-                          a.info.companyName >
-                          b.info.companyName
-                            ? 1
-                            : b.info.companyName >
-                            a.info.companyName
-                              ? -1
-                              : 0
+                        ? vendorsList.sort((a: any, b: any) => {
+                            /*
+                              Sort by display name if not then by company name
+                             */
+                            if (a?.info?.displayName && b?.info?.displayName) {
+                              return a.info.displayName < b.info.displayName ? -1 : a.info.displayName > b.info.displayName ? 1 : 0
+                            } else {
+                              return a.info.companyName < b.info.companyName ? -1 : a.info.companyName > b.info.companyName ? 1 : 0
+                            }
+                          }
                         )
                         : []
                     }
@@ -931,10 +1006,12 @@ function BCJobModal({
                 }
               </Grid>
               <Grid item xs>
-                <Typography variant={'caption'} className={' required previewCaption'}>job type</Typography>
+                <Typography variant={'caption'}
+                            className={' required previewCaption'}>job
+                  type</Typography>
                 <Autocomplete
                   // getOptionDisabled={option => job._id ? disabledChips.includes(option._id) : null}
-                  getOptionDisabled={(option)=>!option.isJobType}
+                  getOptionDisabled={(option) => !option.isJobType}
                   getOptionLabel={option => {
                     const {title} = option;
                     return `${title || '...'}`
@@ -944,8 +1021,12 @@ function BCJobModal({
                   onChange={(ev: any, newValue: any) => handleTaskChange('jobTypes', newValue, index)}
                   options={
                     items && items.length !== 0
-                      ? stringSortCaseInsensitive(items.map((item:{name:string;jobType:string})=>({...item, title:item.name,_id:item.jobType})), 'title')
-                        .sort((a: {isJobType:boolean}, b: {isJobType:boolean}) => a.isJobType.toString() > b.isJobType.toString() ? -1 : 1)
+                      ? stringSortCaseInsensitive(items.map((item: { name: string; jobType: string }) => ({
+                        ...item,
+                        title: item.name,
+                        _id: item.jobType
+                      })), 'title')
+                        .sort((a: { isJobType: boolean }, b: { isJobType: boolean }) => a.isJobType.toString() > b.isJobType.toString() ? -1 : 1)
                       : []
                   }
                   renderInput={(params) => (
@@ -956,9 +1037,9 @@ function BCJobModal({
                     />
                   )}
                   classes={{popper: classes.popper}}
-                  renderOption={(option:{title:string; isJobType:boolean})=>{
+                  renderOption={(option: { title: string; isJobType: boolean }) => {
                     const {title, isJobType} = option;
-                    if(!isJobType){
+                    if (!isJobType) {
                       return ''
                     } else {
                       return `${title || '...'}`
@@ -969,7 +1050,7 @@ function BCJobModal({
                       return (
                         <Chip
                           label={`${option.title || '...'}`}
-                          {...getTagProps({ index })}
+                          {...getTagProps({index})}
                           // disabled={disabledChips.includes(option._id) || !job._id}
                         />
                       );
@@ -980,16 +1061,17 @@ function BCJobModal({
                 />
               </Grid>
               {index > 0 && !jobTypesLoading &&
-              <IconButton className={classes.removeJobTypeButton}
-                          component="span"
-                          onClick={() => removeTask(index)}
-              >
-                <RemoveCircleIcon/>
-              </IconButton>
+                <IconButton className={classes.removeJobTypeButton}
+                            component="span"
+                            onClick={() => removeTask(index)}
+                >
+                  <RemoveCircleIcon/>
+                </IconButton>
               }
             </Grid>
           )}
-          <Grid container className={'modalContent'} justify={'space-between'} spacing={4}>
+          <Grid container className={'modalContent'} justify={'space-between'}
+                spacing={4}>
             <Grid item xs>
               <Button
                 color={'primary'}
@@ -997,14 +1079,16 @@ function BCJobModal({
                 classes={{root: classes.addJobTypeButton}}
                 variant={'outlined'}
                 onClick={addEmptyTask}
-                startIcon={<AddCircleIcon />}
+                startIcon={<AddCircleIcon/>}
               >Add Technician</Button>
 
             </Grid>
           </Grid>
-          <Grid container className={'modalContent'} justify={'space-between'} spacing={4}>
+          <Grid container className={'modalContent'} justify={'space-between'}
+                spacing={4}>
             <Grid item xs>
-              <Typography variant={'caption'} className={' previewCaption'}>Subdivision</Typography>
+              <Typography variant={'caption'}
+                          className={' previewCaption'}>Subdivision</Typography>
               <Autocomplete
                 defaultValue={
                   ticket.jobLocation !== '' &&
@@ -1047,7 +1131,8 @@ function BCJobModal({
               />
             </Grid>
             <Grid item xs>
-              <Typography variant={'caption'} className={' previewCaption'}>Job Address</Typography>
+              <Typography variant={'caption'} className={' previewCaption'}>Job
+                Address</Typography>
               <Autocomplete
                 defaultValue={
                   ticket.jobSite !== '' &&
@@ -1090,7 +1175,8 @@ function BCJobModal({
               />
             </Grid>
             <Grid item xs>
-              <Typography variant={'caption'} className={'previewCaption'}>equipment</Typography>
+              <Typography variant={'caption'}
+                          className={'previewCaption'}>equipment</Typography>
               <Autocomplete
                 className={detail ? 'detail-only' : ''}
                 disabled={detail}
@@ -1128,11 +1214,13 @@ function BCJobModal({
               />
             </Grid>
           </Grid>
-          <Grid container className={'modalContent'} justify={'space-between'} spacing={4}>
+          <Grid container className={'modalContent'} justify={'space-between'}
+                spacing={4}>
             <Grid container xs={8} spacing={4}>
               <Grid container xs={12} spacing={4}>
                 <Grid item xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>contact associated</Typography>
+                  <Typography variant={'caption'} className={'previewCaption'}>contact
+                    associated</Typography>
                   <Autocomplete
                     getOptionLabel={(option) =>
                       option.name ? option.name : ''
@@ -1147,7 +1235,7 @@ function BCJobModal({
                     }
                     options={
                       contacts && contacts.length !== 0
-                        ? contacts.filter((contact:any) =>
+                        ? contacts.filter((contact: any) =>
                           contact.isActive
                         ).sort((a: any, b: any) =>
                           a.name > b.name ? 1 : b.name > a.name ? -1 : 0
@@ -1172,7 +1260,8 @@ function BCJobModal({
                   />
                 </Grid>
                 <Grid item xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>customer po</Typography>
+                  <Typography variant={'caption'} className={'previewCaption'}>customer
+                    po</Typography>
                   <BCInput
                     className={'serviceTicketLabel'}
                     disabled={ticket.customerPO}
@@ -1191,7 +1280,8 @@ function BCJobModal({
               </Grid>
               <Grid container xs={12}>
                 <Grid item xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>description</Typography>
+                  <Typography variant={'caption'}
+                              className={'previewCaption'}>description</Typography>
                   <BCInput
                     handleChange={formikChange}
                     multiline
@@ -1209,12 +1299,16 @@ function BCJobModal({
               </Grid>
             </Grid>
             <Grid item container xs={4} style={{paddingTop: 16}}>
-              <BCDragAndDrop images={thumbs} onDrop={(files) => handleImageDrop(files)}  onDelete={handleRemoveImage}/>
+              <BCDragAndDrop images={thumbs}
+                             onDrop={(files) => handleImageDrop(files)}
+                             onDelete={handleRemoveImage}/>
             </Grid>
             {job.status === 4 && (
-              <Grid container className={classes.lastContent} justify={'space-between'}>
+              <Grid container className={classes.lastContent}
+                    justify={'space-between'}>
                 <Grid item style={{width: '100%'}}>
-                  <Typography variant={'caption'} className={'previewCaption'}>Job Reschedule History</Typography>
+                  <Typography variant={'caption'} className={'previewCaption'}>Job
+                    Reschedule History</Typography>
                   <BCTableContainer
                     className={classes.tableContainer}
                     columns={columns}
@@ -1228,7 +1322,7 @@ function BCJobModal({
                     tableData={filteredJobRescheduleHistory}
                   />
                 </Grid>
-                <Grid item style={{width: '32%'}} />
+                <Grid item style={{width: '32%'}}/>
               </Grid>
             )}
             <Grid container item xs>
@@ -1256,7 +1350,7 @@ function BCJobModal({
                   <BCInput
                     disabled={true}
                     name={'customerFirstName'}
-                    value={jobValue?.ticket?.homeOwner?.profile?.firstName || jobValue?.homeOwnerObj[0]?.profile?.firstName || 'N/A'}
+                    value={jobValue?.ticket?.homeOwner?.profile?.firstName || jobValue?.homeOwnerObj?.[0]?.profile?.firstName || 'N/A'}
                   />
                 </Grid>
                 <Grid justify={'space-between'} xs>
@@ -1266,7 +1360,7 @@ function BCJobModal({
                   <BCInput
                     disabled={true}
                     name={'customerLastName'}
-                    value={jobValue?.ticket?.homeOwner?.profile?.lastName || jobValue?.homeOwnerObj[0]?.profile?.lastName || 'N/A'}
+                    value={jobValue?.ticket?.homeOwner?.profile?.lastName || jobValue?.homeOwnerObj?.[0]?.profile?.lastName || 'N/A'}
                   />
                 </Grid>
                 <Grid justify={'space-between'} xs>
@@ -1274,7 +1368,7 @@ function BCJobModal({
                   <BCInput
                     disabled={true}
                     name={'customerEmail'}
-                    value={jobValue?.ticket?.homeOwner?.info?.email || jobValue?.homeOwnerObj[0]?.info?.email || 'N/A'}
+                    value={jobValue?.ticket?.homeOwner?.info?.email || jobValue?.homeOwnerObj?.[0]?.info?.email || 'N/A'}
                   />
                 </Grid>
                 <Grid justify={'space-between'} xs>
@@ -1282,7 +1376,7 @@ function BCJobModal({
                   <BCInput
                     disabled={true}
                     name={'customerPhone'}
-                    value={jobValue?.ticket?.homeOwner?.contact?.phone || jobValue?.homeOwnerObj[0]?.contact?.phone || 'N/A'}
+                    value={jobValue?.ticket?.homeOwner?.contact?.phone || jobValue?.homeOwnerObj?.[0]?.contact?.phone || 'N/A'}
                   />
                 </Grid>
               </Grid>
@@ -1291,7 +1385,7 @@ function BCJobModal({
           </Grid>
 
           <DialogActions>
-            {job.status === 0 &&(
+            {job.status === 0 && (
               <div className={classes.markCompleteContainer}>
                 <Button
                   color={'primary'}
@@ -1333,7 +1427,7 @@ function BCJobModal({
                 disabled={isSubmitting}
                 type={'submit'}
                 variant={'contained'}
-                style={{ marginLeft: 30 }}
+                style={{marginLeft: 30}}
               >{job._id ? 'Update' : 'Submit'}</Button>
             </div>
           </DialogActions>
@@ -1345,19 +1439,24 @@ function BCJobModal({
 
 const DataContainer = styled.div`
   overflow-y: hidden;
+
   *:not(.MuiGrid-container) > .MuiGrid-container {
     width: 100%;
     padding: 0px 40px;
   }
+
   .MuiGrid-spacing-xs-4 > .MuiGrid-spacing-xs-4 {
     margin: 0;
   }
+
   .MuiGrid-root.MuiGrid-item > .MuiGrid-root.MuiGrid-container {
     padding: 0;
   }
+
   .MuiGrid-grid-xs-true {
     padding: 10px 16px;
   }
+
   .MuiOutlinedInput-root {
     border-radius: 8px;
     padding: 2px;
@@ -1374,4 +1473,4 @@ const DataContainer = styled.div`
   }
 `;
 
-export default withStyles(styles, { withTheme: true })(BCJobModal);
+export default withStyles(styles, {withTheme: true})(BCJobModal);

@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import styles from '../job-equipment-info.style';
 import { withStyles } from '@material-ui/core/styles';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { modalTypes } from '../../../../../../constants';
 import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
 import { getAllJobTypesAPI } from 'api/job.api';
@@ -27,6 +27,8 @@ import {
 } from 'actions/customer/customer.action';
 import {CSButtonSmall} from "../../../../../../helpers/custom";
 import {error} from "../../../../../../actions/snackbar/snackbar.action";
+import { refreshServiceTickets } from 'actions/service-ticket/service-ticket.action';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface LocationStateTypes {
   customerName: string;
@@ -35,6 +37,8 @@ interface LocationStateTypes {
 
 function CustomersJobEquipmentInfoTicketsPage({ classes }: any) {
   const dispatch = useDispatch();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const { isLoading = true, tickets, refresh = true } = useSelector(({ serviceTicket }: any) => ({
     'isLoading': serviceTicket.isLoading,
     'refresh': serviceTicket.refresh,
@@ -74,6 +78,7 @@ function CustomersJobEquipmentInfoTicketsPage({ classes }: any) {
     history.push({
       pathname: `/main/customers/${customerName}`,
       state: {
+        ...location,
         customerName,
         customerId,
         from: 1
@@ -266,9 +271,9 @@ function CustomersJobEquipmentInfoTicketsPage({ classes }: any) {
   ];
 
   useEffect(() => {
-    if (refresh) {
+    if ((refresh && !currentDivision.isDivisionFeatureActivated) || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
       dispatch(getAllJobTypesAPI());
-      dispatch(getAllServiceTicketAPI());
+      dispatch(getAllServiceTicketAPI(undefined,currentDivision.params));
     }
 
     if (tickets) {
@@ -281,8 +286,7 @@ function CustomersJobEquipmentInfoTicketsPage({ classes }: any) {
       dispatch(loadingSingleCustomers());
       dispatch(getCustomerDetailAction({ customerId }));
     }
-  }, [refresh]);
-
+  }, [refresh, currentDivision.isDivisionFeatureActivated, currentDivision.params]);
 
   return (
     <>

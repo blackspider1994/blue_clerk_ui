@@ -21,6 +21,7 @@ import { refreshJobs,
 import {
   setMapTechnicianJobs
 } from 'actions/map-technician-jobs/map-technician-jobs.action'
+import { DivisionParams } from 'app/models/division';
 
 const compareByDate = (a: any, b: any) => {
   if (new Date(a.updatedAt) > new Date(b.updatedAt)) {
@@ -63,7 +64,7 @@ export const getAllJobTypes = () => {
   });
 };
 let cancelTokenGetAllJobsAPI:any;
-export const getAllJobsAPI = (pageSize = 10, currentPageIndex = 0, status = '-1', keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null) => {
+export const getAllJobsAPI = (pageSize = 10, currentPageIndex = 0, status = '-1', keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setJobLoading(true));
@@ -90,7 +91,7 @@ export const getAllJobsAPI = (pageSize = 10, currentPageIndex = 0, status = '-1'
       
       cancelTokenGetAllJobsAPI = axios.CancelToken.source();
 
-      request(`/getJobs`, 'post', optionObj, undefined, undefined, cancelTokenGetAllJobsAPI)
+      request(`/getJobs`, 'post', optionObj, undefined, undefined, cancelTokenGetAllJobsAPI, undefined, division)
         .then((res: any) => {
           let tempJobs = res.data.jobs;
           tempJobs = tempJobs.map((tempJob: any)=>
@@ -103,6 +104,7 @@ export const getAllJobsAPI = (pageSize = 10, currentPageIndex = 0, status = '-1'
                 jobType : currentItem
               }
             });
+            // Jobs data to be sent on List Page
             return {
               ...tempTask, 
               technician : tempJob.technicianObj[index],
@@ -187,7 +189,7 @@ export const getJobsListAPI = (pageSize = 10, currentPageIndex = 0, status = '-1
 };
 
 let cancelTokenGetTodaysJobsAPI:any;
-export const getTodaysJobsAPI = (status = '-1', keyword?: string) => {
+export const getTodaysJobsAPI = (status = '-1', keyword?: string, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setTodaysJobLoading(true));
@@ -210,7 +212,7 @@ export const getTodaysJobsAPI = (status = '-1', keyword?: string) => {
       
       cancelTokenGetTodaysJobsAPI = axios.CancelToken.source();
 
-      request(`/getJobs`, 'post', optionObj, undefined, undefined, cancelTokenGetTodaysJobsAPI)
+      request(`/getJobs`, 'post', optionObj, undefined, undefined, cancelTokenGetTodaysJobsAPI,undefined,division)
         .then((res: any) => {
           let tempJobs = res.data.jobs;
           tempJobs = tempJobs.map((tempJob: any)=>
@@ -258,11 +260,11 @@ export const getTodaysJobsAPI = (status = '-1', keyword?: string) => {
   };
 };
 
-export const getAllJobsByCustomerAPI = (pageSize = 2020, customerId:string) => {
+export const getAllJobsByCustomerAPI = (pageSize = 2020, customerId:string,  division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setJobLoading(true));
-      request(`/getJobs`, 'post', {customerId, pageSize})
+      request(`/getJobs`, 'post', {customerId, pageSize}, undefined, undefined,undefined,undefined,division)
         .then((res: any) => {
           let tempJobs = res.data.jobs;
           tempJobs = tempJobs.map((tempJob: any)=>
@@ -359,11 +361,11 @@ export const getAllJobsByTechnicianAndDateAPI = (technicianIds:any, jobDate:any)
   };
 };
 
-export const getAllJobAPI = async (param?: {}) => {
+export const getAllJobAPI = async (param?: {}, division?: DivisionParams) => {
   const body = param || {};
   let responseData;
   try {
-    const response: any = await request('/getJobs', 'POST', body, false);
+    const response: any = await request('/getJobs', 'POST', body, false,undefined,undefined,undefined,division);
     let tempJobs = response.data.jobs;
     tempJobs = tempJobs.map((tempJob: any)=>
     {

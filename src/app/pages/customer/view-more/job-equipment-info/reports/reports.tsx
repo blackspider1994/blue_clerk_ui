@@ -5,11 +5,13 @@ import {Grid, Typography} from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import styles from '../job-equipment-info.style';
 import { withStyles } from '@material-ui/core/styles';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { formatDate } from "helpers/format";
 import {CSButtonSmall} from "../../../../../../helpers/custom";
 import {loadJobReportsActions} from "../../../../../../actions/customer/job-report/job-report.action";
+import { getAllJobReportsAPI } from 'api/job-report.api';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface LocationStateTypes {
   customerName: string;
@@ -17,11 +19,12 @@ interface LocationStateTypes {
 }
 
 function CustomersJobEquipmentInfoReportsPage({ classes }: any) {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
 
   const { loading: isLoading = true, jobReports, error } = useSelector(({ jobReport }: any) =>
     jobReport);
-
   const location = useLocation<any>();
   const history = useHistory();
   const [curTab, setCurTab] = useState(0);
@@ -65,6 +68,7 @@ function CustomersJobEquipmentInfoReportsPage({ classes }: any) {
     history.push({
       pathname: `/main/customers/${customerName}`,
       state: {
+        ...location,
         customerName,
         customerId,
         from: 1
@@ -127,8 +131,11 @@ function CustomersJobEquipmentInfoReportsPage({ classes }: any) {
   };
 
   useEffect(() => {
-    dispatch(loadJobReportsActions.fetch());
-  }, []);
+    if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+      dispatch(getAllJobReportsAPI(undefined,undefined,undefined,undefined,currentDivision.params));
+    }
+  }, [currentDivision.isDivisionFeatureActivated, currentDivision.params]);
+
 
   useEffect(() => {
     if (jobReports) {

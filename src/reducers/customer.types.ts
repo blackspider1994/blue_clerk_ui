@@ -4,7 +4,8 @@ export const types = {
   'CUSTOMER_REMOVE': 'deleteCustomerActions',
   'SET_CUSTOMERS': 'setCustomer',
   'SET_SINGLE_CUSTOMER': 'setSingleCustomer',
-  'GET_SINGLE_CUSTOMER': 'getSingleCustomer'
+  'GET_SINGLE_CUSTOMER': 'getSingleCustomer',
+  'SET_CUSTOMERS_SEARCH_KEYWORD': 'setCustomersSearchKeyword',
 };
 
 type CustomPrice = {

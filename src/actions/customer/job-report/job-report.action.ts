@@ -68,3 +68,10 @@ export const setKeyword = (keyword: string) => {
     'type': types.SET_REPORT_SEARCH_KEYWORD
   };
 };
+
+export const setDateFilterRange = (dateFilterRange: any) => {
+  return {
+    'payload': dateFilterRange,
+    'type': types.SET_DATE_FILTER_RANGE
+  };
+}

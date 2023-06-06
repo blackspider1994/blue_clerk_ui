@@ -5,11 +5,17 @@ export const types = {
   'SET_EMPLOYEES': 'setEmployee'
 };
 
+export interface updateEmployeeLocPermParam {
+  employeeId: string;
+  canAccessAllLocations: boolean;
+}
+
 export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+  canAccessAllLocations?: boolean;
 }
 
 export interface User {
@@ -41,6 +47,7 @@ export interface User {
     industry?: string
   },
   company?: string
+  allLocation?: boolean
 }
 
 export interface UserDetails {

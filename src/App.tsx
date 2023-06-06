@@ -10,6 +10,7 @@ import { io } from 'socket.io-client';
 import { pushNotification } from 'actions/notifications/notifications.action';
 import { setMessageRead, setNewMessage } from 'actions/chat/bc-chat.action';
 import { RootState } from 'reducers';
+
 const LoginPage = React.lazy(() => import('./app/pages/auth/login/login'));
 const SignUpPage = React.lazy(() => import('./app/pages/auth/signup/signup'));
 const RecoverPage = React.lazy(() => import('./app/pages/recover/recover'));

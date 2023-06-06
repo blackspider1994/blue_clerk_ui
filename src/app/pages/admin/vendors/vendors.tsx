@@ -17,6 +17,7 @@ import {CSButton, CSButtonSmall} from "../../../../helpers/custom";
 import {remindVendorApi} from "../../../../api/vendor.api";
 import {error, info} from "../../../../actions/snackbar/snackbar.action";
 import BCItemsFilter from "../../../components/bc-items-filter/bc-items-filter";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface StatusTypes {
   status: number;
@@ -51,6 +52,7 @@ function AdminVendorsPage({ classes }: any) {
   const [vendorStatus, setVendorStatus] = useState(true);
   const history = useHistory();
   const location = useLocation<any>();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const activeVendors = useMemo(() => vendors.data.filter((vendor:any) => [0, 1, 5].includes(vendor.status)), [vendors]);
   const nonActiveVendors = useMemo(() => vendors.data.filter((vendor:any) => ![0, 1, 5].includes(vendor.status)), [vendors]);
@@ -95,25 +97,37 @@ function AdminVendorsPage({ classes }: any) {
   }
 
   const columns: any = [
-    /*
-     * {
-     *   'Cell'({ row }: any) {
-     *     return <div className={'flex items-center'}>
-     *       {row.index + 1}
-     *     </div>;
-     *   },
-     *   'Header': 'No#',
-     *   'sortable': true,
-     *   'width': 60
-     * },
-     */
+    {
+      'Header': 'Display Name',
+      'accessor': 'contractor.info.displayName',
+      'className': 'font-bold',
+      'sortable': true,
+      Cell({ row }: any) {
+        let isNotAssigned = "";
+        let isNotAssignedTooltip = "";
+        if (currentDivision.isDivisionFeatureActivated && !vendors.assignedVendors?.includes(row.original?.contractor?._id)) {
+          isNotAssigned = "!";
+          isNotAssignedTooltip = "This vendor is not assigned to any division or work type"
+        }
+
+        return <span>
+            <Tooltip title={isNotAssignedTooltip}>
+              <span style={{
+                color: "red",
+                fontWeight: 'bold'
+              }}>{isNotAssigned} </span>  
+            </Tooltip> 
+            {row.original?.contractor?.info?.displayName  || row.original?.displayName || 'N/A' }</span>;
+      }
+    },
     {
       'Header': 'Company Name',
       'accessor': 'contractor.info.companyName',
       'className': 'font-bold',
       'sortable': true,
       Cell({ row }: any) {
-        return <span>{row.original?.contractor?.info?.companyName || row.original?.contractorEmail}</span>;
+        return <span> 
+            {row.original?.contractor?.info?.companyName || row.original?.contractorEmail}</span>;
       }
     },
     {
@@ -159,11 +173,11 @@ function AdminVendorsPage({ classes }: any) {
     if (vendors) {
       setTableData(activeVendors);
     }
-  }, [vendors]);
+  }, [vendors, currentDivision.isDivisionFeatureActivated]);
 
   useEffect(() => {
     dispatch(loadingVendors());
-    dispatch(getVendors());
+    dispatch(getVendors({assignedVendorsIncluded: true}));
   }, []);
 
   const resetLocationState = () => {
@@ -221,7 +235,7 @@ function AdminVendorsPage({ classes }: any) {
         ? baseObj.contractor.info.companyName
         : 'N/A';
     const vendorId = baseObj.contractor._id;
-    const vendorObj:any = { 
+    const vendorObj:any = {
       vendorCompanyName,
       vendorId,
       currentPage,

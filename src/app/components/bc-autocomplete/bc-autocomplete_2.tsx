@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
 export default function AutoComplete({
   handleChange,
   value,
+  filterOptions,
   data = [],
   name = "",
   multiline = false,
@@ -51,6 +52,7 @@ export default function AutoComplete({
         }
         handleChange(virtualEvent);
       }}
+      filterOptions={filterOptions}
       // inputValue={value}
       // onInputChange={(event, newInputValue) => {
       //   let virtualEvent = {

@@ -31,7 +31,7 @@ function ViewJobReportsPage() {
         'invoiceCreated': true,
         'invoice': newInvoice }));
       history.push({
-        'pathname': `view/${newInvoice._id}`,
+        'pathname': `/main/customers/job-reports/view/${newInvoice._id}`,
       });
       dispatch(success(`Draft ${newInvoice.invoiceId} Created`));
     } else {

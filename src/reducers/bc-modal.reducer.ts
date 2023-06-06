@@ -6,7 +6,9 @@ import { closeModalAction, openModalAction, setModalDataAction } from 'actions/b
 const initialState = Record({
   'data': null,
   'open': false,
-  'type': null
+  'type': null,
+  // Flag to force refresh
+  'refresh': false,
 })();
 
 export default handleActions(
@@ -23,6 +25,7 @@ export default handleActions(
       state
         .setIn(['type'], action.payload.type)
         .setIn(['data'], Record(action.payload.data)())
+        .setIn(['refresh'], action.payload.refresh)
   },
   initialState
 );

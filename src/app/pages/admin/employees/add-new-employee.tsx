@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import styles from './add-new-employee.style';
-import { Card, CardActionArea, Fab, IconButton, TextField, withStyles } from "@material-ui/core";
+import { Card, CardActionArea, Checkbox, Fab, FormControlLabel, Grid, IconButton, TextField, withStyles } from "@material-ui/core";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import validator from 'validator';
 import { UserProfile } from 'actions/employee/employee.types';
@@ -46,12 +46,13 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
 
   }
 
-  const submit = async (firstName: string, lastName: string, email: string, phoneNumber: string, role: string) => {
+  const submit = async (firstName: string, lastName: string, email: string, phoneNumber: string, role: string, allLocation: boolean) => {
     const data: UserProfile = {
       firstName,
       lastName,
       email,
-      phone: phoneNumber
+      phone: phoneNumber,
+      canAccessAllLocations: allLocation
     };
 
     let response: any;
@@ -147,8 +148,13 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
     if (step === 1) setStep(2);
     else {
       if (role === '') return;
-      submit(firstName, lastName, email, phoneNumber, role);
+      submit(firstName, lastName, email, phoneNumber, role, showAllLocation);
     }
+  }
+
+  const [showAllLocation, setShowLocation] = useState<boolean>(false);
+  const handleShowAllLocation = (event: any) => {
+    setShowLocation(event.target.checked);
   }
 
   const prev = () => {
@@ -245,6 +251,19 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
                       paddingBottom: '15px'
                     }}
                   />
+                  <Grid container item xs>
+                    <FormControlLabel
+                        control={
+                          <Checkbox
+                            color={'primary'}
+                            checked={showAllLocation}
+                            onChange={handleShowAllLocation}
+                            name="ShowAllLocation"
+                          />
+                        }
+                        label={"Access All Locations"}
+                      />
+                  </Grid>
                 </div>}
                 {step === 2 && <div className={classes.infoPane}>
                   <h2>Roles</h2>

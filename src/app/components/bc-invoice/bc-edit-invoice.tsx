@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   Accordion,
   AccordionDetails,
@@ -44,6 +44,8 @@ import {CSChip} from "../../../helpers/custom";
 import BCButtonGroup from "../bc-button-group";
 import BCMiniSidebar from "app/components/bc-mini-sidebar/bc-mini-sidebar";
 import {formatCurrency} from "../../../helpers/format";
+import { useSelector } from 'react-redux';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface Props {
   classes?: any;
@@ -526,6 +528,13 @@ function BCEditInvoice({
   const [totalTax, setTotalTax] = useState(invoiceData.taxAmount || 0);
   const [totalAmount, setTotalAmount] = useState(invoiceData.total || 0);
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+  const [billingAddress, setBillingAddress] = useState({
+    street: invoiceData?.company?.address?.street,
+    city: invoiceData?.company?.address?.city,
+    state: invoiceData?.company?.address?.state,
+    zipCode: invoiceData?.company?.address?.zipCode,
+  });
 
   const [options, setOptions] =  React.useState(['Save and Continue', 'Save and Send', 'Save as Draft']);
 
@@ -644,6 +653,27 @@ function BCEditInvoice({
     }
     return invoiceData.createdAt?.split('T')[0];
   }
+
+  useEffect(()=>{
+    if (invoiceData.locations?.length && currentDivision.data?.locationId) {
+      let filteredLocation = invoiceData.locations.find((res: any) => res._id === currentDivision.data?.locationId);
+      if (filteredLocation) {
+        setBillingAddress({
+          street :  filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.street : filteredLocation?.billingAddress?.street,
+          city : filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.city : filteredLocation?.billingAddress?.city,
+          state : filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.state : filteredLocation?.billingAddress?.state,
+          zipCode : filteredLocation?.isAddressAsBillingAddress ? filteredLocation?.address?.zipCode : filteredLocation?.billingAddress?.zipCode,
+        })
+      }
+    }else{
+      setBillingAddress({
+        street : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.street ?? '' : invoiceData?.companyLocation?.billingAddress?.street ?? '') : invoiceData?.company?.address?.street,
+        city : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.city ?? '' : invoiceData?.companyLocation?.billingAddress?.city ?? '') : invoiceData?.company?.address?.city,
+        state : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.state ?? '' : invoiceData?.companyLocation?.billingAddress?.state ?? '') : invoiceData?.company?.address?.state,
+        zipCode : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.zipCode ?? '' : invoiceData?.companyLocation?.billingAddress?.zipCode ?? '') : invoiceData?.company?.address?.zipCode,
+      })
+    }
+  },[currentDivision])
 
   return (
     <MuiThemeProvider theme={theme}>
@@ -769,7 +799,8 @@ function BCEditInvoice({
                             className={invoiceStyles.storeIcons}/><span>{invoiceData?.company?.info?.companyEmail}</span>
                           </div>
                           <div><StorefrontIcon
-                            className={invoiceStyles.storeIcons}/><span>{invoiceData?.company?.address?.street}, {invoiceData?.company?.address?.city}, {invoiceData?.company?.address?.state} {invoiceData?.company?.address?.zipCode}</span>
+                            className={invoiceStyles.storeIcons}/>
+                            <span>{billingAddress.street}, {billingAddress.city}, {billingAddress.state} {billingAddress.zipCode}</span>
                           </div>
                           <h5>VENDOR NUMBER</h5>
                           <div className={invoiceStyles.paddingContent}>{values.customer?.vendorId}</div>

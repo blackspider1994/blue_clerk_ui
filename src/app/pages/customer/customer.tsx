@@ -15,7 +15,8 @@ import {
   getCustomerDetailAction,
   getCustomers,
   loadingCustomers,
-  loadingSingleCustomers
+  loadingSingleCustomers,
+  setKeyword
 } from 'actions/customer/customer.action';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -23,7 +24,7 @@ import BCQbSyncStatus from "../../components/bc-qb-sync-status/bc-qb-sync-status
 
 function CustomersPage({ classes }: any) {
   const dispatch = useDispatch();
-  const customers = useSelector((state: any) => state.customers);
+  const {loading, data, keyword} = useSelector((state: any) => state.customers);
   const [curTab, setCurTab] = useState(0);
 
   const history = useHistory();
@@ -88,11 +89,18 @@ function CustomersPage({ classes }: any) {
   }
 
   useEffect(() => {
+    dispatch(setKeyword(''));
     window.addEventListener("beforeunload", resetLocationState);
     return () => {
       window.removeEventListener("beforeunload", resetLocationState);
     };
   }, []);
+
+  useEffect(() => {
+    if(location?.state?.currentPage?.search){
+      dispatch(setKeyword(location.state.currentPage.search));
+    }
+  }, [location]);
 
   useEffect(() => {
     const active = showCustomer === 'inactive' ? false : true;
@@ -116,8 +124,8 @@ function CustomersPage({ classes }: any) {
     const customerId = row.original._id;
     const customerObj:any = { customerName,
       customerId,
-      currentPage: {...currentPage, showCustomer} };
-    if(location?.state?.prevPage?.search){
+      currentPage: {...currentPage, showCustomer, search: keyword} };
+      if(location?.state?.prevPage?.search){
       customerObj.currentPage.search = location.state.prevPage.search
     }
     customerName =
@@ -181,14 +189,17 @@ function CustomersPage({ classes }: any) {
               <BCTableContainer
                 columns={columns}
                 currentPage={currentPage}
-                isLoading={customers.loading}
+                isLoading={loading}
                 isPageSaveEnabled
                 onRowClick={handleRowClick}
                 search
                 setPage={setCurrentPage}
-                tableData={customers.data}
+                tableData={data}
                 toolbarPositionLeft={true}
                 toolbar={Toolbar()}
+                setKeywordFunction={(query: string) => {
+                  dispatch(setKeyword(query));
+                }}
               />
             </div>
             <div

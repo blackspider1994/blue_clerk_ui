@@ -8,9 +8,9 @@ export const loadingEmployeesForJob = () => {
     }
 }
 
-export const getEmployeesForJobAction = () => {
+export const getEmployeesForJobAction = (filter?: any) => {
     return async (dispatch: any) => {
-        const employeesForJob: any = await getEmployeesForJob();
+        const employeesForJob: any = await getEmployeesForJob(filter);
         dispatch(setEmployeesForJob(employeesForJob));
     };
 }

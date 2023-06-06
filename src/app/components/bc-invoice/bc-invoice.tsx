@@ -310,6 +310,13 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
   }) : null;
   serviceAddressSite = serviceAddressSite ? Object.values(serviceAddressSite).filter(key=>!!key) : '';
 
+  let billingAddress = {
+    street: invoiceDetail?.companyLocation ? (invoiceDetail?.companyLocation?.isAddressAsBillingAddress ? invoiceDetail?.companyLocation?.address?.street ?? '' : invoiceDetail?.companyLocation?.billingAddress?.street ?? '') : invoiceDetail?.company?.address?.street,
+    city: invoiceDetail?.companyLocation ? (invoiceDetail?.companyLocation?.isAddressAsBillingAddress ? invoiceDetail?.companyLocation?.address?.city ?? '' : invoiceDetail?.companyLocation?.billingAddress?.city ?? '') : invoiceDetail?.company?.address?.city,
+    state: invoiceDetail?.companyLocation ? (invoiceDetail?.companyLocation?.isAddressAsBillingAddress ? invoiceDetail?.companyLocation?.address?.state ?? '' : invoiceDetail?.companyLocation?.billingAddress?.state ?? '') : invoiceDetail?.company?.address?.state,
+    zipcode: invoiceDetail?.companyLocation ? (invoiceDetail?.companyLocation?.isAddressAsBillingAddress ? invoiceDetail?.companyLocation?.address?.zipCode ?? '' : invoiceDetail?.companyLocation?.billingAddress?.zipCode ?? '') : invoiceDetail?.company?.address?.zipCode,
+  };
+
   return (
     <DataContainer>
       <div className={invoiceStyles.invoiceTop}>
@@ -328,8 +335,8 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
                       <h4>{invoiceDetail?.company?.info?.companyName}</h4>
                       <span>{invoiceDetail?.company?.contact?.phone}</span>
                       <span>{invoiceDetail?.company?.info?.companyEmail}</span>
-                      <span>{invoiceDetail?.company?.address?.street}</span>
-                      <span>{invoiceDetail?.company?.address?.city}, {invoiceDetail?.company?.address?.state} {invoiceDetail?.company?.address?.zipCode}</span>
+                      <span>{billingAddress.street}</span>
+                      <span>{billingAddress.city}, {billingAddress.state} {billingAddress.zipcode}</span>
                     </div>
                   </div>
                 </div>

@@ -3,6 +3,7 @@ import {DEFAULT_COORD} from "../../utils/constants";
 export interface CompanyProfile {
   companyName: string;
   companyEmail: string;
+  companyAdmin?: string;
   logoUrl?: string;
   street?: string;
   city?: string;
@@ -39,8 +40,19 @@ export interface CompanyLocation {
     city?: string;
     state?: string;
     zipCode?: string;
-  }
-
+  },
+  billingAddress?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    emailSender?: string;
+    setUserAsSender?: boolean;
+  },
+  isAddressAsBillingAddress?: boolean,
+  workTypes?: any[],
+  assignedVendors?: any[],
+  assignedEmployees?: any[],
 }
 
 export interface CompanyProfileOtherState {
@@ -48,6 +60,7 @@ export interface CompanyProfileOtherState {
   inputError: {[k: string]: boolean};
   serverError: any;
   isLoading: boolean;
+  isLocationLoading: boolean;
 }
 export interface CompanyProfileRes {
   status?: number;
@@ -57,6 +70,7 @@ export interface CompanyProfileRes {
 export const companyProfileState: CompanyProfile = {
   companyName: '',
   companyEmail: '',
+  companyAdmin: '',
   fax: '',
   phone: '',
   city: '',
@@ -90,7 +104,8 @@ export const initialCompanyProfileState: CompanyProfileStateType = {
   locations: [],
   inputError: {},
   serverError: null,
-  isLoading: false
+  isLoading: false,
+  isLocationLoading: false,
 };
 
 
@@ -103,6 +118,8 @@ export enum CompanyProfileActonType {
   ON_FETCH_ERROR = "COMPANY_PROFILE_FETCH_FAILED",
   ON_INPUT_ERROR = 'VALIDATION_FAILED',
   SET_LOCATIONS = 'SET_LOCATIONS',
+  SET_SELECTED_LOCATION = 'SET_SELECTED_LOCATIONS',
   UPDATE_LOCATION = 'UPDATE_LOCATION',
   ADD_LOCATION = 'ADD_LOCATION ',
+  SET_LOCATIONS_LOADING = "SET_LOCATIONS_LOADING"
 }

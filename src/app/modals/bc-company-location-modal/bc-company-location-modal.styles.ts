@@ -3,12 +3,18 @@ import * as CONSTANTS from "../../../constants";
 import {LABEL_GREY, PRIMARY_BLUE} from "../../../constants";
 
 export default (theme: Theme): any => ({
+  popper: {
+    '& li[aria-disabled="true"]': {
+      paddingTop: 0,
+      paddingBottom: 0,
+    },
+  },
   dialogActions: {
     padding: '25px  40px 25px 0 !important',
     backgroundColor: 'auto'
   },
   dialogContent: {
-    padding: '8px 200px !important',
+    padding: '8px 150px !important',
   },
   modalPreview: {
     backgroundColor: '#EAECF3',
@@ -90,5 +96,16 @@ export default (theme: Theme): any => ({
     border: `2px solid ${PRIMARY_BLUE}`,
     color: PRIMARY_BLUE,
     backgroundColor: '#E5F7FF',
+  },
+  billingAddress:{
+    marginTop: "43px"
+  },
+  billingAddressTtitle: {
+    padding: '45px 0px 12px 94px',
+  },
+  inputState: {
+    '&& .MuiAutocomplete-inputRoot': {
+      padding:"9.5px",
+    },
   }
 });

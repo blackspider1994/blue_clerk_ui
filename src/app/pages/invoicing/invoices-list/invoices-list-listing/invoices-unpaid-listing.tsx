@@ -1,5 +1,5 @@
 import BCTableContainer from '../../../../components/bc-table-container/bc-table-container';
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation, useParams } from "react-router-dom";
 import styled from 'styled-components';
 import styles from './../invoices-list.styles';
 import { withStyles, Tooltip } from "@material-ui/core";
@@ -18,16 +18,18 @@ import { getUnpaidInvoicesAPI } from 'api/invoicing.api';
 import { setCurrentUnpaidPageIndex, setCurrentUnpaidPageSize, setUnpaidKeyword } from 'actions/invoicing/invoicing.action';
 import moment from "moment";
 import TableFilterService from 'utils/table-filter';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 const getSortedInvoices = (state: any) => {
   return TableFilterService.filterByDateDesc(state?.invoiceList.unpaid);
 };
 
 function InvoicingUnpaidListing({ classes, theme }: any) {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
   const history = useHistory();
   const location = useLocation<any>();
-  const callUnpaidInvoicesCount = useRef(0);
 
   const unpaidInvoices = useSelector(getSortedInvoices)
   const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword } = useSelector(
@@ -45,6 +47,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
   const [selectionRange, setSelectionRange] = useState<Range | null>(location?.state?.option?.selectionRange || null);
   const [lastNextCursor, setLastNextCursor] = useState<string | undefined>(location?.state?.option?.lastNextCursor)
   const [lastPrevCursor, setLastPrevCursor] = useState<string | undefined>(location?.state?.option?.lastPrevCursor)
+
   const HtmlTooltip = withStyles((theme) => ({
     tooltip: {
       backgroundColor: '#f5f5f9',
@@ -158,19 +161,22 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
   ];
 
   useEffect(() => {
-    dispatch(getUnpaidInvoicesAPI(currentPageSize, undefined, undefined, keyword, selectionRange, callUnpaidInvoicesCount.current === 0));
-    dispatch(setCurrentUnpaidPageIndex(0));
-    return () => {
-      dispatch(setUnpaidKeyword(''));
-      dispatch(setCurrentUnpaidPageIndex(currentPageIndex));
-      dispatch(setCurrentUnpaidPageSize(currentPageSize));
+    if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+      dispatch(getUnpaidInvoicesAPI(currentPageSize, undefined, undefined, keyword, selectionRange, false, currentDivision.params));
+      dispatch(setCurrentUnpaidPageIndex(0));
+      return () => {
+        dispatch(setUnpaidKeyword(''));
+        dispatch(setCurrentUnpaidPageIndex(currentPageIndex));
+        dispatch(setCurrentUnpaidPageSize(currentPageSize));
+      }
     }
-  }, [selectionRange]);
+  }, [selectionRange, currentDivision.isDivisionFeatureActivated, currentDivision.params]);
+
   useEffect(() => {
     if (location?.state?.tab === 0 && (location?.state?.option?.search || location?.state?.option?.pageSize
       || location?.state?.option?.currentPageIndex || location?.state?.option?.lastNextCursor || location?.state?.option?.lastPrevCursor)) {
       dispatch(setUnpaidKeyword(location.state.option.search));
-      dispatch(getUnpaidInvoicesAPI(location.state.option.pageSize, location?.state?.option?.lastPrevCursor, location?.state?.option?.lastNextCursor, location.state.option.search, selectionRange));
+      dispatch(getUnpaidInvoicesAPI(location.state.option.pageSize, location?.state?.option?.lastPrevCursor, location?.state?.option?.lastNextCursor, location.state.option.search, selectionRange, undefined,currentDivision.params));
       dispatch(setCurrentUnpaidPageSize(location.state.option.pageSize));
       dispatch(setCurrentUnpaidPageIndex(location?.state?.option?.currentPageIndex || 0));
       setSelectionRange(location?.state?.option?.selectionRange)
@@ -180,7 +186,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
 
   const showInvoiceDetail = (id: string) => {
     history.push({
-      'pathname': `view/${id}`,
+      'pathname': `/main/invoicing/view/${id}`,
       'state': {
         keyword,
         currentPageSize,
@@ -205,6 +211,15 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
     />
   }
 
+  const rowTooltip = (row: any) => {
+    let rowData = row.original;
+    if (currentDivision.isDivisionFeatureActivated && currentDivision.data?.name == "All" && (rowData.companyLocation?.name || rowData.workType?.title)) {
+      return `${rowData.companyLocation?.name}  ${rowData.isMainLocation ? "(Main) " : ""}- ${rowData.workType?.title}`
+    }else{
+      return ""
+    }
+  }
+  
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -220,7 +235,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
         fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
           setLastPrevCursor(isPrev ? prevCursor : undefined)
           setLastNextCursor(isNext ? nextCursor : undefined)
-          dispatch(getUnpaidInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, selectionRange))
+          dispatch(getUnpaidInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, selectionRange,undefined,currentDivision.params))
         }}
         total={total}
         currentPageIndex={currentPageIndex}
@@ -229,6 +244,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
         setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentUnpaidPageSize(num))}
         setKeywordFunction={(query: string) => dispatch(setUnpaidKeyword(query))}
         disableInitialSearch={location?.state?.tab !== 0}
+        rowTooltip={rowTooltip}
       />
     </DataContainer>
   );

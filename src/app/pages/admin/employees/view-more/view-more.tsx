@@ -209,6 +209,7 @@ function EmployeeProfilePage({ classes }: any) {
                         cancel={cancel}
                         initialValues={initialValues}
                         inputError={{}}
+                        employeeDetails={employeeDetails}
                         fields={[
                           {
                             left: {

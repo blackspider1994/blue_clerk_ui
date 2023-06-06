@@ -11,7 +11,7 @@ import {
   closeModalAction,
   setModalDataAction
 } from 'actions/bc-modal/bc-modal.action';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import styled from 'styled-components';
 import styles from './bc-manual-sync-modal.styles';
 import BCTableContainer
@@ -31,6 +31,7 @@ import {SYNC_RESPONSE} from "../../models/invoices";
 import BCCircularLoader
   from "../../components/bc-circular-loader/bc-circular-loader";
 import BcSyncStatus from "./bc-sync-status";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 
 function BcManualSyncInvoices({classes, action, closeAction}: any): JSX.Element {
@@ -40,10 +41,11 @@ function BcManualSyncInvoices({classes, action, closeAction}: any): JSX.Element 
   const [isLoading, setLoading] = useState(true);
   const [isSyncing, setSyncing] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const getData = async () => {
     try {
-      const invoices = await getUnsyncedInvoices();
+      const invoices = await getUnsyncedInvoices(currentDivision.params);
       setInvoices(invoices);
     } catch (e) {
       dispatch(error(e));

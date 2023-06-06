@@ -8,9 +8,10 @@ import {
   setNextJobReportsCursor,
   setJobReportsTotal
 } from 'actions/customer/job-report/job-report.action';
+import { DivisionParams } from 'app/models/division';
 
 let cancelTokenGetAllJobReportsAPI:any;
-export const getAllJobReportsAPI = (pageSize = 10, currentPageIndex = 0, keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null) => {
+export const getAllJobReportsAPI = (pageSize = 10, currentPageIndex = 0, keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setJobReportLoading(true));
@@ -33,7 +34,7 @@ export const getAllJobReportsAPI = (pageSize = 10, currentPageIndex = 0, keyword
       }
       
       cancelTokenGetAllJobReportsAPI = axios.CancelToken.source();
-      request(`/getAllJobReports`, 'OPTIONS', optionObj, undefined, undefined, cancelTokenGetAllJobReportsAPI)
+      request(`/getAllJobReports`, 'OPTIONS', optionObj, undefined, undefined, cancelTokenGetAllJobReportsAPI, undefined, division)
         .then((res: any) => {
           let tempReports = res.data.reports;
           tempReports = tempReports.map((tempReport: any)=>
