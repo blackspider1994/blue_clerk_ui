@@ -1,4 +1,4 @@
-import request, { requestApiV2, pdfRequest } from 'utils/http.service';
+import request, { requestApiV2 } from 'utils/http.service';
 import { formatDateYMD } from 'helpers/format';
 import moment from 'moment';
 import axios from 'axios';
