@@ -353,18 +353,21 @@ function BCMapWithMarkerWithList({
                   className={classes.listItemContainer}
                   onClick={() => handleItemClick(datum.ticket._id)}
                 >
-                  <CustomIcon
-                    style={{
-                      marginRight: 5,
-                      border: calculateMarkerBorder(datum.ticket, isTicket, technicianColor),
-                      borderRadius: '50%',
-                      width: 25,
-                      height: 25,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  /> {title}{title && location ? ' - ' : ''}{location}
+                  <div>
+                    <CustomIcon
+                      style={{
+                        marginRight: 5,
+                        border: calculateMarkerBorder(datum.ticket, isTicket, technicianColor),
+                        borderRadius: '50%',
+                        width: 25,
+                        height: 25,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    /> 
+                  </div>
+                  <div>{title}{title && location ? ' - ' : ''}{location}</div>
                 </div>
               )
             })}

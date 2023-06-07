@@ -89,23 +89,34 @@ function JobsPage({ classes, hidden, currentPage, setCurrentPage }: any) {
   function getJobTime(originalRow: any, rowIndex: number) {
     let startTime = 'N/A';
     let endTime = 'N/A';
-    if (originalRow.scheduledStartTime !== undefined) {
-      const formatScheduledObj = formatSchedulingTime(
-        originalRow.scheduledStartTime
-      );
-      startTime = convertMilitaryTime(
-        `${formatScheduledObj.hours}:${formatScheduledObj.minutes}`
-      );
+    // Case for specific time
+    if(originalRow.scheduledStartTime !== undefined || originalRow.scheduledEndTime !== undefined) {
+      if (originalRow.scheduledStartTime !== undefined) {
+        const formatScheduledObj = formatSchedulingTime(
+          originalRow.scheduledStartTime
+        );
+        startTime = convertMilitaryTime(
+          `${formatScheduledObj.hours}:${formatScheduledObj.minutes}`
+        );
+      }
+      if (originalRow.scheduledEndTime !== undefined) {
+        const formatScheduledObj = formatSchedulingTime(
+          originalRow.scheduledEndTime
+        );
+        endTime = convertMilitaryTime(
+          `${formatScheduledObj.hours}:${formatScheduledObj.minutes}`
+        );
+      }
+      return `${startTime} - ${endTime}`;
     }
-    if (originalRow.scheduledEndTime !== undefined) {
-      const formatScheduledObj = formatSchedulingTime(
-        originalRow.scheduledEndTime
-      );
-      endTime = convertMilitaryTime(
-        `${formatScheduledObj.hours}:${formatScheduledObj.minutes}`
-      );
+    // Case for AAM/PM range time
+    else {
+      switch(originalRow.scheduleTimeAMPM) {
+        case 1: return 'AM';
+        case 2: return 'PM';
+        default: return 'N/A - N/A';
+      }
     }
-    return `${startTime} - ${endTime}`;
   }
   const openCreateTicketModal = () => {
     //To ensure that all tickets are detected by the division, and check if the user has activated the division feature.

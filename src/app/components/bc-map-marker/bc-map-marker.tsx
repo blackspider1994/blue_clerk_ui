@@ -300,7 +300,11 @@ function BCMapMarker({
         text += ' - ' + formatTime(ticket.scheduledEndTime);
       }
     } else {
-      text += ' N/A';
+      switch(ticket.scheduleTimeAMPM) {
+        case 1: text += ' AM'; break;
+        case 2: text += ' PM'; break;
+        default: text += ' N/A'; break;
+      }
     }
     return text;
 }
@@ -368,6 +372,7 @@ function BCMapMarker({
         </IconButton>
       </div>
       <div className={'title-container'}>
+        <div>
           <CustomIcon style={{
             border: calculateMarkerBorder(ticket),
             borderRadius: '50%',
@@ -377,18 +382,19 @@ function BCMapMarker({
             justifyContent: 'center',
             alignItems: 'center',
           }}/>
+        </div>
         <span>{title}</span>
         <span style={{
-            marginLeft: 5,
-            marginTop: 5,
-            height: "10px",
-            width: "10px",
-            backgroundColor: ticket.isHomeOccupied ? OCCUPIED_GREEN : NON_OCCUPIED_GREY,
-            borderRadius: "50%",
-            display: "flex", 
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}></span>
+          marginLeft: 5,
+          marginTop: 5,
+          height: "10px",
+          width: "10px",
+          backgroundColor: ticket.isHomeOccupied ? OCCUPIED_GREEN : NON_OCCUPIED_GREY,
+          borderRadius: "50%",
+          display: "flex", 
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}></span>
       </div>
       <span className={'company'}>
         {ticket.jobLocation && ticket.jobLocation.name ? ticket.jobLocation.name : ` `}
