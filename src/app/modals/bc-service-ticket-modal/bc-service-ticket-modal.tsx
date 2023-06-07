@@ -148,7 +148,7 @@ function BCServiceTicketModal(
     });
     await setHomeOwnerId(''); 
     await setHomeOccupied(false);
-    FormikValues.isHomeOccupied = false;
+    await setFieldValue('isHomeOccupied', false);
 
     if (customerId !== '') {
       const data: any = {
@@ -600,15 +600,15 @@ function BCServiceTicketModal(
       setFieldValue('customerLastName', filteredHomeOwners[0].profile.lastName);
       setFormDataEmail({
         ...formDataEmail,
-        value: filteredHomeOwners[0].info?.email
+        value: filteredHomeOwners[0].info?.email || ''
       });
       setFormDataPhone({
         ...formDataPhone,
-        value: filteredHomeOwners[0].contact?.phone
+        value: filteredHomeOwners[0].contact?.phone || ''
       });
       setHomeOwnerId(filteredHomeOwners[0]._id); 
       setHomeOccupied(true);
-      FormikValues.isHomeOccupied = true;
+      setFieldValue('isHomeOccupied', true);
     }
   }, [homeOwners]);
 
