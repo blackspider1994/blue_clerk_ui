@@ -1,6 +1,6 @@
 import moment from 'moment';
 import axios from 'axios';
-import request from 'utils/http.service';
+import request, { requestApiV2 } from 'utils/http.service';
 import { 
   setJobReportLoading,
   setJobReport,
@@ -34,7 +34,7 @@ export const getAllJobReportsAPI = (pageSize = 10, currentPageIndex = 0, keyword
       }
       
       cancelTokenGetAllJobReportsAPI = axios.CancelToken.source();
-      request(`/getAllJobReports`, 'OPTIONS', optionObj, undefined, undefined, cancelTokenGetAllJobReportsAPI, undefined, division)
+      requestApiV2(`/getAllJobReports`, 'OPTIONS', optionObj, cancelTokenGetAllJobReportsAPI, division)
         .then((res: any) => {
           let tempReports = res.data.reports;
           tempReports = tempReports.map((tempReport: any)=>
@@ -91,7 +91,7 @@ export const getAllJobReportsAPI = (pageSize = 10, currentPageIndex = 0, keyword
 
 export const getJobReports = async (data: any) => {
   try {
-    const response: any = await request('/getAllJobReports', 'GET', false);
+    const response: any = await requestApiV2('/getAllJobReports', 'GET', {});
     let tempReports = response.data.reports;
     tempReports = tempReports.map((tempReport: any)=>
     {
