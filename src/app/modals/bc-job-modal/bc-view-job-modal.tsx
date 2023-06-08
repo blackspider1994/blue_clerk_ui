@@ -96,7 +96,7 @@ function BCViewJobModal({
   useEffect(() => {
     const data: any = {
       type: 'Customer',
-      referenceNumber: job.customer,
+      referenceNumber: job.customer?._id,
     };
     dispatch(getContacts(data));
     dispatch(getEmployeesForJobAction());
