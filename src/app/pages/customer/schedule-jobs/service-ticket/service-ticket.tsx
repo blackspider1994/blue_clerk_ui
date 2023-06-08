@@ -375,12 +375,15 @@ function ServiceTicket({ classes, hidden }: any) {
                 toolbarPositionLeft={true}
                 toolbar={Toolbar()}
                 manualPagination
+                fetchFunction={(num: number, isPrev:boolean, isNext:boolean, query :string) =>{}
+                  //dispatch(getAllServiceTicketsAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, showAllTickets, query === '' ? '' : query || keyword, selectionRange))
+                }
                 total={total}
                 currentPageIndex={currentPageIndex}
                 setCurrentPageIndexFunction={(num: number, apiCall: boolean) => {
                   dispatch(setCurrentPageIndex(num))
-                  if (apiCall) {
-                    dispatch(getAllServiceTicketsAPI(currentPageSize, num, showAllTickets, keyword, selectionRange, currentDivision.params))
+                  if(apiCall){
+                    dispatch(getAllServiceTicketsAPI(currentPageSize, num,  showAllTickets,keyword, selectionRange, currentDivision.params))
                   }
                 }}
                 currentPageSize={currentPageSize}
