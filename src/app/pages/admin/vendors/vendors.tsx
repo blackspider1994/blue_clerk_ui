@@ -72,6 +72,9 @@ function AdminVendorsPage({ classes }: any) {
   const [vendorStatus, setVendorStatus] = useState(true);
   const history = useHistory();
   const location = useLocation<any>();
+  const { costingList } = useSelector(
+    ({ InvoiceJobCosting }: any) => InvoiceJobCosting
+  );
 
   const activeVendors = useMemo(
     () =>
@@ -152,6 +155,9 @@ function AdminVendorsPage({ classes }: any) {
         type: modalTypes.EDIT_COMMISSION_MODAL,
       })
     );
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
   };
   const viewHistory = (vendor: any) => {
     dispatch(
@@ -192,13 +198,18 @@ function AdminVendorsPage({ classes }: any) {
     }
   };
   const renderCommission = (vendor: any) => {
-    if (vendor.commission) {
-      return (
-        <span>{`${vendor.commissionType === 'fixed' ? '$' : ''}${
-          vendor.commission
-        }${vendor.commissionType === '%' ? '%' : ''}`}</span>
-      );
+    let commissionValue = '';
+    if (vendor.commissionType === 'fixed') {
+      if (vendor.commissionTier)
+        costingList.forEach((t: any) => {
+          if (t.tier.isActive && t.tier._id === vendor.commissionTier) {
+            commissionValue = 'Tier ' + t.tier.name;
+          }
+        });
+    } else {
+      commissionValue = vendor.commission + '%';
     }
+    return <span>{commissionValue}</span>;
   };
 
   const columns: any = [
@@ -247,12 +258,12 @@ function AdminVendorsPage({ classes }: any) {
       className: 'font-bold',
       sortable: true,
     },
-    // {
-    //   Header: 'Contact Name',
-    //   accessor: 'contact.displayName',
-    //   className: 'font-bold',
-    //   sortable: true,
-    // },
+    {
+      Header: 'Contact Name',
+      accessor: 'contact.displayName',
+      className: 'font-bold',
+      sortable: true,
+    },
     {
       Header: 'Contact Email',
       accessor: 'contact.email',
@@ -265,29 +276,29 @@ function AdminVendorsPage({ classes }: any) {
       className: 'font-bold',
       sortable: true,
     },
-    {
-      Cell({ row }: any) {
-        return null;
-        return row.original?.info?.companyName ? (
-          <RenderStatus status={row.original.status} />
-        ) : (
-          <Tooltip arrow title="Account not created">
-            <CSButtonSmall
-              aria-label={'remind'}
-              color={'primary'}
-              onClick={() => callRemind(row)}
-              variant={'contained'}
-            >
-              {'Remind'}
-            </CSButtonSmall>
-          </Tooltip>
-        );
-      },
-      Header: 'Status',
-      accessor: 'status',
-      className: 'font-bold',
-      sortable: true,
-    },
+    // {
+    //   Cell({ row }: any) {
+    //     return null;
+    //     return row.original?.info?.companyName ? (
+    //       <RenderStatus status={row.original.status} />
+    //     ) : (
+    //       <Tooltip arrow title="Account not created">
+    //         <CSButtonSmall
+    //           aria-label={'remind'}
+    //           color={'primary'}
+    //           onClick={() => callRemind(row)}
+    //           variant={'contained'}
+    //         >
+    //           {'Remind'}
+    //         </CSButtonSmall>
+    //       </Tooltip>
+    //     );
+    //   },
+    //   Header: 'Status',
+    //   accessor: 'status',
+    //   className: 'font-bold',
+    //   sortable: true,
+    // },
     {
       Cell({ row }: any) {
         return (

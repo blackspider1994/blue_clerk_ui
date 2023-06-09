@@ -337,6 +337,7 @@ export const normalizeData = (item: any, type: string) => {
         },
         commission: item.commission,
         commissionType: item.commissionType,
+        commissionTier: item.commissionTier,
         balance: item.balance,
         _id: item._id,
         type: 'vendor',

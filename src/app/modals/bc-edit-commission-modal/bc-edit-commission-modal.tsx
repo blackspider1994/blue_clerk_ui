@@ -22,7 +22,7 @@ import {
   setModalDataAction,
   openModalAction,
 } from 'actions/bc-modal/bc-modal.action';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import * as CONSTANTS from '../../../constants';
 import styles from './bc-edit-commission-modal.styles';
@@ -35,6 +35,7 @@ import { setContractor } from '../../../actions/payroll/payroll.action';
 import { Contractor } from '../../../actions/payroll/payroll.types';
 import { modalTypes } from '../../../constants';
 import { StyledInput } from '../bc-invoice-item-modal/bc-invoice-item-modal';
+import { DiagConsoleLogger } from '@opentelemetry/api';
 
 interface Props {
   classes: any;
@@ -48,12 +49,20 @@ function BcEditCommissionModal({
   const [error, setError] = useState(false);
   const [warning, setWarning] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [commissionType, setCommissionType] = useState<string>('%');
+  const [commissionType, setCommissionType] = useState<string>(
+    vendorCommission.commissionType
+  );
+  const [commissionTier, setTier] = useState<string>(
+    vendorCommission.commissionTier
+  );
   const [commission, setCommission] = useState<number>(
-    vendorCommission.commission
+    vendorCommission.commission || 0
   );
   const [effectiveDate, setEffectiveDate] = useState<Date>(new Date());
   const dispatch = useDispatch();
+  const { costingList } = useSelector(
+    ({ InvoiceJobCosting }: any) => InvoiceJobCosting
+  );
 
   const closeModal = (forceClose?: boolean) => {
     if ((error || warning) && !forceClose) {
@@ -105,7 +114,7 @@ function BcEditCommissionModal({
 
   const submit = async () => {
     const commissionInt = commission;
-    if (commissionInt < 1 || commissionInt >= 100) {
+    if (!commissionTier && (commissionInt < 1 || commissionInt >= 100)) {
       setError(true);
       return;
     }
@@ -125,6 +134,7 @@ function BcEditCommissionModal({
       type: vendorCommission.type,
       commission,
       commissionType,
+      commissionTier,
       commissionEffectiveDate: effectiveDate,
     };
     const contractor = await updateCommissionAPI(params);
@@ -210,51 +220,83 @@ function BcEditCommissionModal({
               </Grid>
             </Grid>
 
-            <Grid item xs={12}>
-              <Grid container direction={'row'} spacing={3}>
-                <Grid
-                  container
-                  item
-                  justify={'flex-end'}
-                  alignItems={'center'}
-                  xs={3}
-                >
-                  <Typography variant={'button'}>COMMISSION</Typography>
-                </Grid>
-                <Grid
-                  item
-                  xs={9}
-                  style={{ display: 'flex', alignItems: 'center' }}
-                >
-                  <TextField
-                    autoFocus
-                    autoComplete={'off'}
-                    className={classNames([
-                      classes.fullWidth,
-                      classes.inputCommision,
-                    ])}
-                    id={'outlined-textarea'}
-                    label={''}
-                    name={'amount'}
-                    onChange={(e: any) => setCommission(e.target.value)}
-                    type={'number'}
-                    value={commission}
-                    variant={'outlined'}
-                  />
-                  {commissionType === '%' && (
-                    <>
-                      &nbsp; &nbsp;
-                      <Typography
-                        variant={'body2'}
-                        style={{ color: '#828282', fontSize: 14 }}
-                      >
-                        % of Invoice total
-                      </Typography>
-                    </>
-                  )}
+            {commissionType === '%' ? (
+              <Grid item xs={12}>
+                <Grid container direction={'row'} spacing={3}>
+                  <Grid
+                    container
+                    item
+                    justify={'flex-end'}
+                    alignItems={'center'}
+                    xs={3}
+                  >
+                    <Typography variant={'button'}>COMMISSION</Typography>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={9}
+                    style={{ display: 'flex', alignItems: 'center' }}
+                  >
+                    <TextField
+                      autoFocus
+                      autoComplete={'off'}
+                      className={classNames([
+                        classes.fullWidth,
+                        classes.inputCommision,
+                      ])}
+                      id={'outlined-textarea'}
+                      label={''}
+                      name={'amount'}
+                      onChange={(e: any) => setCommission(e.target.value)}
+                      type={'number'}
+                      value={commission}
+                      variant={'outlined'}
+                    />
+                    &nbsp; &nbsp;
+                    <Typography
+                      variant={'body2'}
+                      style={{ color: '#828282', fontSize: 14 }}
+                    >
+                      % of Invoice total
+                    </Typography>
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
+            ) : (
+              <Grid item xs={12}>
+                <Grid container direction={'row'} spacing={3}>
+                  <Grid
+                    container
+                    item
+                    justify={'flex-end'}
+                    alignItems={'center'}
+                    xs={3}
+                  >
+                    <Typography variant={'button'}>TIER</Typography>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={9}
+                    style={{ display: 'flex', alignItems: 'center' }}
+                  >
+                    <Select
+                      input={<StyledInput />}
+                      name={'isFixed'}
+                      onChange={(e: any) => setTier(e.target.value)}
+                      value={commissionTier}
+                    >
+                      {costingList
+                        .filter((t: any) => t.tier.isActive)
+                        .map((t: any) => (
+                          <MenuItem key={t.tier._id} value={t.tier._id}>
+                            Tier {t.tier.name}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </Grid>
+                </Grid>
+              </Grid>
+            )}
 
             <Grid item xs={12}>
               <Grid container direction={'row'} spacing={3}>
@@ -407,7 +449,9 @@ function BcEditCommissionModal({
 
           {!error && (
             <Button
-              disabled={isSubmitting}
+              disabled={
+                isSubmitting || (commissionTier === 'fixed' && !commissionTier)
+              }
               aria-label={'submit-edit-commission'}
               classes={{
                 root: classes.submitButton,
@@ -416,7 +460,7 @@ function BcEditCommissionModal({
               color="primary"
               type={'submit'}
               variant={'contained'}
-              onClick={() => submit()}
+              onClick={submit}
             >
               Submit
             </Button>
