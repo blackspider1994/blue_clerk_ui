@@ -375,23 +375,19 @@ function ServiceTicket({ classes, hidden }: any) {
                 toolbarPositionLeft={true}
                 toolbar={Toolbar()}
                 manualPagination
-                fetchFunction={(num: number, isPrev:boolean, isNext:boolean, query :string) =>{}
-                  //dispatch(getAllServiceTicketsAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, showAllTickets, query === '' ? '' : query || keyword, selectionRange))
-                }
                 total={total}
                 currentPageIndex={currentPageIndex}
                 setCurrentPageIndexFunction={(num: number, apiCall: boolean) => {
                   dispatch(setCurrentPageIndex(num))
-                  if(apiCall){
-                    dispatch(getAllServiceTicketsAPI(currentPageSize, num,  showAllTickets,keyword, selectionRange, currentDivision.params))
+                  if (apiCall) {
+                    dispatch(getAllServiceTicketsAPI(currentPageSize, num, showAllTickets, keyword, selectionRange, currentDivision.params))
                   }
                 }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentPageSize(num))}
                 setKeywordFunction={(query: string) => {
                     dispatch(setKeyword(query));
-                    dispatch(setCurrentPageIndex(0))
-                    dispatch(getAllServiceTicketsAPI(currentPageSize, 0, showAllTickets, query, selectionRange, currentDivision.params));
+                    dispatch(getAllServiceTicketsAPI(currentPageSize, currentPageIndex, showAllTickets, query, selectionRange, currentDivision.params));
                   }}
               />
             </div>
