@@ -1,4 +1,4 @@
-import request from '../utils/http.service';
+import request, { requestApiV2 } from '../utils/http.service';
 import { refreshServiceTickets, setOpenServiceTicket, setOpenServiceTicketLoading, setServiceTicket, setServiceTicketLoading, setPreviousServiceTicketCursor, setNextServiceTicketCursor, setTotal} from 'actions/service-ticket/service-ticket.action';
 import moment from 'moment';
 import axios from 'axios';
@@ -19,7 +19,7 @@ export const getAllServiceTicketAPI =  (param?: {pageSize: 2020}, division?: Div
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setServiceTicketLoading(true));
-      request(`/getServiceTickets`, 'post', body, false,undefined,undefined,undefined,division)
+      requestApiV2(`/getServiceTickets`, 'post', body, undefined,division)
         .then((res: any) => {
           const tempJobs = res.data.serviceTickets?.filter((ticket: any) => ticket.status !== 1);
 
@@ -36,14 +36,13 @@ export const getAllServiceTicketAPI =  (param?: {pageSize: 2020}, division?: Div
   };
 };
 let cancelTokenGetAllServiceTicketsAPI:any;
-export const getAllServiceTicketsAPI = (pageSize = 10, previousCursor = '', nextCursor = '', status = false, keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null, division?: any) => {
+export const getAllServiceTicketsAPI = (pageSize = 10, currentPageIndex = 0, status = false, keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null, division?: any) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setServiceTicketLoading(true));
       const optionObj:any = {
         pageSize,
-        previousCursor,
-        nextCursor
+        currentPage: currentPageIndex
       };
 
       if(status)
@@ -69,7 +68,7 @@ export const getAllServiceTicketsAPI = (pageSize = 10, previousCursor = '', next
       
       cancelTokenGetAllServiceTicketsAPI = axios.CancelToken.source();
 
-      request(`/getServiceTickets`, 'post', optionObj, undefined, undefined, cancelTokenGetAllServiceTicketsAPI, undefined,division)
+      requestApiV2(`/getServiceTickets`, 'post', optionObj, cancelTokenGetAllServiceTicketsAPI, division)
         .then((res: any) => {
           let tempServiceTickets = res.data.serviceTickets;
           tempServiceTickets = tempServiceTickets.map((tempServiceTicket: {createdAt:string})=>({
