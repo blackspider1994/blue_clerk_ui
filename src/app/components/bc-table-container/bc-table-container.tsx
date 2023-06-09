@@ -81,7 +81,6 @@ function BCTableContainer({
 
   const handleSearchChange = (event: any) => {
     setSearchText(event.target.value);
-    setKeywordFunction(event.target.value);
   };
 
   /**
@@ -113,6 +112,7 @@ function BCTableContainer({
   const handleSearchTextChanged = (value: string) => {
     if (manualPagination) {
       fetchFunction(currentPageSize, undefined, undefined, value);
+      setKeywordFunction(value);
       setCurrentPageIndexFunction(0);
     } else {
       if (setPage !== undefined) {
