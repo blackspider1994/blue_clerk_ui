@@ -387,7 +387,8 @@ function ServiceTicket({ classes, hidden }: any) {
                 setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentPageSize(num))}
                 setKeywordFunction={(query: string) => {
                     dispatch(setKeyword(query));
-                    dispatch(getAllServiceTicketsAPI(currentPageSize, currentPageIndex, showAllTickets, query, selectionRange, currentDivision.params));
+                    dispatch(setCurrentPageIndex(0))
+                    dispatch(getAllServiceTicketsAPI(currentPageSize, 0, showAllTickets, query, selectionRange, currentDivision.params));
                   }}
               />
             </div>
