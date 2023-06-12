@@ -1,9 +1,14 @@
-import { createApiAction } from '../action.utils';
-import { types } from './vendor.types';
+import {createApiAction} from '../action.utils';
+import {types} from './vendor.types';
 
 
-import { getCompanyContracts, getContractorDetail } from 'api/vendor.api';
-import { VendorActionType } from './vendor.types';
+import {
+  getCompanyContracts,
+  getContractorDetail,
+  setVendorDisplayNameApi
+} from 'api/vendor.api';
+import {VendorActionType} from './vendor.types';
+import {error as errorSnackBar, success} from "../snackbar/snackbar.action";
 
 
 export const loadCompanyContractsActions = createApiAction(types.COMPANY_CONTRACTS_LOAD);
@@ -15,10 +20,13 @@ export const loadingVendors = () => {
   };
 };
 
-export const getVendors = () => {
+export const getVendors = (filter?: any) => {
   return async (dispatch: any) => {
-    const vendors: any = await getCompanyContracts();
-    dispatch(setVendors(vendors));
+    const data = await getCompanyContracts(filter);
+    dispatch(setVendors(data.vendor));
+    if (filter?.assignedVendorsIncluded) {
+      dispatch(setAssignedVendors(data.assignedVendors));
+    }
   };
 };
 
@@ -31,8 +39,10 @@ export const loadingSingleVender = () => {
 export const getVendorDetailAction = (data: any) => {
   return async (dispatch: any) => {
     const vendor: any = await getContractorDetail(data);
-    dispatch({ 'type': VendorActionType.SET_SINGLE_VENDOR,
-      'payload': vendor });
+    dispatch({
+      'type': VendorActionType.SET_SINGLE_VENDOR,
+      'payload': vendor
+    });
   };
 };
 
@@ -42,6 +52,21 @@ export const setVendors = (vendors: any) => {
     'payload': vendors
   };
 };
+
+export const setAssignedVendors = (vendors: any) => {
+  return {
+    'type': VendorActionType.SET_ASSIGNED_VENDORS,
+    'payload': vendors
+  };
+};
+
+export const setUnsignedVendorsFlag = (flag: boolean) => {
+  return {
+    'type': VendorActionType.SET_UNSIGNED_VENDORS_FLAG,
+    'payload': flag
+  };
+};
+
 
 export const updateVendorPayment = (payment: any) => {
   return {
@@ -57,4 +82,33 @@ export const deleteVendorPayment = (payment: any) => {
   };
 };
 
+export const setVendorDisplayName = ({
+                                       displayName,
+                                       contractorId
+                                     }: any, callback?: Function) => {
+  return async (dispatch: any) => {
+    const result: any = await setVendorDisplayNameApi({
+      displayName,
+      contractorId
+    });
 
+    if (result.status === 1) {
+      dispatch({
+        'type': VendorActionType.SET_VENDOR_DISPLAY_NAME,
+        'payload': displayName,
+      })
+      dispatch(success(result?.message || 'Vendor display name updated successfully'));
+      callback && callback();
+    } else {
+      dispatch(errorSnackBar(result?.message || 'Something went wrong'));
+    }
+  }
+}
+
+export const setFlagUnsignedVendors = (filter?: any) => {
+  return async (dispatch: any) => {
+    const data = await getCompanyContracts(filter);
+    const flag = data.vendor?.length > 0 && data.vendor?.length != data.assignedVendors?.length;
+    dispatch(setUnsignedVendorsFlag(flag));
+  };
+};

@@ -29,6 +29,7 @@ interface ColumnField {
   value: any;
   disabled?: boolean;
   onChange: (newValue: any) => void;
+  filterOptions: (newValue: any) => void;
   data?: any[],
   type?: string,
   max?: number,
@@ -235,6 +236,7 @@ function BCEditProfileModal({
                                       {element.left?.data ?
                                         <AutoComplete
                                           handleChange={handleChange}
+                                          filterOptions={element.left.filterOptions}
                                           name={element.left.id}
                                           data={element.left.data}
                                           value={values[element.left.id]}

@@ -5,6 +5,7 @@ import {
   getPayrollBalanceAPI, recordPaymentContractorAPI
 } from 'api/payroll.api';
 import {error} from "../snackbar/snackbar.action";
+import { DivisionParams } from 'app/models/division';
 
 
 export const setContractorsLoading = (isLoading: any) => {
@@ -14,10 +15,10 @@ export const setContractorsLoading = (isLoading: any) => {
   };
 };
 
-export const getContractors = () => {
+export const getContractors = (division?: DivisionParams) => {
   return async (dispatch: any) => {
     dispatch(setContractorsLoading(true));
-    const contractors: any = await getContractorsAPI();
+    const contractors: any = await getContractorsAPI(division);
     if (contractors.status === 0) {
       dispatch(error(contractors.message));
       dispatch(setContractors([]));
@@ -28,10 +29,10 @@ export const getContractors = () => {
   };
 };
 
-export const getPayrollBalance = (startDate: string|null = null, endDate: string|null = null) => {
+export const getPayrollBalance = (startDate: string|null = null, endDate: string|null = null, division?: DivisionParams) => {
   return async (dispatch: any) => {
     dispatch(setContractorsLoading(true));
-    const contractors: any = await getPayrollBalanceAPI(startDate, endDate);
+    const contractors: any = await getPayrollBalanceAPI(startDate, endDate, division);
     if (contractors.status === 0) {
       dispatch(error(contractors.message));
       dispatch(setContractors([]));
@@ -53,10 +54,10 @@ export const recordPaymentContractor = (params: any) => {
   };
 };
 
-export const getContractorPayments = (params?: {type: string; id: string}) => {
+export const getContractorPayments = (params?: {type: string; id: string}, division?: DivisionParams) => {
   return async (dispatch: any) => {
     dispatch(setContractorsLoading(true));
-    const response: any = await getPaymentsByContractorAPI(params?.type, params?.id);
+    const response: any = await getPaymentsByContractorAPI(params?.type, params?.id,division);
     if (response.status === 0) {
       dispatch(error(response.message));
     } else {

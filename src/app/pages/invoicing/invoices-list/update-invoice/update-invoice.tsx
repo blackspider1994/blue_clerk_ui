@@ -13,6 +13,7 @@ import { RootState } from 'reducers';
 import { loadInvoiceItems } from 'actions/invoicing/items/items.action';
 import { getAllSalesTaxAPI } from 'api/tax.api';
 import {formatCurrency} from "../../../../../helpers/format";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 function UpdateInvoice({ classes }: any) {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ function UpdateInvoice({ classes }: any) {
   const customers = useSelector(({ customers }: any) => customers.data);
   const { 'items': invoiceItems } = useSelector(({ invoiceItems }:RootState) => invoiceItems);
   const taxes = useSelector(({ tax }: any) => tax.data);
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const getCustomersDispatcher = () => {
     dispatch(getCustomers());
@@ -162,7 +164,7 @@ function UpdateInvoice({ classes }: any) {
 
   };
 
-  const redirectURL = '/main/invoicing/invoices-list';
+  const redirectURL = currentDivision.urlParams ? `/main/invoicing/invoices-list/${currentDivision.urlParams}` : `/main/invoicing/invoices-list`;
 
   const handleFormSubmit = (data: any) => {
     return new Promise((resolve, reject) => {

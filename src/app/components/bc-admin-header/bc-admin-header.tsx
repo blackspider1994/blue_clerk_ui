@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, ClickAwayListener, Grow, Paper, Popper, useMediaQuery, useTheme } from "@material-ui/core";
+import { Button, ClickAwayListener, Grid, Grow, Paper, Popper, Select, useMediaQuery, useTheme } from "@material-ui/core";
 import { withStyles, makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import styles from "./bc-admin-header.style";
 import AppBar from "@material-ui/core/AppBar";
@@ -24,6 +24,15 @@ import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import LocationOn from '@material-ui/icons/LocationOn';
+import { useDispatch, useSelector } from "react-redux";
+import { CompanyProfileStateType } from "actions/user/user.types";
+import { callSelectDivisionModal, setCurrentDivision, setDivisionParams, setIsDivisionFeatureActivated } from "actions/filter-division/filter-division.action";
+import { ICurrentDivision, IDivision, ISelectedDivision } from "actions/filter-division/fiter-division.types";
+import { modalTypes } from '../../../constants';
+import { getDivision, refreshDivision } from "actions/division/division.action";
+import { openModalAction, setModalDataAction } from "actions/bc-modal/bc-modal.action";
+import { setFlagUnsignedVendors } from "actions/vendor/vendor.action";
 
 interface Props {
   classes: any;
@@ -34,6 +43,7 @@ interface Props {
   showNotificationDetails: (state?:boolean) => void;
   openModalHandler: (type:any, data:any, itemId:any, metadata?:any) => void;
   jobRequests: any;
+  user: any;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -139,6 +149,7 @@ function BCAdminHeader({
   showNotificationDetails,
   openModalHandler,
   jobRequests,
+  user,
 }: Props): JSX.Element {
   const fabStyles = useStyles();
   const headerStyles = useHeaderStyles();
@@ -148,15 +159,105 @@ function BCAdminHeader({
   const activeNotifications = notifications.filter((notification:NotificationItem) => !notification.dismissedStatus.isDismissed);
   const location = useLocation();
   const pathName = location.pathname;
+  const urlParams = pathName?.split('/').slice(-2);
+  const [ companyLocation,workType ] = urlParams || [];
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [notificationEl, setNotificationEl] = React.useState<null | HTMLElement>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
   const isMenuOpen = Boolean(menuAnchorEl);
+  const profileState: CompanyProfileStateType = useSelector((state: any) => state.profile);
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const [selectedDivision, setSelectedDivision] = useState<number>(0);
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+  const divisions = useSelector((state: any) => state.divisions);
+  const divisionList = divisions.data as IDivision[];
+  const vendors = useSelector((state: any) => state.vendors);
+
 
   useEffect(() => {
     initialLoad()
+    if (user?._id && divisions.refresh) {
+      dispatch(setFlagUnsignedVendors({assignedVendorsIncluded: true}));
+      dispatch(getDivision(user?._id));
+    }
   }, []);
+
+  useEffect(() => {
+    if (divisionList.length && divisions.refresh) {
+      dispatch(refreshDivision(false));
+      let selectedDivision = divisionList.findIndex((res: any) => {
+        return res.workTypeId == workType && res.locationId == companyLocation
+      });
+
+      if (selectedDivision > -1) {
+        if (selectedDivision) {
+          setSelectedDivision(selectedDivision);
+          if (divisionList[selectedDivision]) {
+            dispatch(setCurrentDivision(divisionList[selectedDivision]));
+            dispatch(setDivisionParams({
+              companyLocation: JSON.stringify([divisionList[selectedDivision].locationId]),
+              workType: JSON.stringify([divisionList[selectedDivision].workTypeId]),
+            }));
+          }
+          
+        }
+      }else if(user?.currentLocation){
+        let divisionIdx = divisionList?.findIndex((res) => {
+          return res.key == user.currentLocation.key
+        })
+        if (divisionIdx < 0) divisionIdx = 0;
+
+        let userDivision = divisionList[divisionIdx]
+        dispatch(setCurrentDivision(userDivision));
+        dispatch(setDivisionParams({
+          companyLocation: JSON.stringify(userDivision?.name != "All" ? [userDivision?.locationId] : userDivision?.locationId),
+          workType: JSON.stringify(userDivision?.name != "All" ? [userDivision?.workTypeId] : userDivision?.workTypeId)
+        }));
+        setSelectedDivision(divisionIdx)
+      }else{
+        setSelectedDivision(0);
+        if (divisionList[0]) {
+          dispatch(setCurrentDivision(divisionList[0]));
+          dispatch(setDivisionParams({
+            companyLocation: JSON.stringify(divisionList[0].name != "All" ? [divisionList[0].locationId] : divisionList[0].locationId),
+            workType: JSON.stringify(divisionList[0].name != "All" ? [divisionList[0].workTypeId] : divisionList[0].workTypeId)
+          }));
+        }
+      }
+
+        //Call Select Division Modal
+        if (user && currentDivision.openSelectDivisionModal && divisionList.length > 1) {
+          dispatch(callSelectDivisionModal(false));
+          dispatch(setModalDataAction({
+            'data': {
+              'user': user
+            },
+            'type': modalTypes.SELECT_DIVISION_MODAL
+          }));
+          setTimeout(() => {
+            dispatch(openModalAction());
+          }, 200);
+        }
+    }
+  }, [divisionList]);
+
+  useEffect(() => {
+    if (currentDivision.data){
+      if(currentDivision.data?.key != divisionList?.[selectedDivision]?.key) {
+        let divisionIdx = divisionList?.findIndex((res) => {
+          return res.key == currentDivision.data?.key
+        })
+        setSelectedDivision(divisionIdx || 0)
+      }
+
+      //Set the division to local storage and the division is automatically set.
+      let userStorage = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem('user', JSON.stringify({...userStorage, currentLocation: currentDivision.data}));   
+    }
+  }, [currentDivision.data])
 
   const notificationPopover = notificationOpen ? 'notification-popper' : undefined;
 
@@ -197,13 +298,13 @@ function BCAdminHeader({
       'label': 'Invoicing',
       'link': '/main/invoicing'
     },
-    {
-      'label': 'Tags',
-      'link': '/main/tags/purchasedtag'
-    },
+    // {
+    //   'label': 'Tags',
+    //   'link': '/main/tags/purchasedtag'
+    // },
     {
       'label': 'Payroll',
-      'link': '/main/payroll'
+      'link':  currentDivision.isDivisionFeatureActivated && currentDivision.urlParams ? `/main/payroll/${currentDivision.urlParams}` : `/main/payroll`
     },
     /*
      * {
@@ -220,10 +321,40 @@ function BCAdminHeader({
       'link': '/main/reports'
     },
     {
-      'label': 'Admin',
-      'link': '/main/admin'
-    },
+      'label': ' Admin',
+      'link': '/main/admin',
+      'flag':  currentDivision.isDivisionFeatureActivated && vendors.unsignedVendorsFlag 
+    }
   ];
+
+  const handleLocationChange = (params: any) => {
+    const selectedDivision = divisionList[params.target.value];
+
+    const confirmAction = ()=> {
+      setSelectedDivision(params.target.value);
+      dispatch(setCurrentDivision(selectedDivision));
+      dispatch(setDivisionParams({
+        companyLocation: JSON.stringify(selectedDivision.name != "All" ? [selectedDivision.locationId] : selectedDivision.locationId),
+        workType: JSON.stringify(selectedDivision.name != "All" ? [selectedDivision.workTypeId] : selectedDivision.workTypeId)
+      }));
+      history.push({
+        pathname: `/main/dashboard`,
+        state: {}
+      });
+    }
+
+    dispatch(setModalDataAction({
+      'data': {
+        message: `Now Viewing: ${selectedDivision.name}`,
+        action: confirmAction
+      },
+      'type': CONSTANTS.modalTypes.DIVISION_CONFIRM_MODAL
+    }));
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
+  }
+
 
   return (
     <>
@@ -265,6 +396,9 @@ function BCAdminHeader({
                     key={idx}
                     tabIndex={0}>
                     <Link to={item.link} onClick={handleClose}>
+                      {item.flag && (
+                        <span className={classes.flagWarning}>!</span>  
+                      )}
                       {item.label}
                     </Link>
                   </li>
@@ -308,6 +442,33 @@ function BCAdminHeader({
         </div>
 
         <div className={classes.bcAdminHeaderTools} >
+          {
+            divisionList.length > 0 && (
+              <div className={classes.bcDropdownLocation}>
+                <div className={classes.bcDropdownLocationIcon}>
+                  <LocationOn fontSize={'small'} color={'action'}/>
+                </div>
+                <Select
+                  id="select-location"
+                  disableUnderline={true}
+                  value={selectedDivision}
+                  onChange={handleLocationChange}
+                >
+                  {
+                    divisionList?.map((res: any,index: number) => {
+                      return (
+                        <MenuItem value={index} key={index} style={{fontSize: 14}}> 
+                          <div className={classes.divisionList}>
+                            {res.name}
+                          </div>
+                        </MenuItem>
+                      )
+                    })
+                  }
+                </Select>
+              </div>
+            )
+          }
           <div className={searchStyles.search}>
             <div className={searchStyles.searchIcon}>
               <SearchIcon color={'action'}/>

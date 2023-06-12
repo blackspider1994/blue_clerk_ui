@@ -18,6 +18,8 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {Autocomplete} from "@material-ui/lab";
 import {useLocation} from "react-router-dom";
+import { useSelector } from "react-redux";
+
 
 
 const useInvoiceTableStyles = makeStyles((theme: Theme) =>
@@ -154,7 +156,9 @@ interface Props {
 }
 
 function BCInvoiceItemsTableRow({ classes, values, invoiceItems=[], handleChange, itemTier, errors, taxes, getItems }: Props) {
-  const [serviceItems, setServiceItems] = useState<any>([])
+  const [serviceItems, setServiceItems] = useState<any>([]);
+  const { user } = useSelector(({ auth }: any) => auth);
+  const profile = useSelector(({ profile }: any) => profile);
   
   const invoiceTableStyle = useInvoiceTableStyles();
   const { state } = useLocation<any>();
@@ -309,6 +313,7 @@ function BCInvoiceItemsTableRow({ classes, values, invoiceItems=[], handleChange
                         }),
                         input: invoiceTableStyle.bootstrapInput,
                       }}
+                      readOnly={user._id != profile.companyAdmin && !values.isDraft}
                       startAdornment={<InputAdornment position="start">$</InputAdornment>}
                     />
                   </FormControl>

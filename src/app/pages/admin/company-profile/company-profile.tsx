@@ -27,6 +27,13 @@ import {
   zipCodeRegExp
 } from "../../../../helpers/format";
 import {modalTypes} from '../../../../constants';
+import styles from "./company-profile.styles";
+import BCTabs from 'app/components/bc-tab/bc-tab';
+import SwipeableViews from 'react-swipeable-views';
+import { useTheme, withStyles } from '@material-ui/core';
+import TabEmployeesGrid  from "./employees/employees";
+import TabVendorsGrid  from "./vendors/vendors";
+import { getDivision } from 'actions/division/division.action';
 
 interface User {
   _id?: string,
@@ -65,10 +72,18 @@ interface User {
   company?: string
 }
 
-function CompanyProfilePage() {
+function CompanyProfilePage({ classes }: any) {
   const dispatch = useDispatch();
+  const theme = useTheme();
   const profileState: CompanyProfileStateType = useSelector((state: any) => state.profile);
   const [location, setLocation] = useState<CompanyLocation| null>(null);
+  const [curTab, setCurTab] = useState(0);
+  const { user } = useSelector((state: any) => state.auth);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const handleTabChange = (newValue: number) => {
+    setCurTab(newValue);
+  }
 
   useEffect(() => {
     let user: User = {};
@@ -77,6 +92,13 @@ function CompanyProfilePage() {
     dispatch(getCompanyLocationsAction());
   }, []);
 
+
+  useEffect(()=> {
+    if (user._id && profileState.locations?.length) dispatch(getDivision(user._id))
+    if(!profileState.isLoading && !profileState.isLocationLoading){
+     setLoading(false); 
+    }
+  }, [profileState])
   const handleUpdateCompanyProfile = async (values: any) => {
     const {
       companyName,
@@ -148,6 +170,7 @@ function CompanyProfilePage() {
           companyLocation: fullItem,
           //modalTitle: 'Add New Location',
           removeFooter: false,
+          companyLocationList: profileState.locations,
         },
         type: modalTypes.COMPANY_LOCATION_MODAL,
       })
@@ -165,6 +188,7 @@ function CompanyProfilePage() {
             contact: {phone: profileState?.phone || ''},
             info: {companyEmail: profileState?.companyEmail || ''},
           },
+          companyLocationList: profileState.locations,
           removeFooter: false,
         },
         type: modalTypes.COMPANY_LOCATION_MODAL,
@@ -179,7 +203,7 @@ function CompanyProfilePage() {
     <MainContainer>
       <PageContainer>
         {
-          profileState.isLoading ? (
+          loading ? (
               <BCCircularLoader/>
             ) :
             <div>
@@ -191,11 +215,59 @@ function CompanyProfilePage() {
                 handleAddLocation={handleAddLocation}
               />
               <br />
-              {location &&
-                <BCCompanyProfile
-                  fields={companyLocationFields(location)}
-                />
-              }
+
+              <BCTabs
+                curTab={curTab}
+                indicatorColor={"primary"}
+                onChangeTab={handleTabChange}
+                tabsData={[
+                  {
+                    label: "Details",
+                    value: 0,
+                  },
+                  {
+                    label: "Employees",
+                    value: 1,
+                  },
+                  {
+                    label: "Vendors",
+                    value: 2,
+                  }
+                ]}
+              />
+              <SwipeableViews
+                axis={theme.direction === "rtl" ? "x-reverse" : "x"}
+                index={curTab}
+              >
+                <div
+                  className={classes.dataContainer}
+                  hidden={curTab !== 0}
+                  id={'0'}>
+                    {location &&
+                      <BCCompanyProfile
+                        fields={companyLocationFields(location)}
+                        companyLocation={location}
+                      />
+                    }
+                </div>
+                <div
+                  className={classes.dataContainer}
+                  hidden={curTab !== 1}
+                  id={'1'}>
+                    {location && <TabEmployeesGrid companyLocation={location}>
+                    </TabEmployeesGrid>
+                    }
+                </div>
+                <div
+                  className={classes.dataContainer}
+                  hidden={curTab !== 2}
+                  id={'2'}>
+                  {
+                    location && <TabVendorsGrid companyLocation={location}>
+                    </TabVendorsGrid>
+                  }
+                </div>
+              </SwipeableViews>
             </div>
         }
       </PageContainer>
@@ -223,4 +295,4 @@ const PageContainer = styled.div`
 `;
 
 
-export default CompanyProfilePage;
+export default withStyles(styles, { withTheme: true })(CompanyProfilePage);

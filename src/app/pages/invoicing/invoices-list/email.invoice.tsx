@@ -28,8 +28,8 @@ export default function EmailInvoiceButton({ invoice, Component, showLoader = tr
     emailToSend = invoice?.customerContactId?.email || customer?.info?.email
     customerName = invoice?.customerContactId?.name || customer?.profile?.displayName
   } else {
-    emailToSend = invoice?.contactsObj?.length ? invoice?.contactsObj[0]?.email : customer?.info?.email
-    customerName = invoice?.contactsObj?.length ? invoice?.contactsObj[0]?.name : customer?.profile?.displayName
+    emailToSend = invoice?.customerContactId ? invoice?.customerContactId?.email : customer?.info?.email
+    customerName = invoice?.customerContactId ? invoice?.customerContactId?.name : customer?.profile?.displayName
   }
   
 
@@ -46,7 +46,7 @@ export default function EmailInvoiceButton({ invoice, Component, showLoader = tr
 
   const draftInvoiceHandler = (data:any, emailDefault:string) => {
     dispatch(setModalDataAction({
-      data: {...data, emailDefault, modalTitle: 'Save & Send'},
+      data: {...data, emailDefault, modalTitle: 'Save & Send', from: invoice?.companyLocation?.billingAddress?.emailSender},
       'type': modalTypes.SAVE_INVOICE_AND_EMAIL_JOB_REPORT_MODAL
     }));
     dispatch(resetEmailState());
@@ -57,7 +57,7 @@ export default function EmailInvoiceButton({ invoice, Component, showLoader = tr
 
   const invoiceHandler = (data:any, emailDefault:string) => {
     dispatch(setModalDataAction({
-      data: {...data, emailDefault},
+      data: {...data, emailDefault,  from: invoice?.companyLocation?.billingAddress?.emailSender},
       'type': modalTypes.EMAIL_JOB_REPORT_MODAL
     }));
     dispatch(resetEmailState());
@@ -68,8 +68,8 @@ export default function EmailInvoiceButton({ invoice, Component, showLoader = tr
 
   const oldJobReportHandler = (data:any) => {
     dispatch(setModalDataAction({
-      data,
-      'type': modalTypes.EMAIL_JOB_REPORT_MODAL_OLD
+      data: {...data,  from: invoice?.companyLocation?.billingAddress?.emailSender},
+      'type': modalTypes.EMAIL_JOB_REPORT_MODAL_OLD,
     }));
     dispatch(resetEmailState());
     setTimeout(() => {

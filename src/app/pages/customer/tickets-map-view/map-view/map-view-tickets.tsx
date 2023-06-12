@@ -37,12 +37,15 @@ import {
 import { getServiceTicketDetail } from 'api/service-tickets.api';
 import { getJobLocation } from 'api/job-location.api';
 import { getJobSite } from 'api/job-site.api';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 function MapViewTicketsScreen({
   classes,
   filter: filterTickets,
   selectedDate,
 }: any) {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
   const { token } = useSelector(({ auth }: any) => auth);
   const { ticket2Job } = useSelector(({ serviceTicket }: any) => ({
@@ -75,7 +78,7 @@ function MapViewTicketsScreen({
   const mapTechnicianFilterData: any = useSelector(
     ({ mapTechnicianFilterState }: any) => mapTechnicianFilterState
   );
-
+  
   const tempRefTicket = useRef<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [allTickets, setAllTickets] = useState<any[]>([]);
@@ -97,6 +100,10 @@ function MapViewTicketsScreen({
             filter &&
             ticket.customerContactId?._id === filterTickets.contact._id;
         }
+      }
+
+      if (filterTickets.isHomeOccupied && filterTickets.isHomeOccupied === true) {
+        filter = filter && ticket.isHomeOccupied === true;
       }
 
       if (selectedDate) {
@@ -121,7 +128,7 @@ function MapViewTicketsScreen({
   }, []);
 
   useEffect(() => {
-    if (refresh) {
+    if ((refresh && !currentDivision.isDivisionFeatureActivated) || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
       setIsLoading(true);
       setAllTickets([]);
       tempRefTicket.current = [];
@@ -130,7 +137,7 @@ function MapViewTicketsScreen({
       });
 
       socket.on('connect', () => {
-        getOpenServiceTicketsStream(socket.id);
+        getOpenServiceTicketsStream(socket.id, currentDivision.params);
         dispatch(streamServiceTickets(true));
       });
 
@@ -172,6 +179,7 @@ function MapViewTicketsScreen({
             setIsLoading(false);
             setAllTickets([...tempRefTicket.current]);
           }
+          
           if (count === total) {
             socket.close();
             dispatch(streamServiceTickets(false));
@@ -190,7 +198,7 @@ function MapViewTicketsScreen({
         setIsLoading(false);
       };
     }
-  }, [refresh]);
+  }, [refresh, currentDivision.isDivisionFeatureActivated, currentDivision.params]);
 
   useEffect(() => {
     setFilteredTickets([...filterOpenTickets(allTickets), ...techniciansJobs]);
@@ -273,7 +281,7 @@ function MapViewTicketsScreen({
           isTicket={true}
           streamingTickets={streamingTickets}
           selected={selected}
-          coordinates={coordinates}
+          coordinates={currentDivision.data?.address?.coordinates || coordinates}
           tickets={tickets}
           dispatchUnselectTicket={dispatchUnselectTicket}
           openModalHandler={openModalHandler}

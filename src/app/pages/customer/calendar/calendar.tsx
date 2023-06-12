@@ -15,6 +15,8 @@ import { CSButton } from "../../../../helpers/custom";
 import { refreshServiceTickets } from 'actions/service-ticket/service-ticket.action';
 import JobPage from "./job-page";
 import TicketPage from "./ticket-page";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import { warning } from 'actions/snackbar/snackbar.action';
 
 function ScheduleJobsPage({ classes }: any) {
   const dispatch = useDispatch();
@@ -24,6 +26,7 @@ function ScheduleJobsPage({ classes }: any) {
   const history = useHistory();
   const locationState = location.state;
   const [curTab, setCurTab] = useState(locationState?.curTab ? locationState.curTab : 0);
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   useEffect(() => {
     if(localStorage.getItem('prevPage') === 'ticket-map-view'){
@@ -56,36 +59,41 @@ function ScheduleJobsPage({ classes }: any) {
   const customers = useSelector(({ customers }: any) => customers.data);
 
   const openCreateTicketModal = () => {
-    if (customers.length !== 0) {
-      dispatch(setModalDataAction({
-        'data': {
-          'modalTitle': 'New Service Ticket',
-          'removeFooter': false,
-          'className': 'serviceTicketTitle',
-          'error': {
-            'status': false,
-            'message': ''
-          }
-        },
-        'type': modalTypes.CREATE_TICKET_MODAL
-      }));
-      setTimeout(() => {
-        dispatch(openModalAction());
-      }, 200);
-    } else {
-      dispatch(setModalDataAction({
-        'data': {
-          'removeFooter': false,
-          'error': {
-            'status': true,
-            'message': 'You must add customers to create a service ticket'
-          }
-        },
-        'type': modalTypes.CREATE_TICKET_MODAL
-      }));
-      setTimeout(() => {
-        dispatch(openModalAction());
-      }, 200);
+    //To ensure that all tickets are detected by the division, and check if the user has activated the division feature.
+    if ((currentDivision.isDivisionFeatureActivated && currentDivision.data?.name != "All") || !currentDivision.isDivisionFeatureActivated) {
+      if (customers.length !== 0) {
+        dispatch(setModalDataAction({
+          'data': {
+            'modalTitle': 'New Service Ticket',
+            'removeFooter': false,
+            'className': 'serviceTicketTitle',
+            'error': {
+              'status': false,
+              'message': ''
+            }
+          },
+          'type': modalTypes.CREATE_TICKET_MODAL
+        }));
+        setTimeout(() => {
+          dispatch(openModalAction());
+        }, 200);
+      } else {
+        dispatch(setModalDataAction({
+          'data': {
+            'removeFooter': false,
+            'error': {
+              'status': true,
+              'message': 'You must add customers to create a service ticket'
+            }
+          },
+          'type': modalTypes.CREATE_TICKET_MODAL
+        }));
+        setTimeout(() => {
+          dispatch(openModalAction());
+        }, 200);
+      }
+    }else{
+      dispatch(warning("Please select a division before creating a ticket."))
     }
   };
 

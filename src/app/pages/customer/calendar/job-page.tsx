@@ -21,8 +21,11 @@ import {
   setModalDataAction
 } from "../../../../actions/bc-modal/bc-modal.action";
 import {modalTypes} from "../../../../constants";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 function JobPage() {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentStatus, setCurrentStatus] = useState(-1);
@@ -58,34 +61,36 @@ function JobPage() {
   }
 
   useEffect(() => {
-    const params={
-      startDate: moment(currentDate).utc().startOf('month').toDate(),
-      endDate: moment(currentDate).utc().endOf('month').toDate(),
-      pageSize: 1000,
-    }
-    setRefresh(true);
-    setEvents([]);
-    dispatch(clearSelectedEvent());
-    getAllJobAPI(params).then((data) => {
-      const {status, jobs, total} = data;
-      if (status === 1) {
-        const events = jobs.map((job: Job) => ({
-          date: job.scheduledStartTime ? new Date(job.scheduledStartTime) : new Date(job.scheduleDate),
-          hasTime: !!job.scheduledStartTime,
-          title: getTitle(job, currentTitle),
-          id: job._id,
-          status: job.status,
-          data: job,
-          })
-        );
-        setEvents(events);
+    if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+      const params={
+        startDate: moment(currentDate).utc().startOf('month').toDate(),
+        endDate: moment(currentDate).utc().endOf('month').toDate(),
+        pageSize: 1000,
       }
-      setRefresh(false);
-    }).catch((e) => {
-      dispatch(error(e.message));
-      setRefresh(false);
-    })
-  }, [currentDate]);
+      setRefresh(true);
+      setEvents([]);
+      dispatch(clearSelectedEvent());
+      getAllJobAPI(params, currentDivision.params).then((data) => {
+        const {status, jobs, total} = data;
+        if (status === 1) {
+          const events = jobs.map((job: Job) => ({
+            date: job.scheduledStartTime ? new Date(job.scheduledStartTime) : new Date(job.scheduleDate),
+            hasTime: !!job.scheduledStartTime,
+            title: getTitle(job, currentTitle),
+            id: job._id,
+            status: job.status,
+            data: job,
+            })
+          );
+          setEvents(events);
+        }
+        setRefresh(false);
+      }).catch((e) => {
+        dispatch(error(e.message));
+        setRefresh(false);
+      })
+    }
+  }, [currentDate,currentDivision.isDivisionFeatureActivated, currentDivision.params]);
 
   const onTitleChange = (id: number, type: string) => {
     const eventsTemp = events.map((event) => ({...event, title: getTitle(event.data, type)}));

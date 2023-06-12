@@ -5,7 +5,8 @@ export const types = {
   'SET_CUSTOMERS': 'setCustomer',
   'SET_SINGLE_CUSTOMER': 'setSingleCustomer',
   'GET_SINGLE_CUSTOMER': 'getSingleCustomer',
-  'UPDATE_CUSTOMER_FAILED': 'updateCustomerFailed'
+  'UPDATE_CUSTOMER_FAILED': 'updateCustomerFailed',
+  'SET_CUSTOMERS_SEARCH_KEYWORD': 'setCustomersSearchKeyword',
 };
 
 export interface Customer {
@@ -45,10 +46,11 @@ export interface Customer {
 }
 
 export interface CustomersState {
-  readonly loading: boolean
-  readonly data?: Customer[]
-  readonly error?: string
-  readonly customerObj?: Customer
+  readonly loading: boolean;
+  readonly data?: Customer[];
+  readonly error?: string;
+  readonly customerObj?: Customer;
+  keyword?: string;
 }
 
 export enum CustomersActionType {

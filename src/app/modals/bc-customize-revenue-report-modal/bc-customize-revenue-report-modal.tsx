@@ -37,6 +37,7 @@ import {
   DIVISION_OPTIONS,
   ITEM_AND_SERVICE_OPTIONS,
 } from './constants'
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 
 function BCCustomizeRevenueReportModal({ classes }: any) {
@@ -45,6 +46,7 @@ function BCCustomizeRevenueReportModal({ classes }: any) {
   const history = useHistory();
   const [isDisabled, setIsDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const closeModal = () => {
     dispatch(closeModalAction());
@@ -177,7 +179,7 @@ function BCCustomizeRevenueReportModal({ classes }: any) {
     },
     onSubmit: (values: any, { setSubmitting }: any) => {
       history.push({
-        'pathname': `/main/reports/revenue`,
+        'pathname': currentDivision.urlParams ? `/main/reports/revenue/${currentDivision.urlParams}` : "/main/reports/revenue",
         'state': {
           reportQuery: values,
           tab: 0,

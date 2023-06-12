@@ -15,6 +15,7 @@ const initialJobReport: JobReportState = {
   currentPageIndex: 0,
   currentPageSize: 10,
   keyword: '',
+  dateFilterRange: null,
 
   'jobReportObj': {
     '_id': '',
@@ -255,6 +256,11 @@ export const JobReportReducer: Reducer<any> = (
       return {
         ...state,
         keyword: payload,
+      };
+    case types.SET_DATE_FILTER_RANGE:
+      return {
+        ...state,
+        dateFilterRange: payload,
       };
 
 

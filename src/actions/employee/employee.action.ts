@@ -1,7 +1,7 @@
 
 import { createApiAction } from '../action.utils';
-import { UsersActionType, types, UserProfile } from './employee.types';
-import { getEmployees as fetchEmployees, addTechnician, addManager, addOfficeAdmin, getEmployeeDetail,addAdministrator, updateAdminRole } from 'api/employee.api';
+import { UsersActionType, types, UserProfile, updateEmployeeLocPermParam } from './employee.types';
+import { getEmployees as fetchEmployees, addTechnician, addManager, addOfficeAdmin, getEmployeeDetail,addAdministrator, updateAdminRole, updateLocPermission } from 'api/employee.api';
 
 export const loadAllEmployeesActions = createApiAction(types.EMPLOYEE_LOAD);
 export const newCustomerAction = createApiAction(types.EMPLOYEE_NEW);
@@ -54,6 +54,12 @@ export const createOfficeAdmin = (data: UserProfile) => {
 export const updateEmployeeRole = (data: UserProfile) => {
   return async (dispatch: any) => {
     return await updateAdminRole(data);
+  };
+}
+
+export const updateEmployeeLocPermission = (data: updateEmployeeLocPermParam) => {
+  return async (dispatch: any) => {
+    return await updateLocPermission(data);
   };
 }
 

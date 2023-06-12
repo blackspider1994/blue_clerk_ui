@@ -1,8 +1,9 @@
+import { DivisionParams } from 'app/models/division';
 import request from '../utils/http.service';
 
-export const generateIncomeReport = async (params: any) => {
+export const generateIncomeReport = async (params: any, division?: DivisionParams) => {
   try {
-    const response: any = await request("/generateIncomeReport", 'OPTIONS', params);
+    const response: any = await request("/generateIncomeReport", 'OPTIONS', params,undefined,undefined,undefined,undefined,division);
     const {status, message} = response.data;
     if (status === 1) {
       return response.data;
@@ -14,9 +15,9 @@ export const generateIncomeReport = async (params: any) => {
   }
 }
 
-export const getMemorizedReports = async () => {
+export const getMemorizedReports = async (division?: DivisionParams) => {
   try {
-    const response: any = await request("/getMemorizedReports", 'OPTIONS');
+    const response: any = await request("/getMemorizedReports", 'OPTIONS', undefined,undefined,undefined,undefined,undefined,division);
     const {status, message} = response.data;
     if (status === 1) {
       return response.data;
@@ -56,10 +57,10 @@ export const createMemorizedReport = async (params: any) => {
   }
 }
 
-export const generateIncomePdfReport = async (params: any) => {
+export const generateIncomePdfReport = async (params: any, division?: DivisionParams) => {
   const queryParams = Object.keys(params).reduce((acc: string, key: string, index, arr) => `${acc}${key}=${params[key]}${index < arr.length -1 ? '&' : ''}`, '?' );
   try {
-    const response: any = await request(`/generateIncomeReportPdf${queryParams}`, 'GET', {});
+    const response: any = await request(`/generateIncomeReportPdf${queryParams}`, 'GET', {}, undefined,undefined,undefined,undefined,division);
     return response.data;
   } catch {
     return {status: 0, message: `Something went wrong`};
@@ -85,12 +86,12 @@ export const sendIncomeEmail = async (params: any) => {
   }
 }
 
-export const generateAccountReceivableReport = async (type: number, asOf: string, customerIds?: string[]) => {
+export const generateAccountReceivableReport = async (type: number, asOf: string, customerIds?: string[], division?: DivisionParams) => {
   const ids = customerIds ? JSON.stringify(customerIds) : null;
 
   const params = `?reportData=${type}&asOf=${asOf}${ids ? '&customerIds='+ids : ''}`
   try {
-    const response: any = await request(`/generateAccountReceivableReport${params}`, 'GET', {});
+    const response: any = await request(`/generateAccountReceivableReport${params}`, 'GET', {}, undefined,undefined,undefined,undefined,division);
     return response.data;
   } catch {
     return {status: 0, message: `Something went wrong`};
@@ -108,12 +109,12 @@ export const generateAccountReceivableReportSubdivisions = async (asOf: string, 
 }
 
 
-export const generateAccountReceivablePdfReport = async (type: number, asOf: string, customerIds?: string[]) => {
+export const generateAccountReceivablePdfReport = async (type: number, asOf: string, customerIds?: string[], division?: DivisionParams) => {
   const ids = customerIds ? JSON.stringify(customerIds) : null;
 
   const params = `?reportData=${type}&asOf=${asOf}${ids ? '&customerIds='+ids : ''}`
   try {
-    const response: any = await request(`/generateReportPdf/AccountReceivableReport${params}`, 'GET', {});
+    const response: any = await request(`/generateReportPdf/AccountReceivableReport${params}`, 'GET', {},undefined,undefined,undefined,undefined,division);
     return response.data;
   } catch {
     return {status: 0, message: `Something went wrong`};

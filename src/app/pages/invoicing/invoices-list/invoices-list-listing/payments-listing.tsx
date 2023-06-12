@@ -19,6 +19,7 @@ import BCDateRangePicker
   , {Range} from "../../../../components/bc-date-range-picker/bc-date-range-picker";
   import { getAllPaymentsAPI } from 'api/payment.api';
 import { RootState } from 'reducers';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 const getFilteredList = (state: any) => {
   const sortedPayments = TableFilterService.filterByDateDesc(state?.paymentList.data);
@@ -26,6 +27,8 @@ const getFilteredList = (state: any) => {
 };
 
 function InvoicingPaymentListing({ classes, theme }: any) {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
   const paymentList = useSelector(getFilteredList);
   const customStyles = useCustomStyles()
@@ -125,8 +128,10 @@ function InvoicingPaymentListing({ classes, theme }: any) {
     //   dispatch(setCurrentPageIndex(currentPageIndex));
     //   dispatch(setCurrentPageSize(currentPageSize));
     // }
-    dispatch(getAllPaymentsAPI());
-  }, []);
+    if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+      dispatch(getAllPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
+    }
+  }, [currentDivision.isDivisionFeatureActivated,currentDivision.params]);
 
   // useEffect(() => {
   //   dispatch(getAllInvoicesAPI(currentPageSize, undefined, undefined, keyword, selectionRange));
@@ -149,6 +154,15 @@ function InvoicingPaymentListing({ classes, theme }: any) {
     />
   }
 
+  const rowTooltip = (row: any) => {
+    let rowData = row.original;
+    if (currentDivision.isDivisionFeatureActivated && currentDivision.data?.name == "All" && (rowData.companyLocation?.name || rowData.workType?.title)) {
+      return `${rowData.companyLocation?.name}  ${rowData.isMainLocation ? "(Main) " : ""}- ${rowData.workType?.title}`
+    }else{
+      return ""
+    }
+  }
+
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -160,6 +174,7 @@ function InvoicingPaymentListing({ classes, theme }: any) {
         tableData={filteredPayments}
         toolbarPositionLeft={true}
         toolbar={Toolbar()}
+        rowTooltip={rowTooltip}
         // manualPagination
         // fetchFunction={(num: number, isPrev:boolean, isNext:boolean, query :string) =>
         //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, selectionRange))

@@ -22,6 +22,7 @@ interface BCEmailValidateInputProps {
   disabled?: boolean;
   referenceEmail? : string;
   infoText? : string;
+  required? : boolean;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -80,6 +81,7 @@ function BCEmailValidateInput({
   size = 'small',
   inputData,
   disabled = false,
+  required = true,
   onChange,
   referenceEmail = '',
   infoText = '',
@@ -95,13 +97,13 @@ function BCEmailValidateInput({
       'value': e.target.value
     };
 
-    if (e.target.value.length === 0) {
+    if (e.target.value.length === 0 && required) {
       emailData.validate = false;
       emailData.errorMsg = 'This field is required';
     } else if (emailData.value === referenceEmail) {
       emailData.validate = false;
       emailData.errorMsg = 'This email cannot be the same as primary email';
-    } else if (validator.isEmail(emailData.value)) {
+    } else if (validator.isEmail(emailData.value) || (emailData.value.length === 0 && !required)) {
       emailData.validate = true;
       emailData.errorMsg = '';
     } else {

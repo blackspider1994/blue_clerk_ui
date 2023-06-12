@@ -77,11 +77,14 @@ export default (): any => ({
     width: '100%',
     background: 'white',
     position: 'relative',
+    marginTop: '20px',
+    //gridAutoRows: 'minmax(100px, auto)',
+    padding: 20,
+  },
+  fieldsPaneContainer: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '10px',
-    //gridAutoRows: 'minmax(100px, auto)',
-    padding: 20,
   },
   fieldPane: {
     display: 'flex',
@@ -106,5 +109,18 @@ export default (): any => ({
     border: `1px solid ${LABEL_GREY}`,
     borderRadius: 4,
     padding: 2,
+  },
+  billingAddress: {
+    padding: "33px",
+    border: "1px solid #D0D3DC",
+    borderRadius: "8px",
+    marginTop: "55px"
+  },
+  billingAddressUpdate: {
+    border: "1px solid #D0D3DC !important",
+    width: "200px",
+    height: "38px",
+    borderRadius: "8px",
+    textTransform: "capitalize"
   }
 });

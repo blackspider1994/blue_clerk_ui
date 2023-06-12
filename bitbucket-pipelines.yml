@@ -4,7 +4,7 @@
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
 image: node:14.17.3
-  
+
 definitions:
   services:
     docker:
@@ -44,7 +44,39 @@ pipelines:
               AWS_DEFAULT_REGION: 'us-east-1'
               DISTRIBUTION_ID: 'E18B11G7D9D3CU'
 
-    dev:
+    release:
+    - step:
+        name: Build
+        caches:
+          - node
+        script:
+          - unset CI
+          - yarn install
+          - yarn add env-cmd
+          - yarn build:release
+        artifacts:
+          - build/**
+    - step:
+        name: pushing to s3
+        deployment: production
+        script:
+          - pipe: atlassian/aws-s3-deploy:0.4.5
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: 'us-east-1'
+              S3_BUCKET: 'blueclerk-react-release-deployment'
+              LOCAL_PATH: 'build'
+              ACL: 'public-read'
+
+          - pipe: atlassian/aws-cloudfront-invalidate:0.1.1
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: 'us-east-1'
+              DISTRIBUTION_ID: 'E3C1TKHJG0Q26X'
+
+    staging:
     - step:
         name: Build
         caches:
@@ -65,7 +97,7 @@ pipelines:
               AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
               AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
               AWS_DEFAULT_REGION: 'us-east-1'
-              S3_BUCKET: 'blueclerk-react-app'
+              S3_BUCKET: 'blueclerk-react-staging-deployment'
               LOCAL_PATH: 'build'
               ACL: 'public-read'
 
@@ -87,7 +119,7 @@ pipelines:
               REF_NAME: 'master'
               WAIT: 'true'
 
-    testing:
+    test:
     - step:
         name: Build
         caches:
@@ -95,7 +127,7 @@ pipelines:
         script:
           - unset CI
           - yarn install
-          - yarn build
+          - yarn build:test
         artifacts:
           - build/**
     - step:
@@ -107,7 +139,7 @@ pipelines:
               AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
               AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
               AWS_DEFAULT_REGION: 'us-east-1'
-              S3_BUCKET: 'blueclerk-testing'
+              S3_BUCKET: 'blueclerk-react-test-deployment'
               LOCAL_PATH: 'build'
               ACL: 'public-read'
 
@@ -116,4 +148,4 @@ pipelines:
               AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
               AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
               AWS_DEFAULT_REGION: 'us-east-1'
-              DISTRIBUTION_ID: 'E2WUPD9FPCPR34'
+              DISTRIBUTION_ID: 'E1V19VX69NRM1U'

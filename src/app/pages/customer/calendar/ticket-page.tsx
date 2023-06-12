@@ -20,8 +20,12 @@ import {
 } from "actions/bc-modal/bc-modal.action";
 import {error} from "actions/snackbar/snackbar.action";
 import {modalTypes} from "../../../../constants";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import { refreshServiceTickets } from 'actions/service-ticket/service-ticket.action';
 
 function TicketPage() {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTitle, setCurrentTitle] = useState('Customer');
@@ -67,9 +71,9 @@ function TicketPage() {
 
   useEffect(() => {
     if (refresh) {
-      dispatch(getAllServiceTicketAPI());
+      dispatch(getAllServiceTicketAPI(undefined, currentDivision.params));
     }
-  }, [refresh]);
+  }, [refresh, currentDivision.params]);
 
   const onTitleChange = (id: number, type: string) => {
     const eventsTemp = events.map((event) => ({...event, title: getTitle(event.data, type)}));

@@ -68,6 +68,8 @@ import NoCompanyLogo from '../../../assets/img/avatars/NoCompanyLogo.png';
 import { ReactComponent as CollectIcon } from 'assets/img/icons/sidebar/reports/collect.svg';
 import { ReactComponent as AmountIcon } from 'assets/img/icons/sidebar/reports/amount.svg';
 import { ReactComponent as PayrollIcon } from 'assets/img/icons/sidebar/reports/payroll.svg';
+import { useSelector } from 'react-redux';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface BCSidebarProps {
   user: any;
@@ -189,6 +191,16 @@ function BCAdminSidebar({
   const location = useLocation();
   const pathName = location.pathname;
   const nestedRouteKey = localStorage.getItem('nestedRouteKey');
+  const currentDivision: ISelectedDivision = useSelector(
+    (state: any) => state.currentDivision
+  );
+  const vendors = useSelector((state: any) => state.vendors);
+
+  const getLinkByDivision = (path: string) => {
+    return currentDivision.urlParams
+      ? `${path}/${currentDivision.urlParams}`
+      : path;
+  };
 
   const LINK_DATA = [
     {
@@ -209,13 +221,13 @@ function BCAdminSidebar({
     {
       label: 'Jobs',
       icon: <WorkIcon />,
-      link: '/main/customers/schedule/jobs',
+      link: getLinkByDivision('/main/customers/schedule/jobs'),
       group: 'Schedule',
     },
     {
       label: 'Tickets',
       icon: <TicketIcon />,
-      link: '/main/customers/schedule/tickets',
+      link: getLinkByDivision('/main/customers/schedule/tickets'),
       group: 'Schedule',
     },
     {
@@ -231,32 +243,32 @@ function BCAdminSidebar({
     {
       label: 'Calendar',
       icon: <CalendarIcon />,
-      link: '/main/customers/calendar',
+      link: getLinkByDivision('/main/customers/calendar'),
     },
     {
       label: 'Map View',
       icon: <MapIcon />,
-      link: '/main/customers/ticket-map-view',
+      link: getLinkByDivision('/main/customers/ticket-map-view'),
     },
     {
       label: 'Job Reports',
       icon: <DescriptionIcon />,
-      link: '/main/customers/job-reports',
+      link: getLinkByDivision('/main/customers/job-reports'),
     },
     {
       label: 'Payroll List',
       icon: <PaymentIcon />,
-      link: '/main/payroll',
+      link: getLinkByDivision('/main/payroll'),
     },
     {
       label: 'Past Payments',
       icon: <HistoryIcon />,
-      link: '/main/payroll/pastpayment',
+      link: getLinkByDivision('/main/payroll/pastpayment'),
     },
     {
       label: 'Reports',
       icon: <DescriptionIcon />,
-      link: '/main/payroll/reports',
+      link: getLinkByDivision('/main/payroll/reports'),
     },
     /*
      * {
@@ -267,7 +279,7 @@ function BCAdminSidebar({
     {
       label: 'Invoices',
       icon: <AccountBalanceWalletIcon />,
-      link: '/main/invoicing/invoices-list',
+      link: getLinkByDivision('/main/invoicing/invoices-list'),
     },
     {
       label: 'Purchase Order',
@@ -338,6 +350,14 @@ function BCAdminSidebar({
       label: 'Vendors',
       icon: <StorefrontIcon />,
       link: '/main/admin/vendors',
+      flag:
+        currentDivision.isDivisionFeatureActivated &&
+        vendors.unsignedVendorsFlag,
+    },
+    {
+      label: 'Payroll',
+      icon: <PaymentIcon />,
+      link: '/main/admin/payroll',
     },
     // {
     //   'label': 'Payroll',
@@ -402,13 +422,13 @@ function BCAdminSidebar({
     {
       label: 'Revenue',
       icon: <CollectIcon />,
-      link: '/main/reports/revenue',
+      link: getLinkByDivision('/main/reports/revenue'),
       group: 'Customers',
     },
     {
       label: 'A/R',
       icon: <AmountIcon />,
-      link: '/main/reports/ar',
+      link: getLinkByDivision('/main/reports/ar'),
       group: 'Customers',
     },
     {
@@ -594,6 +614,10 @@ function BCAdminSidebar({
                       pathName === `${item.link}/${nestedRouteKey}`
                     }
                   >
+                    {item.flag && (
+                      <span className={classes.flagWarning}>!</span>
+                    )}
+
                     {item.icon && item.icon}
                     <span className="menuLabel">{item.label}</span>
                   </StyledListItem>

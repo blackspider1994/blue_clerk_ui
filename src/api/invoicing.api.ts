@@ -1,33 +1,34 @@
 import axios from 'axios';
 import moment from 'moment';
-import request from 'utils/http.service';
+import request, { requestApiV2 } from 'utils/http.service';
 import {
-  setInvoicesLoading,
-  setInvoices,
-  setInvoicesTotal,
-  setNextInvoicesCursor,
-  setPreviousInvoicesCursor,
-  setDraftInvoicesLoading,
   setDraftInvoices,
+  setDraftInvoicesLoading,
   setDraftInvoicesTotal,
+  setInvoices,
+  setInvoicesLoading,
+  setInvoicesTotal,
   setNextDraftInvoicesCursor,
+  setNextInvoicesCursor,
   setPreviousDraftInvoicesCursor,
-  updateSyncedInvoices,
-  setUnsyncedInvoicesCount, setUnpaidInvoices, setUnpaidInvoicesLoading,
+  setPreviousInvoicesCursor,
+  setUnpaidInvoices,
+  setUnpaidInvoicesLoading, setUnsyncedInvoicesCount, updateSyncedInvoices
 } from 'actions/invoicing/invoicing.action';
 import {
-  setInvoicesLoading as setInvoicesForBulkPaymentsLoading,
   setInvoices as setInvoicesForBulkPayments,
+  setInvoicesLoading as setInvoicesForBulkPaymentsLoading,
   setInvoicesTotal as setInvoicesForBulkPaymentsTotal,
   setNextInvoicesCursor as setNextInvoicesForBulkPaymentsCursor,
-  setPreviousInvoicesCursor as setPreviousInvoicesForBulkPaymentsCursor,
+  setPreviousInvoicesCursor as setPreviousInvoicesForBulkPaymentsCursor
 } from 'actions/invoicing/invoices-for-bulk-payments/invoices-for-bulk-payments.action';
-import {SYNC_RESPONSE} from "../app/models/invoices";
+import { SYNC_RESPONSE } from "../app/models/invoices";
+import { DivisionParams } from 'app/models/division';
 
 export const getTodos = async (params = {}) => {
   let responseData;
   try {
-    const response: any = await request('/getJobs', 'POST', params, false);
+    const response: any = await requestApiV2('/getJobs', 'POST', params);
     responseData = response.data;
   } catch (err) {
     responseData = err.data;
@@ -42,34 +43,35 @@ export const getTodos = async (params = {}) => {
   return responseData.jobs;
 };
 
-let cancelTokenGetAllInvoicesForBulkPaymentsAPI:any;
-export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null, customerId?: string, dueDate?: Date|null, showPaid?: boolean) => {
+let cancelTokenGetAllInvoicesForBulkPaymentsAPI: any;
+export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, selectionRange?: { startDate: Date; endDate: Date } | null, customerId?: string, dueDate?: Date | null, showPaid?: boolean, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setInvoicesForBulkPaymentsLoading(true));
-      const optionObj:any = {
+      const optionObj: any = {
         pageSize,
         previousCursor,
         nextCursor,
-        isDraft: false,
+        'isDraft': false
       };
-      if(keyword){
-        optionObj.keyword = keyword
+      if (keyword) {
+        optionObj.keyword = keyword;
       }
-      if(selectionRange){
+      if (selectionRange) {
         optionObj.startDate = moment(selectionRange.startDate).format('YYYY-MM-DD');
-        optionObj.endDate = moment(selectionRange.endDate).add(1,'day').format('YYYY-MM-DD');
+        optionObj.endDate = moment(selectionRange.endDate).add(1, 'day')
+          .format('YYYY-MM-DD');
       }
-      if(customerId){
+      if (customerId) {
         optionObj.customerId = customerId;
       }
-      if(dueDate){
+      if (dueDate) {
         optionObj.dueDate = moment(dueDate).format('YYYY-MM-DD');
       }
-      if(showPaid === false) {
-        optionObj.status = JSON.stringify(["UNPAID", "PARTIALLY_PAID"]);
+      if (showPaid === false) {
+        optionObj.status = JSON.stringify(['UNPAID', 'PARTIALLY_PAID']);
       }
-      if(cancelTokenGetAllInvoicesForBulkPaymentsAPI) {
+      if (cancelTokenGetAllInvoicesForBulkPaymentsAPI) {
         cancelTokenGetAllInvoicesForBulkPaymentsAPI.cancel('axios canceled');
         setTimeout(() => {
           dispatch(setInvoicesForBulkPaymentsLoading(true));
@@ -78,9 +80,9 @@ export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor =
 
       cancelTokenGetAllInvoicesForBulkPaymentsAPI = axios.CancelToken.source();
 
-      request(`/getInvoices`, 'post', optionObj, undefined, undefined, cancelTokenGetAllInvoicesForBulkPaymentsAPI)
+      requestApiV2(`/getInvoices`, 'post', optionObj, cancelTokenGetAllInvoicesForBulkPaymentsAPI, division)
         .then((res: any) => {
-          let tempInvoices = res.data.invoices;
+          const tempInvoices = res.data.invoices;
           dispatch(setInvoicesForBulkPayments(tempInvoices.reverse()));
           dispatch(setPreviousInvoicesForBulkPaymentsCursor(res.data?.pagination?.previousCursor ? res.data?.pagination?.previousCursor : ''));
           dispatch(setNextInvoicesForBulkPaymentsCursor(res.data?.pagination?.nextCursor ? res.data?.pagination?.nextCursor : ''));
@@ -91,7 +93,7 @@ export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor =
         .catch(err => {
           dispatch(setInvoicesForBulkPaymentsLoading(false));
           dispatch(setInvoicesForBulkPayments([]));
-          if(err.message !== 'axios canceled'){
+          if (err.message !== 'axios canceled') {
             return reject(err);
           }
         });
@@ -99,89 +101,88 @@ export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor =
   };
 };
 
-let cancelTokenGetAllInvoicesAPI:any;
-export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, advanceFilterInvoiceData?:any, customerId?: string, dueDate?: Date|null, showPaid?: boolean) => {
-  return (dispatch: any) => {
+let cancelTokenGetAllInvoicesAPI: any;
+export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, advanceFilterInvoiceData?: any, customerId?: string, dueDate?: Date | null, showPaid?: boolean, division?: DivisionParams) => {
+  return (dispatch: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       dispatch(setInvoicesLoading(true));
-      const optionObj:any = {
+      const optionObj: any = {
         pageSize,
         previousCursor,
         nextCursor,
-        isDraft: false,
+        'isDraft': false
       };
-      if(keyword){
-        optionObj.keyword = keyword
+      if (keyword) {
+        optionObj.keyword = keyword;
       }
-      if(advanceFilterInvoiceData){
-        
+      if (advanceFilterInvoiceData) {
         optionObj.missingPO = advanceFilterInvoiceData.checkMissingPo;
 
-        if(advanceFilterInvoiceData.invoiceDateRange){
+        if (advanceFilterInvoiceData.invoiceDateRange) {
           optionObj.startDate = moment(advanceFilterInvoiceData.invoiceDateRange.startDate).format('YYYY-MM-DD');
           optionObj.endDate = moment(advanceFilterInvoiceData.invoiceDateRange.endDate).format('YYYY-MM-DD');
         }
-        if(advanceFilterInvoiceData.invoiceDate){
+        if (advanceFilterInvoiceData.invoiceDate) {
           optionObj.startDate = moment(advanceFilterInvoiceData.invoiceDate).format('YYYY-MM-DD');
           optionObj.endDate = moment(advanceFilterInvoiceData.invoiceDate).format('YYYY-MM-DD');
         }
-        if(advanceFilterInvoiceData.invoiceId){
+        if (advanceFilterInvoiceData.invoiceId) {
           optionObj.invoiceId = advanceFilterInvoiceData.invoiceId;
         }
-        if(advanceFilterInvoiceData.jobId){
+        if (advanceFilterInvoiceData.jobId) {
           optionObj.jobId = advanceFilterInvoiceData.jobId;
         }
-        if(advanceFilterInvoiceData.poNumber){
+        if (advanceFilterInvoiceData.poNumber) {
           optionObj.customerPO = advanceFilterInvoiceData.poNumber;
         }
-        if(advanceFilterInvoiceData.selectedPaymentStatus && advanceFilterInvoiceData.selectedPaymentStatus !== 'all'){
+        if (advanceFilterInvoiceData.selectedPaymentStatus && advanceFilterInvoiceData.selectedPaymentStatus !== 'all') {
           optionObj.status = `["${advanceFilterInvoiceData.selectedPaymentStatus}"]`;
         }
-        if(advanceFilterInvoiceData.selectedCustomer){
+        if (advanceFilterInvoiceData.selectedCustomer) {
           optionObj.customerId = advanceFilterInvoiceData.selectedCustomer.value;
         }
-        if(advanceFilterInvoiceData.selectedTechnician){
+        if (advanceFilterInvoiceData.selectedTechnician) {
           optionObj.technicianId = advanceFilterInvoiceData.selectedTechnician.value;
         }
-        if(advanceFilterInvoiceData.selectedContact){
+        if (advanceFilterInvoiceData.selectedContact) {
           optionObj.customerContactId = advanceFilterInvoiceData.selectedContact.value;
         }
-        if(advanceFilterInvoiceData.lastEmailSentDateRange){
+        if (advanceFilterInvoiceData.lastEmailSentDateRange) {
           optionObj.lastEmailStartDate = moment(advanceFilterInvoiceData.lastEmailSentDateRange.startDate).format('YYYY-MM-DD');
           optionObj.lastEmailEndDate = moment(advanceFilterInvoiceData.lastEmailSentDateRange.endDate).format('YYYY-MM-DD');
         }
-        if(advanceFilterInvoiceData.amountRangeFrom){
+        if (advanceFilterInvoiceData.amountRangeFrom) {
           optionObj.startAmount = parseInt(advanceFilterInvoiceData.amountRangeFrom);
         }
-        if(advanceFilterInvoiceData.amountRangeTo){
+        if (advanceFilterInvoiceData.amountRangeTo) {
           optionObj.endAmount = parseInt(advanceFilterInvoiceData.amountRangeTo);
         }
-        if(advanceFilterInvoiceData.selectedSubdivision){
+        if (advanceFilterInvoiceData.selectedSubdivision) {
           optionObj.jobLocationId = advanceFilterInvoiceData.selectedSubdivision.value;
         }
-        if(advanceFilterInvoiceData.jobAddressStreet){
+        if (advanceFilterInvoiceData.jobAddressStreet) {
           optionObj.jobAddress = advanceFilterInvoiceData.jobAddressStreet;
         }
-        if(advanceFilterInvoiceData.jobAddressCity){
+        if (advanceFilterInvoiceData.jobAddressCity) {
           optionObj.jobCity = advanceFilterInvoiceData.jobAddressCity;
         }
-        if(advanceFilterInvoiceData.selectedJobAddressState){
+        if (advanceFilterInvoiceData.selectedJobAddressState) {
           optionObj.jobState = advanceFilterInvoiceData.selectedJobAddressState;
         }
-        if(advanceFilterInvoiceData.jobAddressZip){
+        if (advanceFilterInvoiceData.jobAddressZip) {
           optionObj.jobZip = advanceFilterInvoiceData.jobAddressZip;
         }
       }
-      if(customerId){
+      if (customerId) {
         optionObj.customerId = customerId;
       }
-      if(dueDate){
+      if (dueDate) {
         optionObj.dueDate = moment(dueDate).format('YYYY-MM-DD');
       }
-      if(showPaid === false) {
-        optionObj.status = JSON.stringify(["UNPAID", "PARTIALLY_PAID"]);
+      if (showPaid === false) {
+        optionObj.status = JSON.stringify(['UNPAID', 'PARTIALLY_PAID']);
       }
-      if(cancelTokenGetAllInvoicesAPI) {
+      if (cancelTokenGetAllInvoicesAPI) {
         cancelTokenGetAllInvoicesAPI.cancel('axios canceled');
         setTimeout(() => {
           dispatch(setInvoicesLoading(true));
@@ -190,9 +191,9 @@ export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor
 
       cancelTokenGetAllInvoicesAPI = axios.CancelToken.source();
 
-      request(`/getInvoices`, 'post', optionObj, undefined, undefined, cancelTokenGetAllInvoicesAPI)
+      requestApiV2(`/getInvoices`, 'post', optionObj, cancelTokenGetAllInvoicesAPI, division)
         .then((res: any) => {
-          let tempInvoices = res.data.invoices || [];
+          const tempInvoices = res.data.invoices || [];
           dispatch(setInvoices(tempInvoices.reverse()));
           dispatch(setPreviousInvoicesCursor(res.data?.pagination?.previousCursor ? res.data?.pagination?.previousCursor : ''));
           dispatch(setNextInvoicesCursor(res.data?.pagination?.nextCursor ? res.data?.pagination?.nextCursor : ''));
@@ -204,7 +205,7 @@ export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor
         .catch(err => {
           dispatch(setInvoicesLoading(false));
           dispatch(setInvoices([]));
-          if(err.message !== 'axios canceled'){
+          if (err.message !== 'axios canceled') {
             return reject(err);
           }
         });
@@ -212,24 +213,24 @@ export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor
   };
 };
 
-let cancelTokenGetAllDraftInvoicesAPI:any;
-export const getAllDraftInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, recentOnly = false) => {
+let cancelTokenGetAllDraftInvoicesAPI: any;
+export const getAllDraftInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, recentOnly = false, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setDraftInvoicesLoading(true));
-      const optionObj:any = {
+      const optionObj: any = {
         pageSize,
         previousCursor,
         nextCursor,
-        isDraft: true,
+        'isDraft': true
       };
-      if(keyword){
-        optionObj.keyword = keyword
+      if (keyword) {
+        optionObj.keyword = keyword;
       }
-      if(recentOnly){
+      if (recentOnly) {
         optionObj.recentOnly = true;
       }
-      if(cancelTokenGetAllDraftInvoicesAPI) {
+      if (cancelTokenGetAllDraftInvoicesAPI) {
         cancelTokenGetAllDraftInvoicesAPI.cancel('axios canceled');
         setTimeout(() => {
           dispatch(setDraftInvoicesLoading(true));
@@ -238,9 +239,9 @@ export const getAllDraftInvoicesAPI = (pageSize = 10, previousCursor = '', nextC
 
       cancelTokenGetAllDraftInvoicesAPI = axios.CancelToken.source();
 
-      request(`/getInvoices`, 'post', optionObj, undefined, undefined, cancelTokenGetAllDraftInvoicesAPI)
+      requestApiV2(`/getInvoices`, 'post', optionObj, cancelTokenGetAllDraftInvoicesAPI, division)
         .then((res: any) => {
-          let tempDraftInvoices = res.data.invoices;
+          const tempDraftInvoices = res.data.invoices;
           dispatch(setDraftInvoices(tempDraftInvoices.reverse()));
           dispatch(setPreviousDraftInvoicesCursor(res.data?.pagination?.previousCursor ? res.data?.pagination?.previousCursor : ''));
           dispatch(setNextDraftInvoicesCursor(res.data?.pagination?.nextCursor ? res.data?.pagination?.nextCursor : ''));
@@ -251,7 +252,7 @@ export const getAllDraftInvoicesAPI = (pageSize = 10, previousCursor = '', nextC
         .catch(err => {
           dispatch(setDraftInvoicesLoading(false));
           dispatch(setDraftInvoices([]));
-          if(err.message !== 'axios canceled'){
+          if (err.message !== 'axios canceled') {
             return reject(err);
           }
         });
@@ -259,29 +260,30 @@ export const getAllDraftInvoicesAPI = (pageSize = 10, previousCursor = '', nextC
   };
 };
 
-let cancelTokenGetUnpaidInvoicesAPI:any;
-export const getUnpaidInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string,  selectionRange?:{startDate:Date;endDate:Date}|null, recentOnly = false) => {
+let cancelTokenGetUnpaidInvoicesAPI: any;
+export const getUnpaidInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, selectionRange?: { startDate: Date; endDate: Date } | null, recentOnly = false, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setUnpaidInvoicesLoading(true));
-      const optionObj:any = {
+      const optionObj: any = {
         pageSize,
         previousCursor,
         nextCursor,
-        status: JSON.stringify(["UNPAID"]),
-        isDraft: false,
+        'status': JSON.stringify(['UNPAID']),
+        'isDraft': false
       };
-      if(keyword){
-        optionObj.keyword = keyword
+      if (keyword) {
+        optionObj.keyword = keyword;
       }
-      if(recentOnly){
-        optionObj.recentOnly = true
+      if (recentOnly) {
+        optionObj.recentOnly = true;
       }
-      if(selectionRange){
+      if (selectionRange) {
         optionObj.startDate = moment(selectionRange.startDate).format('YYYY-MM-DD');
-        optionObj.endDate = moment(selectionRange.endDate).add(1,'day').format('YYYY-MM-DD');
+        optionObj.endDate = moment(selectionRange.endDate).add(1, 'day')
+          .format('YYYY-MM-DD');
       }
-      if(cancelTokenGetUnpaidInvoicesAPI) {
+      if (cancelTokenGetUnpaidInvoicesAPI) {
         cancelTokenGetUnpaidInvoicesAPI.cancel('axios canceled');
         setTimeout(() => {
           dispatch(setUnpaidInvoicesLoading(true));
@@ -290,23 +292,23 @@ export const getUnpaidInvoicesAPI = (pageSize = 10, previousCursor = '', nextCur
 
       cancelTokenGetUnpaidInvoicesAPI = axios.CancelToken.source();
 
-      request(`/getInvoices`, 'post', optionObj, undefined, undefined, cancelTokenGetUnpaidInvoicesAPI)
+      requestApiV2(`/getInvoices`, 'post', optionObj, cancelTokenGetUnpaidInvoicesAPI, division)
         .then((res: any) => {
-          const {invoices, pagination, total} = res.data;
-          let tempUnpaidInvoices = res.data.invoices;
+          const { invoices, pagination, total } = res.data;
+          const tempUnpaidInvoices = res.data.invoices;
           dispatch(setUnpaidInvoices(
             tempUnpaidInvoices.reverse(),
             pagination?.previousCursor || '',
             pagination?.nextCursor || '',
             total
-            ));
+          ));
           dispatch(setUnpaidInvoicesLoading(false));
           return resolve(res.data);
         })
         .catch(err => {
           dispatch(setUnpaidInvoices([], '', '', 0));
           setUnpaidInvoicesLoading(false);
-          if(err.message !== 'axios canceled'){
+          if (err.message !== 'axios canceled') {
             return reject(err);
           }
         });
@@ -317,7 +319,7 @@ export const getUnpaidInvoicesAPI = (pageSize = 10, previousCursor = '', nextCur
 export const getInvoicingList = async (params = {}) => {
   let responseData;
   try {
-    const response: any = await request('/getInvoices', 'POST', params, false);
+    const response: any = await requestApiV2('/getInvoices', 'POST', params);
     responseData = response.data;
   } catch (err) {
     responseData = err.data;
@@ -332,39 +334,42 @@ export const getInvoicingList = async (params = {}) => {
   return responseData.invoices;
 };
 
-export const getUnsyncedInvoices = async() => {
+export const getUnsyncedInvoices = async (division?: DivisionParams) => {
   try {
-    const response: any = await request('/getUnsyncedInvoices', 'GET');
-    const {status, message, invoices} = response.data;
+    const response: any = await request('/getUnsyncedInvoices', 'GET', undefined, undefined, undefined, undefined, undefined, division);
+    const { status, message, invoices } = response.data;
     if (status === 1) return invoices;
-    throw ({message});
+    throw ({ message });
   } catch (e) {
-    throw (e.message);
+    throw e.message;
   }
-}
+};
 
-export const SyncInvoices = (ids: string[] = []) => async(dispatch: any):Promise<SYNC_RESPONSE> => {
+export const SyncInvoices = (ids: string[] = []) => async (dispatch: any): Promise<SYNC_RESPONSE> => {
   let responseData;
   try {
-    const params ={invoiceIds :  JSON.stringify(ids)};
+    const params = { 'invoiceIds': JSON.stringify(ids) };
     const response: any = await request('/createQBInvoices', 'POST', params, false);
-    const {status, message, totalInvoiceSynced, totalInvoiceUnsynced, invoiceSynced, invoiceUnsynced} = response.data;
+    const { status, message, totalInvoiceSynced, totalInvoiceUnsynced, invoiceSynced, invoiceUnsynced } = response.data;
 
     if (status === 1) {
       const unsynced = invoiceUnsynced.map((invoice: any) => ({
-        _id: invoice.invoice._id,
-        error: invoice.errorMessage,
+        '_id': invoice.invoice._id,
+        'error': invoice.errorMessage
       }));
       const synced = invoiceSynced.map((invoice: any) => ({
-        _id: invoice._id,
-        quickbookId: invoice.quickbookId
+        '_id': invoice._id,
+        'quickbookId': invoice.quickbookId
       }));
 
       dispatch(updateSyncedInvoices(invoiceSynced));
-      return ({ids: [...unsynced, ...synced], totalInvoiceSynced, totalInvoiceUnsynced});
-    } else {
-      throw new Error(message);
+      return {
+        'ids': [...unsynced, ...synced],
+        totalInvoiceSynced,
+        totalInvoiceUnsynced
+      };
     }
+    throw new Error(message);
   } catch (err) {
     responseData = err.data;
     if (err.response?.status >= 400 || err.data?.status === 0) {
@@ -375,7 +380,7 @@ export const SyncInvoices = (ids: string[] = []) => async(dispatch: any):Promise
       throw new Error(`Something went wrong`);
     }
   }
-  //return responseData;
+  // Return responseData;
 };
 
 export const getPurchaseOrder = async (params = {}) => {
@@ -414,7 +419,7 @@ export const getInvoicingEstimates = async (params = {}) => {
   return responseData.estimates;
 };
 
-export const getInvoiceDetail = async (invoiceId:string) => {
+export const getInvoiceDetail = async (invoiceId: string) => {
   try {
     const response: any = await request('/getInvoiceDetail', 'POST', { invoiceId }, false);
     return response.data;
@@ -467,7 +472,7 @@ export const voidInvoice = (data: any) => {
 
 export const sendEmailInvoice = (data: any) => {
   return new Promise((resolve, reject) => {
-    const {id, ...rest} = data;
+    const { id, ...rest } = data;
     request(`/sendInvoice`, 'post', rest)
       .then((res: any) => {
         return resolve(res.data);
@@ -480,7 +485,7 @@ export const sendEmailInvoice = (data: any) => {
 
 export const sendEmailInvoices = (data: any) => {
   return new Promise((resolve, reject) => {
-    const {ids, ...rest} = data;
+    const { ids, ...rest } = data;
     request(`/sendInvoices`, 'post', rest)
       .then((res: any) => {
         return resolve(res.data);

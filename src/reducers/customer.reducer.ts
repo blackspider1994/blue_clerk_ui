@@ -8,6 +8,8 @@ import {
 const initialCustomers: CustomersState = {
   'loading': false,
   'data': [],
+  keyword: '',
+  
   'customerObj': {
     '_id': '',
     'info': {
@@ -90,6 +92,11 @@ export const CustomersReducer: Reducer<any> = (
         ...state,
         'loading': false,
         'customerObj': state.customerObj
+      };
+    case types.SET_CUSTOMERS_SEARCH_KEYWORD:
+      return {
+        ...state,
+        keyword: action.payload
       };
   }
   return state;

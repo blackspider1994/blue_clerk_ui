@@ -1,4 +1,4 @@
-import request from '../utils/http.service';
+import request, { requestApiV2 } from '../utils/http.service';
 import { refreshServiceTickets, setServiceTicket, setServiceTicketLoading, setOpenServiceTicketLoading, setOpenServiceTicket } from 'actions/service-ticket/service-ticket.action';
 
 
@@ -6,7 +6,7 @@ export const getAllBillingMethodsAPI = () => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setServiceTicketLoading(true));
-      request(`/getServiceTickets`, 'post', null)
+      requestApiV2(`/getServiceTickets`, 'post', null)
         .then((res: any) => {
           dispatch(setServiceTicket(res.data.serviceTickets));
           dispatch(setServiceTicketLoading(false));

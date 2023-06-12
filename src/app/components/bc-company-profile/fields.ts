@@ -1,3 +1,4 @@
+import { createFilterOptions } from "@material-ui/lab";
 import {
   CompanyLocation,
   CompanyProfileStateType
@@ -57,7 +58,10 @@ export const companyProfileFields = (profileState: CompanyProfileStateType) => [
       label: 'State:',
       placehold: 'Input State',
       value: profileState.state,
-      data: allStates.map((state) => state.name),
+      data: allStates,
+      filterOptions: createFilterOptions({
+        stringify: (option: any) => option.name + option.abbreviation,
+      })
     },
     right: {
       id: 'zipCode',
@@ -118,9 +122,9 @@ export const companyLocationFields = (location: CompanyLocation) => [
     label: 'Contact Email',
     value: location.info?.companyEmail,
   }, {
-    id: 'empty',
-    label: '',
-    value: '',
+    id: 'isActive',
+    label: 'Status:',
+    value: location.isActive ? "Active": "Inactive",
   }, {
     id: 'street',
     label: 'Street:',

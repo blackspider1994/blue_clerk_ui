@@ -25,7 +25,7 @@ import {ReactComponent as IconIncomplete} from "../../../assets/img/icons/map/ic
 import {ReactComponent as IconPending} from "../../../assets/img/icons/map/icon-pending.svg";
 import {ReactComponent as IconJobRequest} from "../../../assets/img/icons/map/icon-job-request.svg";
 import {ReactComponent as IconOpenServiceTicket} from "../../../assets/img/icons/map/icon-open-service-ticket.svg";
-
+import { AM_COLOR, OCCUPIED_ORANGE, PM_COLOR } from "../../../constants";
 interface BCMapWithMarkerListProps {
   reactAppGoogleKeyFromConfig: string;
   list: any;
@@ -64,6 +64,8 @@ const superClusterOptions = {
     includeTicket: !!props.ticket?.ticketId,
     includeRequest: !!props.ticket?.requestId,
     includeJob: !!props.ticket?.jobId,
+    isHomeOccupied: !!props.ticket?.isHomeOccupied,
+    scheduleTimeAMPM: props.ticket?.scheduleTimeAMPM || 0,
   }),
   reduce: (acc:any, props:any) => {
     if(!!props.includeTicket) {
@@ -85,19 +87,45 @@ const calculateColor = (cluster:any) => {
   if(cluster.properties?.includeTicket){
     return '#2477FF'
   }
-  return 'rgb(130,130,130)'
+  return cluster.properties?.isHomeOccupied ? OCCUPIED_ORANGE : 'rgb(130,130,130)'
 }
 const calculateBorder = (cluster:any) => {
   if(cluster.properties?.includeJob){
+    if(cluster.properties?.scheduleTimeAMPM !== 0) {
+      switch(cluster.properties?.scheduleTimeAMPM) {
+        case 1: return `3px solid ${AM_COLOR}`; 
+        case 2: return `3px solid ${PM_COLOR}`;
+        default: return '3px solid black';
+      }
+    }
     return '3px solid black'
   }
   if(cluster.properties?.includeTicket){
-    return '3px solid #2477FF'
+    return cluster.properties?.isHomeOccupied ? `3px solid ${OCCUPIED_ORANGE}` : '3px solid #2477FF';
   }
   if(cluster.properties?.includeRequest){
     return '3px solid #970505'
   }
   return '3px solid rgb(130,130,130)'
+}
+
+const calculateMarkerBorder = (ticket : any, isTicket : boolean, technicianColor : string) : string => {
+  if(!isTicket && ticket.jobId?.length > 0) {
+    if(ticket?.scheduleTimeAMPM !== 0) {
+      switch(ticket?.scheduleTimeAMPM) {
+        case 1: return `3px solid ${AM_COLOR}`; 
+        case 2: return `3px solid ${PM_COLOR}`;
+        default: return '3px solid black';
+      }
+    }
+    return '3px solid black'
+  }
+  else if(isTicket && ticket?.jobId) {
+    return `3px solid ${technicianColor}`;
+  }
+  else {
+    return ticket?.isHomeOccupied ? `3px solid ${OCCUPIED_ORANGE}` : 'none';
+  }
 }
 
 function BCMapWithMarkerWithList({
@@ -125,7 +153,7 @@ function BCMapWithMarkerWithList({
   const [zoom, setZoom] = useState(11);
   const locationCoordinate = useRef<any>({});
   const overlappingCoordinates = useRef<any>([]);
-  const [_, setRefresh] = useState(0)
+  const [_, setRefresh] = useState(0);
 
   let centerLat = coordinates?.lat || DEFAULT_COORD.lat;
   let centerLng = coordinates?.lng || DEFAULT_COORD.lng;
@@ -325,18 +353,21 @@ function BCMapWithMarkerWithList({
                   className={classes.listItemContainer}
                   onClick={() => handleItemClick(datum.ticket._id)}
                 >
-                  <CustomIcon
-                    style={{
-                      marginRight: 5,
-                      border: isTicket && datum.ticket?.jobId ? `3px solid ${technicianColor}` : 'none',
-                      borderRadius: '50%',
-                      width: 25,
-                      height: 25,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  /> {title}{title && location ? ' - ' : ''}{location}
+                  <div>
+                    <CustomIcon
+                      style={{
+                        marginRight: 5,
+                        border: calculateMarkerBorder(datum.ticket, isTicket, technicianColor),
+                        borderRadius: '50%',
+                        width: 25,
+                        height: 25,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    /> 
+                  </div>
+                  <div>{title}{title && location ? ' - ' : ''}{location}</div>
                 </div>
               )
             })}

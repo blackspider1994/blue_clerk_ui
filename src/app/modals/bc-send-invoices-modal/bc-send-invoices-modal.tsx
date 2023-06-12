@@ -54,7 +54,7 @@ import { modalTypes } from "../../../constants";
 import { resetEmailState } from "../../../actions/email/email.action";
 import { setTimeout } from 'timers';
 import { PaymentStatus } from 'app/pages/invoicing/invoices-list/invoices-list-listing/invoices-unpaid-listing';
-
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 const SHOW_OPTIONS = [
   {
@@ -111,6 +111,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
   const [isSuccess, setIsSuccess] = useState(false);
   const customers = useSelector(({ customers }: any) => customers.data);
   const debounceInputStyles = useDebounceInputStyles();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const getFilteredList = (state: any) => {
     return TableFilterService.filterByDateDesc(state?.invoiceList.data);
@@ -176,8 +177,8 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
     //cycle thru the array for individual objects
     for (let i = 0; i < selectedInvoices.length; i++) {
       const invoice = selectedInvoices[i];
-      if (invoice.contactsObj.length > 0) {
-        const email = invoice.contactsObj[0].email;
+      if (invoice?.customerContactId) {
+        const email = invoice.customerContactId?.email;
 
         //first check if email is in array
 
@@ -187,7 +188,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
           continue;
         } else {
-          const tempArray = selectedInvoices.filter(inv => inv.contactsObj[0]?.email === email);
+          const tempArray = selectedInvoices.filter(inv => inv.customerContactId?.email === email);
           const invoicesArray: any = []
           tempArray.map((inv) => {
             invoicesArray.push(inv._id)
@@ -204,6 +205,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 'typeText': 'Invoice',
                 'className': 'wideModalTitle',
                 'customerId': invoice.customer?._id,
+                'from': invoice?.companyLocation?.billingAddress?.emailSender,
               };
               const combined: any = { ...data, emailDefault }
 
@@ -226,7 +228,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
         } else {
 
           //filter to get those with empty contactObj's first
-          const contactlessInvoices = selectedInvoices.filter(inv => inv.contactsObj.length === 0 && inv.customer.info.email === email)
+          const contactlessInvoices = selectedInvoices.filter(inv => !inv.customerContactId && inv.customer.info.email === email)
           if (contactlessInvoices.length) {
             //get the id's
             const invoicesArray: any = []
@@ -243,6 +245,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                   'handleClick': () => { },
                   'ids': invoicesArray,
                   'typeText': 'Invoice',
+                  'from': invoice?.companyLocation?.billingAddress?.emailSender,
                   'className': 'wideModalTitle',
                   'customerId': invoice.customer?._id,
                 };
@@ -272,13 +275,13 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
     dispatch(resetEmailState());
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI());
+    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
   };
 
   const closeModal = () => {
 
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI());
+    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
     dispatch(closeModalAction());
     setTimeout(() => {
       dispatch(setModalDataAction({
@@ -298,7 +301,8 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
       { invoiceDateRange: selectionRange },
       customerValue?._id,
       isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
-      showValue === 'all'
+      showValue === 'all',
+      currentDivision.params
     ));
   }, [customerValue, selectionRange, showValue]);
 
@@ -388,24 +392,20 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
     {
       Cell({ row }: any) {
-        return row.original.contactsObj.length > 0
-          ? row.original.contactsObj[0]?.name
-          : 'N/A';
+         return row.original?.customerContactId?.name || 'N/A';
       },
       'Header': 'Contact',
-      'accessor': 'row.original.contactsObj[0]?.name',
+      'accessor': 'row.original.customerContactId?.name',
       'className': 'font-bold',
       'sortable': true
     },
 
     {
       Cell({ row }: any) {
-        return row.original.contactsObj.length > 0
-          ? row.original.contactsObj[0]?.email
-          : 'N/A';
+        return row.original?.customerContactId?.email || 'N/A';
       },
       'Header': 'Email',
-      'accessor': 'row.original.contactsObj[0]?.email',
+      'accessor': 'row.original.customerContactId?.email',
       'className': 'font-bold',
       'sortable': true
     },
@@ -499,7 +499,8 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                     { invoiceDateRange: selectionRange },
                     customerValue?._id,
                     isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
-                    showValue === 'all'
+                    showValue === 'all',
+                    currentDivision.params
                   ))
                 }}
                 total={total}

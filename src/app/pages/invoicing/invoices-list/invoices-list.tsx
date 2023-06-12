@@ -9,7 +9,7 @@ import {Button, Fab, useTheme, withStyles} from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import BCMenuToolbarButton from 'app/components/bc-menu-toolbar-button';
-import { info } from 'actions/snackbar/snackbar.action';
+import { info, warning } from 'actions/snackbar/snackbar.action';
 import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
 import { modalTypes } from '../../../../constants'
 import { getCustomers } from 'actions/customer/customer.action'
@@ -17,6 +17,7 @@ import {Sync as SyncIcon} from '@material-ui/icons';
 import InvoicingUnpaidListing
   from "./invoices-list-listing/invoices-unpaid-listing";
 import {RootState} from "../../../../reducers";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 function InvoiceList({ classes }: any) {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ function InvoiceList({ classes }: any) {
   const [curTab, setCurTab] = useState(location?.state?.tab || 0);
   const theme = useTheme();
 
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const [visibleTabs, setVisibleTabs] = useState<number[]>([0])
   const {loading, totalDraft, unSyncedInvoicesCount} = useSelector(({invoiceList}: any) => invoiceList);
@@ -34,6 +36,7 @@ function InvoiceList({ classes }: any) {
   const handleTabChange = (newValue: number) => {
     setCurTab(newValue);
     if (visibleTabs.indexOf(newValue) === -1) setVisibleTabs([...visibleTabs, newValue]);
+    history.replace({...history.location, state: {...history.location.state, tab: newValue}})
   };
 
   const openCreateInvoicePage = () => {
@@ -60,7 +63,12 @@ function InvoiceList({ classes }: any) {
   const handleMenuToolbarListClick = (e: any, id: number) => {
     switch (id) {
       case 0:
-        openCreateInvoicePage();
+        //To ensure that all invoices are detected by the division, and check if the user has activated the division feature.
+        if ((currentDivision.isDivisionFeatureActivated && currentDivision.data?.name != "All") || !currentDivision.isDivisionFeatureActivated) {
+          openCreateInvoicePage();
+        }else{
+          dispatch(warning("Please select a division before creating an invoice."));
+        }
         break;
       case 2:
         dispatch(setModalDataAction({

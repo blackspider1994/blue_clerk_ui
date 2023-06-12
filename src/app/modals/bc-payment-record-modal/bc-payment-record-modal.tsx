@@ -19,7 +19,7 @@ import {
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import { closeModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import InputAdornment from "@material-ui/core/InputAdornment";
 import { error } from "../../../actions/snackbar/snackbar.action";
@@ -27,6 +27,7 @@ import {modalTypes} from "../../../constants";
 import { voidPayment } from 'api/payment.api';
 import BCSentSync from "../../components/bc-sent-sync";
 import {formatCurrency} from "../../../helpers/format";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface ApiProps {
   customerId: string,
@@ -49,6 +50,7 @@ function BcPaymentRecordModal({
   const [sent, setSent] = useState<null | {created: boolean,synced: boolean }>(null);
   const [invoice, setInvoice] = useState(invoiceOrg);
   const dispatch = useDispatch();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const paymentTypes = [
     {
@@ -145,7 +147,7 @@ function BcPaymentRecordModal({
         request = recordPayment;
       }
 
-      dispatch(request(params)).then((response: any) => {
+      dispatch(request(params,currentDivision.params)).then((response: any) => {
         const {status, payment, quickbookPayment, invoice: updatedInvoice, invoices, message} = response;
         if (status === 1) {
           const {
@@ -221,7 +223,7 @@ function BcPaymentRecordModal({
         modalTitle: '         ',
         message: 'Are you sure you want to void this payment?',
         subMessage: 'This action cannot be undone.',
-        action: voidPayment({type: 'customer', paymentId: payment._id}),
+        action: voidPayment({type: 'customer', paymentId: payment._id},currentDivision.params),
         closeAction,
       },
       'type': modalTypes.WARNING_MODAL

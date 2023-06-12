@@ -65,4 +65,10 @@ export default (theme: Theme): any => ({
       }
     }
   },
+  "flagWarning": {
+    "color": "red",
+    "fontWeight": 'bold',
+    "position": "absolute",
+    "left": "10px"
+  }
 });

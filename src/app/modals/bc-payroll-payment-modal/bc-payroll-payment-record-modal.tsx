@@ -18,7 +18,7 @@ import {
 } from '@material-ui/core';
 import React, {useState, useEffect} from 'react';
 import { closeModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import InputAdornment from "@material-ui/core/InputAdornment";
 import { error } from "../../../actions/snackbar/snackbar.action";
@@ -39,6 +39,7 @@ import {updateVendorPayment} from "../../../actions/vendor/vendor.action";
 import BCTabs2 from 'app/components/bc-tab2/bc-tab2';
 import SwipeableViews from 'react-swipeable-views';
 import {refreshContractorPayment} from "../../../actions/payroll/payroll.action";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 function BcPayrollPaymentRecordModal({
   classes,
@@ -51,7 +52,9 @@ function BcPayrollPaymentRecordModal({
   const [sentAdvance, setSentAdvance] = useState(false);
   const [curTab, setCurTab] = useState(advancePayment ? 1 : 0);
   const dispatch = useDispatch();
-  const theme = useTheme()
+  const theme = useTheme();
+
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const isValidate = () => {
     const amount = FormikValues.amount ?? 0;
@@ -92,6 +95,8 @@ function BcPayrollPaymentRecordModal({
         offset: new Date().getTimezoneOffset() / 60,
         paidAt: formatDateYMD(FormikValues.paymentDate),
         note: FormikValues.notes,
+        companyLocation: payroll.companyLocation,
+        workType: payroll.workType,
       }
 
       if (FormikValues.referenceNumber)
@@ -104,7 +109,7 @@ function BcPayrollPaymentRecordModal({
         params.startDate = formatDateYMD(dateRange.startDate);
         params.endDate = formatDateYMD(dateRange.endDate);
       }
-
+      
       try {
         if (payment) {
           params.paymentId = payment._id;
@@ -384,6 +389,8 @@ function BcPayrollPaymentRecordModal({
         paidAt: formatDateYMD(FormikValuesAdvance.paymentDate),
         appliedAt: formatDateYMD(FormikValuesAdvance.appliedAt),
         note: FormikValuesAdvance.notes,
+        companyLocation: payroll.companyLocation,
+        workType: payroll.workType,
       }
 
       if (FormikValuesAdvance.referenceNumber)
@@ -400,6 +407,7 @@ function BcPayrollPaymentRecordModal({
             setSentAdvance(true);
             dispatch(updateContractorPayment(response.payment));
             dispatch(updateVendorPayment(response.payment));
+            dispatch(refreshContractorPayment(true));
           } else {
             dispatch(error(response.message))
           }

@@ -28,13 +28,14 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { editableStatus } from 'app/models/contract';
 import styled from 'styled-components';
 import Tooltip from '@material-ui/core/Tooltip';
-import { CSButton, CSButtonSmall } from '../../../../helpers/custom';
+import { CSButton } from '../../../../helpers/custom';
 import { remindVendorApi } from '../../../../api/vendor.api';
 import { error, info } from '../../../../actions/snackbar/snackbar.action';
 import BCItemsFilter from '../../../components/bc-items-filter/bc-items-filter';
 import BCMenuButton from '../../../components/bc-menu-more';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import { getContractors } from 'actions/payroll/payroll.action';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface StatusTypes {
   status: number;
@@ -66,6 +67,7 @@ const ITEMS = [
 
 function AdminVendorsPage({ classes }: any) {
   const dispatch = useDispatch();
+  const vendors = useSelector((state: any) => state.vendors);
   const { loading, contractors } = useSelector((state: any) => state.payroll);
   const [curTab, setCurTab] = useState(0);
   const [tableData, setTableData] = useState([]);
@@ -74,6 +76,9 @@ function AdminVendorsPage({ classes }: any) {
   const location = useLocation<any>();
   const { costingList } = useSelector(
     ({ InvoiceJobCosting }: any) => InvoiceJobCosting
+  );
+  const currentDivision: ISelectedDivision = useSelector(
+    (state: any) => state.currentDivision
   );
 
   const activeVendors = useMemo(
@@ -213,18 +218,42 @@ function AdminVendorsPage({ classes }: any) {
   };
 
   const columns: any = [
-    /*
-     * {
-     *   'Cell'({ row }: any) {
-     *     return <div className={'flex items-center'}>
-     *       {row.index + 1}
-     *     </div>;
-     *   },
-     *   'Header': 'No#',
-     *   'sortable': true,
-     *   'width': 60
-     * },
-     */
+    {
+      Header: 'Display Name',
+      accessor: 'contractor.info.displayName',
+      className: 'font-bold',
+      sortable: true,
+      Cell({ row }: any) {
+        let isNotAssigned = '';
+        let isNotAssignedTooltip = '';
+        if (
+          currentDivision.isDivisionFeatureActivated &&
+          !vendors.assignedVendors?.includes(row.original?.contractor?._id)
+        ) {
+          isNotAssigned = '!';
+          isNotAssignedTooltip =
+            'This vendor is not assigned to any division or work type';
+        }
+
+        return (
+          <span>
+            <Tooltip title={isNotAssignedTooltip}>
+              <span
+                style={{
+                  color: 'red',
+                  fontWeight: 'bold',
+                }}
+              >
+                {isNotAssigned}{' '}
+              </span>
+            </Tooltip>
+            {row.original?.contractor?.info?.displayName ||
+              row.original?.displayName ||
+              'N/A'}
+          </span>
+        );
+      },
+    },
     {
       Header: 'Company Name',
       accessor: 'vendor',
@@ -232,7 +261,10 @@ function AdminVendorsPage({ classes }: any) {
       sortable: true,
       Cell({ row }: any) {
         return (
-          <span>{row.original?.vendor || row.original?.contractorEmail}</span>
+          <span>
+            {row.original?.contractor?.info?.companyName ||
+              row.original?.contractorEmail}
+          </span>
         );
       },
     },
@@ -327,6 +359,11 @@ function AdminVendorsPage({ classes }: any) {
     // dispatch(loadingVendors());
     // dispatch(getVendors());
     dispatch(getContractors());
+  }, [vendors, currentDivision.isDivisionFeatureActivated]);
+
+  useEffect(() => {
+    dispatch(loadingVendors());
+    dispatch(getVendors({ assignedVendorsIncluded: true }));
   }, []);
 
   const resetLocationState = () => {
@@ -380,8 +417,12 @@ function AdminVendorsPage({ classes }: any) {
 
   const renderViewMore = (row: any) => {
     const baseObj = row.original;
-    let vendorCompanyName = baseObj.vendor ? baseObj.vendor : 'N/A';
-    const vendorId = baseObj._id;
+    let vendorCompanyName =
+      baseObj.contractor.info &&
+      baseObj.contractor.info.companyName !== undefined
+        ? baseObj.contractor.info.companyName
+        : 'N/A';
+    const vendorId = baseObj.contractor._id;
     const vendorObj: any = {
       vendorCompanyName,
       vendorId,

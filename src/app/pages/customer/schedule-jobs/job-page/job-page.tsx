@@ -16,24 +16,28 @@ import {
   openModalAction,
   setModalDataAction,
 } from 'actions/bc-modal/bc-modal.action';
-import { setCurrentPageIndex, setCurrentPageSize, setKeyword } from 'actions/job/job.action';
+import { refreshJobs, setCurrentPageIndex, setCurrentPageSize, setKeyword } from 'actions/job/job.action';
 import { getCustomers } from 'actions/customer/customer.action';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'reducers';
 import BCJobStatus from '../../../../components/bc-job-status';
 import BCDateRangePicker
-  , {Range} from "../../../../components/bc-date-range-picker/bc-date-range-picker";
+, { Range } from "../../../../components/bc-date-range-picker/bc-date-range-picker";
 import moment from "moment";
-import {getVendor} from "../../../../../helpers/job";
+import { getVendor } from "../../../../../helpers/job";
 import { CSButton } from "../../../../../helpers/custom";
 import debounce from 'lodash.debounce';
+import { warning } from 'actions/snackbar/snackbar.action';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
-function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
+function JobsPage({ classes, hidden, currentPage, setCurrentPage }: any) {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
   const customers = useSelector(({ customers }: any) => customers.data);
   // const [showAllJobs, toggleShowAllJobs] = useState(true);
   const { _id } = useSelector(({ auth }: RootState) => auth);
-  const { isLoading = true, jobs, jobsList, refresh = true, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword} = useSelector(
+  const { isLoading = true, jobs, jobsList, refresh = false, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword } = useSelector(
     ({ jobState }: any) => ({
       isLoading: jobState.isLoading,
       jobs: jobState.data,
@@ -57,7 +61,7 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
     setFilterMenuAnchorEl(event.currentTarget);
   };
 
-  const handleSelectStatusFilter = (statusNumber:string) => {
+  const handleSelectStatusFilter = (statusNumber: string) => {
     setSelectedStatus(statusNumber);
     setFilterMenuAnchorEl(null);
   };
@@ -66,7 +70,7 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
   //   (job: any) => [0, 1, 4, 5, 6].indexOf(job.status) >= 0
   // );
 
-  const filteredJobs = jobs.filter((job: any) =>  {
+  const filteredJobs = jobs.filter((job: any) => {
     let cond = true;
     // if (selectionRange) {
     //   cond = cond &&
@@ -85,55 +89,71 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
   function getJobTime(originalRow: any, rowIndex: number) {
     let startTime = 'N/A';
     let endTime = 'N/A';
-    if (originalRow.scheduledStartTime !== undefined) {
-      const formatScheduledObj = formatSchedulingTime(
-        originalRow.scheduledStartTime
-      );
-      startTime = convertMilitaryTime(
-        `${formatScheduledObj.hours}:${formatScheduledObj.minutes}`
-      );
+    // Case for specific time
+    if(originalRow.scheduledStartTime !== undefined || originalRow.scheduledEndTime !== undefined) {
+      if (originalRow.scheduledStartTime !== undefined) {
+        const formatScheduledObj = formatSchedulingTime(
+          originalRow.scheduledStartTime
+        );
+        startTime = convertMilitaryTime(
+          `${formatScheduledObj.hours}:${formatScheduledObj.minutes}`
+        );
+      }
+      if (originalRow.scheduledEndTime !== undefined) {
+        const formatScheduledObj = formatSchedulingTime(
+          originalRow.scheduledEndTime
+        );
+        endTime = convertMilitaryTime(
+          `${formatScheduledObj.hours}:${formatScheduledObj.minutes}`
+        );
+      }
+      return `${startTime} - ${endTime}`;
     }
-    if (originalRow.scheduledEndTime !== undefined) {
-      const formatScheduledObj = formatSchedulingTime(
-        originalRow.scheduledEndTime
-      );
-      endTime = convertMilitaryTime(
-        `${formatScheduledObj.hours}:${formatScheduledObj.minutes}`
-      );
+    // Case for AAM/PM range time
+    else {
+      switch(originalRow.scheduleTimeAMPM) {
+        case 1: return 'AM';
+        case 2: return 'PM';
+        default: return 'N/A - N/A';
+      }
     }
-    return `${startTime} - ${endTime}`;
   }
   const openCreateTicketModal = () => {
-    if (customers.length !== 0) {
-      dispatch(setModalDataAction({
-        'data': {
-          'modalTitle': 'New Service Ticket',
-          'removeFooter': false,
-          'className': 'serviceTicketTitle',
-          'error': {
-            'status': false,
-            'message': ''
-          }
-        },
-        'type': modalTypes.CREATE_TICKET_MODAL
-      }));
-      setTimeout(() => {
-        dispatch(openModalAction());
-      }, 200);
+    //To ensure that all tickets are detected by the division, and check if the user has activated the division feature.
+    if ((currentDivision.isDivisionFeatureActivated && currentDivision.data?.name != "All") || !currentDivision.isDivisionFeatureActivated) {
+      if (customers.length !== 0) {
+        dispatch(setModalDataAction({
+          'data': {
+            'modalTitle': 'New Service Ticket',
+            'removeFooter': false,
+            'className': 'serviceTicketTitle',
+            'error': {
+              'status': false,
+              'message': ''
+            }
+          },
+          'type': modalTypes.CREATE_TICKET_MODAL
+        }));
+        setTimeout(() => {
+          dispatch(openModalAction());
+        }, 200);
+      } else {
+        dispatch(setModalDataAction({
+          'data': {
+            'removeFooter': false,
+            'error': {
+              'status': true,
+              'message': 'You must add customers to create a service ticket'
+            }
+          },
+          'type': modalTypes.CREATE_TICKET_MODAL
+        }));
+        setTimeout(() => {
+          dispatch(openModalAction());
+        }, 200);
+      }
     } else {
-      dispatch(setModalDataAction({
-        'data': {
-          'removeFooter': false,
-          'error': {
-            'status': true,
-            'message': 'You must add customers to create a service ticket'
-          }
-        },
-        'type': modalTypes.CREATE_TICKET_MODAL
-      }));
-      setTimeout(() => {
-        dispatch(openModalAction());
-      }, 200);
+      dispatch(warning("Please select a division before creating a ticket."))
     }
   };
 
@@ -262,46 +282,46 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
   ];
 
   function Toolbar() {
-    type IconComponentType = React.FunctionComponent<React.SVGProps<SVGSVGElement> & {title?: string | undefined;}>;
+    type IconComponentType = React.FunctionComponent<React.SVGProps<SVGSVGElement> & { title?: string | undefined; }>;
     const [IconComponent, setIconComponent] = useState<null | IconComponentType>(null);
 
-/*    const handleCheckBoxChange = () => {
-      toggleShowAllJobs((current) => {
-        if(current === false){
-          setSelectedStatus('-1');
-        } else {
-          setSelectedStatus('-2');
-        }
-        return !current;
-      });
-    };*/
+    /*    const handleCheckBoxChange = () => {
+          toggleShowAllJobs((current) => {
+            if(current === false){
+              setSelectedStatus('-1');
+            } else {
+              setSelectedStatus('-2');
+            }
+            return !current;
+          });
+        };*/
 
     useEffect(() => {
-      if(selectedStatus !== '-1' && selectedStatus !== '-2'){
+      if (selectedStatus !== '-1' && selectedStatus !== '-2') {
         setIconComponent(statusReference[selectedStatus].icon);
         // toggleShowAllJobs(false);
-      } else if(selectedStatus === '-1'){
+      } else if (selectedStatus === '-1') {
         // toggleShowAllJobs(true);
         setIconComponent(null);
       } else {
         setIconComponent(null);
       }
-      if(loadCount.current !== 0){
-        dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange));
+      if (loadCount.current !== 0) {
+        dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange, currentDivision.params));
         dispatch(setCurrentPageIndex(0));
       }
     }, [selectedStatus]);
 
     useEffect(() => {
-      if(loadCount.current !== 0){
-        dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange));
+      if (loadCount.current !== 0) {
+        dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange, currentDivision.params));
         dispatch(setCurrentPageIndex(0));
       }
     }, [selectionRange]);
 
     return (
       <>
-{/*        <FormControlLabel
+        {/*        <FormControlLabel
           control={
             <Checkbox
               checked={showAllJobs}
@@ -322,10 +342,10 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
           {
             statusReference[selectedStatus] &&
             IconComponent &&
-            <IconComponent className={classes.filterIcon}/>
+            <IconComponent className={classes.filterIcon} />
           }
           <span
-            style={{color: statusReference[selectedStatus] && statusReference[selectedStatus].color || 'inherit'}}
+            style={{ color: statusReference[selectedStatus] && statusReference[selectedStatus].color || 'inherit' }}
           >
             {
               statusReference[selectedStatus]
@@ -335,7 +355,7 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
                   : 'Default'
             }
           </span>
-          <span style={{flex: 1, textAlign: 'right'}}>
+          <span style={{ flex: 1, textAlign: 'right' }}>
             <ArrowDropDownIcon />
           </span>
         </div>
@@ -364,11 +384,11 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
                 root: classes.filterMenuItemRoot,
                 selected: classes.filterMenuItemSelected
               }}
-              style={{color: statusObj.color || 'inherit'}}
+              style={{ color: statusObj.color || 'inherit' }}
               selected={statusObj.statusNumber === selectedStatus}
               onClick={() => handleSelectStatusFilter(statusObj.statusNumber)}
             >
-              <statusObj.icon className={classes.filterIcon}/>
+              <statusObj.icon className={classes.filterIcon} />
               {statusObj.text}
             </MenuItem>
           ))}
@@ -384,18 +404,19 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
   }
 
   useEffect(() => {    
-    if (refresh) {
-      dispatch(getAllJobsAPI(undefined, currentPageIndex, selectedStatus, keyword, selectionRange));    
-      dispatch(setCurrentPageIndex(0));
-      dispatch(setCurrentPageSize(10));
-    }
-    setTimeout(() => {
-      loadCount.current++;
-    }, 1000);
-  }, [refresh]);
+      if ((refresh && !currentDivision.isDivisionFeatureActivated) || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
+        dispatch(getAllJobsAPI(undefined, currentPageIndex, selectedStatus, keyword, selectionRange, currentDivision.params));
+        dispatch(setCurrentPageIndex(0));
+        dispatch(setCurrentPageSize(10));
+      }
+      setTimeout(() => {
+        loadCount.current++;
+      }, 1000);
+  }, [refresh, currentDivision.params]);
 
   useEffect(() => {
-    dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange));
+    console.log('refetch', keyword);
+    dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange, currentDivision.params));
   }, [currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange])
 
   const handleTabChange = (newValue: number) => {
@@ -414,7 +435,7 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
 
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
-    dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus,keyword, selectionRange))
+    dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange, currentDivision.params))
   }, 500);
   return (
     <div className={classes.pageMainContainer}>
@@ -461,16 +482,15 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
                 // }
                 total={total}
                 currentPageIndex={currentPageIndex}
-                setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => 
-                  {
-                    dispatch(setCurrentPageIndex(num));
-                    if(apiCall)
-                      dispatch(getAllJobsAPI(currentPageSize, num, selectedStatus, keyword, selectionRange))
-                  }}
+                setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
+                  dispatch(setCurrentPageIndex(num));
+                  if (apiCall)
+                    dispatch(getAllJobsAPI(currentPageSize, num, selectedStatus, keyword, selectionRange, currentDivision.params))
+                }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => {
                   dispatch(setCurrentPageSize(num));
-                  dispatch(getAllJobsAPI(num || currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange))
+                  dispatch(getAllJobsAPI(num || currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange, currentDivision.params))
                 }}
                 setKeywordFunction={(query: string) => {
                   // dispatch(setKeyword(query));
@@ -482,10 +502,10 @@ function JobsPage({ classes,hidden, currentPage, setCurrentPage }: any) {
             <div
               hidden={true}
               id={'1'}>
-                <Grid
-                  item
-                  xs={12}
-                />
+              <Grid
+                item
+                xs={12}
+              />
             </div>
           </SwipeableViews>
         </div>

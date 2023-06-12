@@ -4,7 +4,7 @@ import { AuthInfo } from 'app/models/user';
 import { connect, useDispatch } from 'react-redux';
 import { setAuthAction } from 'actions/auth/auth.action';
 import React, { useEffect } from 'react';
-import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
+import { Redirect, Route, RouteComponentProps,  BrowserRouter as Router, Switch } from 'react-router-dom';
 import { setRouteDataAction, setRouteTitleAction } from 'actions/route/route.action';
 
 interface Props {

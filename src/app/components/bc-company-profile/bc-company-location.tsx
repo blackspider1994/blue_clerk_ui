@@ -44,10 +44,10 @@ function BCCompanyLocation(props: Props) {
   useEffect(() => {
     let mainIndex = 0;
     const companyLocations = profileState.locations.map((location: any, index) => {
-      const temp = {
+      const temp: DROP_ITEM = {
         id: location._id,
-        title: location.name,
-        icon: location.isMainLocation ? BusinessIcon : undefined,
+        title: location.isMainLocation ? location.isActive ? `${location.name} (Main)` : `${location.name} (Main) (Inactive)` :  location.isActive ? location.name : `${location.name} (Inactive)`,
+        icon: undefined,
         selectable: true,
       };
       if (temp.id === selectedItem?.id) setSelectedItem(temp);
@@ -56,8 +56,11 @@ function BCCompanyLocation(props: Props) {
     });
     companyLocations.unshift({id: '0', title: 'Add New Location', icon: AddIcon, selectable: false});
     setLocations(companyLocations);
-    if (!selectedItem) {
+    if (!selectedItem || selectedItem.id == "0") {
       setSelectedItem(companyLocations[mainIndex + 1]);
+    }
+    if (companyLocations.length == 1) {
+      setSelectedItem(companyLocations[0]);
     }
   }, [profileState.locations])
 
@@ -101,12 +104,22 @@ function BCCompanyLocation(props: Props) {
           items={locations}
           onSelect={handleClick}
         />
-        <IconButton
-          disabled={!selectedItem}
-          onClick={() => editItem(selectedItem)}
-        >
-          <EditIcon style={{color: showEdit && selectedItem ? ADMIN_SIDEBAR_BG : 'white'}}/>
-        </IconButton>
+        {locations.length == 1 &&(
+            <IconButton
+              onClick={() => handleAddLocation()}
+            >
+              <AddIcon style={{color: ADMIN_SIDEBAR_BG}}/>
+            </IconButton>   
+        )
+        }
+        {locations.length > 1 &&(
+          <IconButton
+            disabled={!selectedItem}
+            onClick={() => editItem(selectedItem)}
+          >
+            <EditIcon style={{color:  ADMIN_SIDEBAR_BG }}/>
+          </IconButton>
+         )}
       </div>
     </div>
   );

@@ -42,7 +42,7 @@ const BCMapFilterTech = ({classes}:any) => {
     vendors.data.reduce((acc: any[], vendor: any) => {
       if (vendor.status === 1) acc.push(vendor.contractor);
       return acc;
-    }, []).map((vendor: any) => ({ name: vendor.info.companyName, id: vendor._id }))
+    }, []).map((vendor: any) => ({ name: vendor?.info?.displayName ? vendor?.info?.displayName : vendor?.info?.companyName, id: vendor._id }))
       .sort((a: any, b: any) =>
         a.name > b.name
           ? 1
@@ -159,7 +159,7 @@ const BCMapFilterTech = ({classes}:any) => {
                               checkedIcon={checkedIcon}
                               style={{ marginLeft: 8 }}
                               checked={selected}
-                            /> 
+                            />
                           </>
                         )}
                         classes={{

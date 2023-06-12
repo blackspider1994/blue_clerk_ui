@@ -13,7 +13,7 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import {useHistory, useLocation} from 'react-router-dom';
 import clsx from 'clsx';
 import styles from './bc-table.styles';
-import {createStyles, makeStyles, withStyles} from "@material-ui/core";
+import {Tooltip, createStyles, makeStyles, withStyles} from "@material-ui/core";
 import {
   useGlobalFilter,
   usePagination,
@@ -72,6 +72,7 @@ function BCTableContent({
                           setCurrentPageIndexFunction = () => {},
                           currentPageSize,
                           setCurrentPageSizeFunction = () => {},
+                          rowTooltip,
                         }: any) {
   const location = useLocation<any>();
   const history = useHistory();
@@ -366,32 +367,34 @@ function BCTableContent({
           {page.map((row: any, i: number) => {
             prepareRow(row);
             return (
-              <TableRow
-                key={`table-row-${i}`}
-                {...row.getRowProps()}
-                className={`truncate${row.original.readStatus?.isRead
-                  ? ''
-                  : ' unread'} ${tableStyles.tableRow} ${row.original.checked ? tableStyles.highlighted : ''}`}
-                hover={!invoiceTable}
-                onClick={(ev: any) => onRowClick(ev, row)}>
-                {row.cells.map((cell: any, cindex: number) => {
-                  return (
-                    <TableCell
-                      classes={{'root': cellSize ? tableClass.cellMd : ''}}
-                      key={`table-cell-${cindex}`}
-                      {...cell.getCellProps()}
-                      className={clsx(cell.column.className, `${cell.column.borderRight
-                        ? 'cell-border-right cursor-default'
-                        : ''}`)
-                      }
-                      style={{
-                        'width': cell.column.width || 'auto'
-                      }}>
-                      {cell.render('Cell')}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
+              <Tooltip title={rowTooltip ? rowTooltip(row) : ''}>
+                <TableRow
+                  key={`table-row-${i}`}
+                  {...row.getRowProps()}
+                  className={`truncate${row.original.readStatus?.isRead
+                    ? ''
+                    : ' unread'} ${tableStyles.tableRow} ${row.original.checked ? tableStyles.highlighted : ''}`}
+                  hover={!invoiceTable}
+                  onClick={(ev: any) => onRowClick(ev, row)}>
+                  {row.cells.map((cell: any, cindex: number) => {
+                    return (
+                      <TableCell
+                        classes={{'root': cellSize ? tableClass.cellMd : ''}}
+                        key={`table-cell-${cindex}`}
+                        {...cell.getCellProps()}
+                        className={clsx(cell.column.className, `${cell.column.borderRight
+                          ? 'cell-border-right cursor-default'
+                          : ''}`)
+                        }
+                        style={{
+                          'width': cell.column.width || 'auto'
+                        }}>
+                        {cell.render('Cell')}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              </Tooltip>
             );
           })}
         </TableBody>

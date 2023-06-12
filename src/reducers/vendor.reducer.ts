@@ -8,6 +8,8 @@ const initialVendors: VendorsState = {
   data: [],
   vendorObj: undefined,
   vendorPayments: [],
+  assignedVendors: [],
+  unsignedVendorsFlag: false
 };
 
 export const VendorsReducer: Reducer<any> = (state = initialVendors, action) => {
@@ -44,6 +46,7 @@ export const VendorsReducer: Reducer<any> = (state = initialVendors, action) => 
       };
     case VendorActionType.GET:
       return {
+        ...state,
         'loading': true,
         'data': []
       };
@@ -77,8 +80,19 @@ export const VendorsReducer: Reducer<any> = (state = initialVendors, action) => 
       };
     case VendorActionType.SET:
       return {
+        ...state,
         'loading': false,
         'data': [...action.payload]
+      };
+    case VendorActionType.SET_ASSIGNED_VENDORS:
+      return {
+        ...state,
+        'assignedVendors': [...action.payload]
+      };
+    case VendorActionType.SET_UNSIGNED_VENDORS_FLAG:
+      return {
+        ...state,
+        'unsignedVendorsFlag': action.payload
       };
     case VendorActionType.FAILED:
       return {

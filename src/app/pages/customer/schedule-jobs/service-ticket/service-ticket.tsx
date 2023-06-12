@@ -3,7 +3,6 @@ import BCTabs from '../../../../components/bc-tab/bc-tab';
 import SwipeableViews from 'react-swipeable-views';
 import InfoIcon from '@material-ui/icons/Info';
 import {
-  getAllServiceTicketAPI,
   getServiceTicketDetail,
   getAllServiceTicketsAPI
 } from 'api/service-tickets.api';
@@ -11,10 +10,10 @@ import { modalTypes } from '../../../../../constants';
 import { formatDate } from 'helpers/format';
 import styled from 'styled-components';
 import styles from '../../customer.styles';
-import {Checkbox, FormControlLabel, withStyles, Grid} from "@material-ui/core";
-import React, {useEffect, useState, useRef} from 'react';
+import { Checkbox, FormControlLabel, withStyles, Grid } from "@material-ui/core";
+import React, { useEffect, useState, useRef } from 'react';
 import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
-import { setCurrentPageIndex, setCurrentPageSize, setKeyword } from 'actions/service-ticket/service-ticket.action';
+import { refreshServiceTickets, setCurrentPageIndex, setCurrentPageSize, setKeyword } from 'actions/service-ticket/service-ticket.action';
 import { getCustomers } from 'actions/customer/customer.action';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearJobSiteStore, getJobSites, loadingJobSites } from 'actions/job-site/job-site.action';
@@ -26,20 +25,22 @@ import {
   CSIconButton,
   useCustomStyles
 } from "../../../../../helpers/custom";
-import {error} from "../../../../../actions/snackbar/snackbar.action";
-import BCDateRangePicker, {Range}
+import { error, warning } from "../../../../../actions/snackbar/snackbar.action";
+import BCDateRangePicker, { Range }
   from "../../../../components/bc-date-range-picker/bc-date-range-picker";
-import moment from "moment";
 import { CSButton } from "../../../../../helpers/custom";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 function ServiceTicket({ classes, hidden }: any) {
   const dispatch = useDispatch();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const customers = useSelector(({ customers }: any) => customers.data);
   const [showAllTickets, toggleShowAllTickets] = useState(false);
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
   const loadCount = useRef<number>(0);
   const customStyles = useCustomStyles();
-  const { isLoading = true, tickets, refresh = true, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword} = useSelector(({ serviceTicket }: any) => ({
+  const { isLoading = true, tickets, refresh = true, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword } = useSelector(({ serviceTicket }: any) => ({
     isLoading: serviceTicket.isLoading,
     refresh: serviceTicket.refresh,
     tickets: serviceTicket.tickets,
@@ -55,38 +56,44 @@ function ServiceTicket({ classes, hidden }: any) {
 
     // if (!showAllTickets) cond = cond && ticket.status !== 2 && !ticket.jobCreated;
     return cond;
-  })
+  });
+
   const openCreateTicketModal = () => {
-    if (customers.length !== 0) {
-      dispatch(setModalDataAction({
-        'data': {
-          'modalTitle': 'New Service Ticket',
-          'removeFooter': false,
-          'className': 'serviceTicketTitle',
-          'error': {
-            'status': false,
-            'message': ''
-          }
-        },
-        'type': modalTypes.CREATE_TICKET_MODAL
-      }));
-      setTimeout(() => {
-        dispatch(openModalAction());
-      }, 200);
+    //To ensure that all tickets are detected by the division, and check if the user has activated the division feature.
+    if ((currentDivision.isDivisionFeatureActivated && currentDivision.data?.name != "All") || !currentDivision.isDivisionFeatureActivated) {
+      if (customers.length !== 0) {
+        dispatch(setModalDataAction({
+          'data': {
+            'modalTitle': 'New Service Ticket',
+            'removeFooter': false,
+            'className': 'serviceTicketTitle',
+            'error': {
+              'status': false,
+              'message': ''
+            }
+          },
+          'type': modalTypes.CREATE_TICKET_MODAL
+        }));
+        setTimeout(() => {
+          dispatch(openModalAction());
+        }, 200);
+      } else {
+        dispatch(setModalDataAction({
+          'data': {
+            'removeFooter': false,
+            'error': {
+              'status': true,
+              'message': 'You must add customers to create a service ticket'
+            }
+          },
+          'type': modalTypes.CREATE_TICKET_MODAL
+        }));
+        setTimeout(() => {
+          dispatch(openModalAction());
+        }, 200);
+      }
     } else {
-      dispatch(setModalDataAction({
-        'data': {
-          'removeFooter': false,
-          'error': {
-            'status': true,
-            'message': 'You must add customers to create a service ticket'
-          }
-        },
-        'type': modalTypes.CREATE_TICKET_MODAL
-      }));
-      setTimeout(() => {
-        dispatch(openModalAction());
-      }, 200);
+      dispatch(warning("Please select a division before creating a ticket."))
     }
   };
 
@@ -134,21 +141,21 @@ function ServiceTicket({ classes, hidden }: any) {
 
   function Toolbar() {
     useEffect(() => {
-      if(loadCount.current !== 0){
-        dispatch(getAllServiceTicketsAPI(currentPageSize, undefined, undefined, showAllTickets, keyword, selectionRange));
+      if (loadCount.current !== 0) {
+        dispatch(getAllServiceTicketsAPI(currentPageSize, currentPageIndex, showAllTickets, keyword, selectionRange, currentDivision.params));
         dispatch(setCurrentPageIndex(0));
       }
     }, [showAllTickets]);
 
     useEffect(() => {
-      if(loadCount.current !== 0){
-        dispatch(getAllServiceTicketsAPI(currentPageSize, undefined, undefined, showAllTickets, keyword, selectionRange));
+      if (loadCount.current !== 0) {
+        dispatch(getAllServiceTicketsAPI(currentPageSize, currentPageIndex, showAllTickets, keyword, selectionRange, currentDivision.params));
         dispatch(setCurrentPageIndex(0));
       }
     }, [selectionRange]);
     return <>
       <FormControlLabel
-        classes={{root: classes.noMarginRight}}
+        classes={{ root: classes.noMarginRight }}
         control={
           <Checkbox
             checked={showAllTickets}
@@ -169,7 +176,7 @@ function ServiceTicket({ classes, hidden }: any) {
   }
 
   const openDetailTicketModal = async (ticket: any) => {
-    const {serviceTicket, status, message} = await getServiceTicketDetail(ticket._id);
+    const { serviceTicket, status, message } = await getServiceTicketDetail(ticket._id);
     if (status === 1) {
       dispatch(setModalDataAction({
         'data': {
@@ -257,21 +264,21 @@ function ServiceTicket({ classes, hidden }: any) {
             size="small"
             onClick={() => openDetailTicketModal(row.original)}
           >
-            <InfoIcon className={customStyles.iconBtn}/>
+            <InfoIcon className={customStyles.iconBtn} />
           </CSIconButton>
           {row.original && row.original.status !== 1
             ? <CSIconButton
-            //variant="contained"
-            color="primary"
-            size="small"
-            aria-label={'edit-ticket'}
-            onClick={(e) => {
-              e.stopPropagation();
-              openEditTicketModal(row.original);
-            }}
-          >
-            <EditIcon className={customStyles.iconBtn}/>
-          </CSIconButton>
+              //variant="contained"
+              color="primary"
+              size="small"
+              aria-label={'edit-ticket'}
+              onClick={(e) => {
+                e.stopPropagation();
+                openEditTicketModal(row.original);
+              }}
+            >
+              <EditIcon className={customStyles.iconBtn} />
+            </CSIconButton>
             : null
           }
           {
@@ -298,7 +305,7 @@ function ServiceTicket({ classes, hidden }: any) {
 
   useEffect(() => {
     if (refresh) {
-      dispatch(getAllServiceTicketsAPI(undefined, undefined, undefined, showAllTickets, keyword, selectionRange));
+      dispatch(getAllServiceTicketsAPI(undefined, undefined, showAllTickets, keyword, selectionRange, currentDivision.params));
       dispatch(setCurrentPageIndex(0));
       dispatch(setCurrentPageSize(10));
     }
@@ -306,16 +313,17 @@ function ServiceTicket({ classes, hidden }: any) {
       loadCount.current++;
     }, 1000);
   }, [refresh]);
+
   useEffect(() => {
-    dispatch(getAllServiceTicketsAPI());
-    if(customers.length == 0) {
+    dispatch(getAllServiceTicketsAPI(undefined, undefined, undefined, undefined, undefined, currentDivision.params));
+    if (customers.length == 0) {
       dispatch(getCustomers());
     }
     dispatch(getAllJobTypesAPI());
     dispatch(setKeyword(''));
     dispatch(setCurrentPageIndex(0));
     dispatch(setCurrentPageSize(10));
-  }, [])
+  }, [currentDivision.params])
 
   const handleRowClick = (event: any, row: any) => {
   };
@@ -361,24 +369,29 @@ function ServiceTicket({ classes, hidden }: any) {
                 toolbarPositionLeft={true}
                 toolbar={Toolbar()}
                 manualPagination
-                fetchFunction={(num: number, isPrev:boolean, isNext:boolean, query :string) =>
-                  dispatch(getAllServiceTicketsAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, showAllTickets, query === '' ? '' : query || keyword, selectionRange))
-                }
                 total={total}
                 currentPageIndex={currentPageIndex}
-                setCurrentPageIndexFunction={(num: number) => dispatch(setCurrentPageIndex(num))}
+                setCurrentPageIndexFunction={(num: number, apiCall: boolean) => {
+                  dispatch(setCurrentPageIndex(num))
+                  if (apiCall) {
+                    dispatch(getAllServiceTicketsAPI(currentPageSize, num, showAllTickets, keyword, selectionRange, currentDivision.params))
+                  }
+                }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentPageSize(num))}
-                setKeywordFunction={(query: string) => dispatch(setKeyword(query))}
+                setKeywordFunction={(query: string) => {
+                    dispatch(setKeyword(query));
+                    dispatch(getAllServiceTicketsAPI(currentPageSize, currentPageIndex, showAllTickets, query, selectionRange, currentDivision.params));
+                  }}
               />
             </div>
             <div
               hidden={true}
               id={'1'}>
-                <Grid
-                  item
-                  xs={12}
-                />
+              <Grid
+                item
+                xs={12}
+              />
             </div>
           </SwipeableViews>
         </div>

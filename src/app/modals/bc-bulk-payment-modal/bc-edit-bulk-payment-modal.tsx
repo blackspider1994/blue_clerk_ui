@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import {
@@ -30,6 +30,7 @@ import { updatePayment } from 'api/payment.api';
 import { error } from "actions/snackbar/snackbar.action";
 import { voidPayment } from 'api/payment.api';
 import { modalTypes } from '../../../constants';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 const StyledGrid = withStyles(() => ({
   item: {
@@ -55,6 +56,7 @@ function BCBulkPaymentModal({ classes, modalOptions, setModalOptions, payments }
   const [localPaymentList, setLocalPaymentList] = useState<any[]>([]);
   const [isSuccess, setIsSuccess] = useState(false);
   const inputStyles = useInputStyles();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const paymentList = payments.line;
 
@@ -129,7 +131,7 @@ function BCBulkPaymentModal({ classes, modalOptions, setModalOptions, payments }
       if(values.paymentType !== ''){
         paramObj.paymentType = paymentTypeReference.filter(type => type._id == values.paymentType)[0].label
       }
-      dispatch(updatePayment(paramObj))
+      dispatch(updatePayment(paramObj, currentDivision.params))
         .then((response: any) => {
           if (response.status === 1) {
             setIsSuccess(true);
@@ -213,7 +215,7 @@ function BCBulkPaymentModal({ classes, modalOptions, setModalOptions, payments }
         modalTitle: '         ',
         message: 'Are you sure you want to void this bulk payment?',
         subMessage: 'This action cannot be undone.',
-        action: voidPayment({type: 'customer', paymentId: payments._id}),
+        action: voidPayment({type: 'customer', paymentId: payments._id},currentDivision.params),
         closeAction,
       },
       'type': modalTypes.WARNING_MODAL

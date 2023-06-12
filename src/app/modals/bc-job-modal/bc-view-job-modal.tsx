@@ -5,6 +5,8 @@ import {
   Grid,
   Typography,
   withStyles,
+  FormControlLabel,
+  Checkbox
 } from '@material-ui/core';
 import React, {useEffect, useMemo, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -66,7 +68,6 @@ const initialJobState = {
   },
   jobRescheduled: false,
 };
-
 function BCViewJobModal({
   classes,
   job = initialJobState,
@@ -85,6 +86,7 @@ function BCViewJobModal({
   const vendorsList = useSelector(({ vendors }: any) =>
     vendors.data.filter((vendor: any) => vendor.status <= 1)
   );
+
   const employeesForJob = useMemo(() => [...data], [data]);
   const [isSubmitting, SetIsSubmitting] = useState(false);
 
@@ -94,7 +96,7 @@ function BCViewJobModal({
   useEffect(() => {
     const data: any = {
       type: 'Customer',
-      referenceNumber: job.customer,
+      referenceNumber: job.customer?._id,
     };
     dispatch(getContacts(data));
     dispatch(getEmployeesForJobAction());
@@ -161,8 +163,14 @@ function BCViewJobModal({
   ];
 
   const scheduleDate = job.scheduleDate;
+  // Format time
   const startTime = job.scheduledStartTime ? formatTime(job.scheduledStartTime) : 'N/A';
   const endTime = job.scheduledEndTime ? formatTime(job.scheduledEndTime) : 'N/A';
+  const scheduleTimeAMPM = job.scheduleTimeAMPM ? 
+    job.scheduleTimeAMPM === 1 ? 'AM' :
+      job.scheduleTimeAMPM === 2 ? 'PM' :
+        job.scheduleTimeAMPM === 3 ? 'All day' : 'N/A'
+  : 'N/A';
   const canEdit = [0, 4, 6].indexOf(job.status) >= 0;
   let jobImages = job?.images?.length ? [...job.images] : [];
   jobImages = job?.technicianImages?.length ? [...jobImages, ...job.technicianImages] : jobImages;
@@ -255,7 +263,7 @@ function BCViewJobModal({
       SetIsSubmitting(false);
     })
   }
-
+  
   return (
     <DataContainer className={'new-modal-design'}>
       <Grid container className={'modalPreview'} justify={'space-around'}>
@@ -282,6 +290,10 @@ function BCViewJobModal({
         <Grid item xs className={classNames({[classes.editButtonPadding]: canEdit})}>
           <Typography variant={'caption'} className={'previewCaption'}>close time</Typography>
           <Typography variant={'h6'} className={'previewTextTitle'}>{endTime}</Typography>
+        </Grid>
+        <Grid item xs className={classNames({[classes.editButtonPadding]: canEdit})}>
+          <Typography variant={'caption'} className={'previewCaption'}>time range</Typography>
+          <Typography variant={'h6'} className={'previewTextTitle'}>{scheduleTimeAMPM}</Typography>
         </Grid>
       </Grid>
       <div className={'modalDataContainer'}>
@@ -357,6 +369,49 @@ function BCViewJobModal({
               <BCDragAndDrop images={jobImages.map((image: any) => image.imageUrl)} readonly={true}  />
             </Grid>
           </Grid>
+        </Grid>
+        <Grid container className={'modalContent'} justify={'space-between'}>
+          <Grid container xs={12}>
+            <FormControlLabel
+              classes={{label: classes.checkboxLabel}}
+              control={
+                <Checkbox
+                  color={'primary'}
+                  checked={job.isHomeOccupied }
+                  name="isHomeOccupied"
+                  classes={{root: classes.checkboxInput}}
+                  disabled={true}
+                />
+              }
+              label={`HOUSE IS OCCUPIED`}
+            />
+          </Grid> 
+          { 
+            job.isHomeOccupied ? (
+            <Grid container xs={12}>
+              <Grid justify={'space-between'} xs>
+                <Typography variant={'caption'} className={'previewCaption'}>
+                  First name
+                </Typography>
+                <Typography variant={'h6'} className={'previewText'}>{job?.homeOwnerObj[0]?.profile?.firstName ||'N/A'}</Typography>
+              </Grid>
+              <Grid justify={'space-between'} xs>
+                <Typography variant={'caption'} className={'previewCaption'}>
+                  Last name
+                </Typography>
+                <Typography variant={'h6'} className={'previewText'}>{job?.homeOwnerObj[0]?.profile?.lastName ||'N/A'}</Typography>
+              </Grid>
+              <Grid justify={'space-between'} xs>
+                <Typography variant={'caption'} className={'previewCaption'}>Email</Typography>
+                <Typography variant={'h6'} className={'previewText'}>{job?.homeOwnerObj[0]?.info?.email ||'N/A'}</Typography>
+              </Grid>
+              <Grid justify={'space-between'} xs>
+                <Typography variant={'caption'} className={'previewCaption'}>Phone</Typography>
+                <Typography variant={'h6'} className={'previewText'}>{job?.homeOwnerObj[0]?.contact?.phone ||'N/A'}</Typography>
+              </Grid>
+            </Grid>
+            ) : null
+          }
         </Grid>
         <Grid container className={classNames('modalContent', classes.lastRow)}  justify={'space-between'}>
           <Grid item xs>

@@ -19,18 +19,19 @@ import {
 } from 'actions/invoicing/payments/payments.action';
 import { error, success } from 'actions/snackbar/snackbar.action';
 import {SYNC_RESPONSE} from "../app/models/payments";
+import { DivisionParams } from 'app/models/division';
 
-export const recordPayment: any = (params = {}) => {
+export const recordPayment: any = (params = {}, division?:DivisionParams) => {
   return (dispatch: any) => {
     return new Promise(async (resolve, reject) => {
       request('/recordPayment', 'POST', params, false)
         .then((res: any) => {
           // dispatch(getInvoicingList());
           if (res.data.status === 1) {
-            dispatch(getAllInvoicesAPI());
-            dispatch(getUnpaidInvoicesAPI());
-            dispatch(getAllInvoicesForBulkPaymentsAPI());
-            dispatch(getAllPaymentsAPI());
+            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getUnpaidInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllInvoicesForBulkPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
           }
           return resolve(res.data);
         })
@@ -41,16 +42,16 @@ export const recordPayment: any = (params = {}) => {
   }
 };
 
-export const updatePayment: any = (params = {}) => {
+export const updatePayment: any = (params = {},  division?:DivisionParams) => {
   return (dispatch: any) => {
     return new Promise(async (resolve, reject) => {
       request('/updatePayment', 'PUT', params, false)
         .then((res: any) => {
           // dispatch(getInvoicingList());
           if (res.data.status === 1) {
-            dispatch(getAllInvoicesAPI());
-            dispatch(getAllInvoicesForBulkPaymentsAPI());
-            dispatch(getAllPaymentsAPI());
+            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllInvoicesForBulkPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
           }
           return resolve(res.data);
         })
@@ -61,16 +62,16 @@ export const updatePayment: any = (params = {}) => {
   }
 };
 
-export const voidPayment: any = (params = {}) => {
+export const voidPayment: any = (params = {},  division?:DivisionParams) => {
   return (dispatch: any) => {
     return new Promise(async (resolve, reject) => {
       request('/voidPayment', 'DELETE', params, false)
         .then((res: any) => {
           if(res.data?.status === 1){
             dispatch(success("Payment voided succesfully"));
-            dispatch(getAllInvoicesAPI());
-            dispatch(getAllInvoicesForBulkPaymentsAPI());
-            dispatch(getAllPaymentsAPI());
+            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllInvoicesForBulkPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
             return resolve(res.data);
           } else {
             dispatch(error("Something went wrong! Cannot void payment"));
@@ -84,7 +85,7 @@ export const voidPayment: any = (params = {}) => {
 };
 
 let cancelTokenGetAllPaymentsAPI:any;
-export const getAllPaymentsAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null, customerId?: string, dueDate?: Date|null, showPaid?: boolean) => {
+export const getAllPaymentsAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, selectionRange?:{startDate:Date;endDate:Date}|null, customerId?: string, dueDate?: Date|null, showPaid?: boolean, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setPaymentsLoading(true));
@@ -120,7 +121,7 @@ export const getAllPaymentsAPI = (pageSize = 10, previousCursor = '', nextCursor
 
       cancelTokenGetAllPaymentsAPI = axios.CancelToken.source();
 
-      request(`/getPayments`, 'GET', optionObj, undefined, undefined, cancelTokenGetAllPaymentsAPI)
+      request(`/getPayments`, 'GET', optionObj, undefined, undefined, cancelTokenGetAllPaymentsAPI,undefined,division)
         .then((res: any) => {
           const {payment, unsyncedPayments} = res.data;
           dispatch(setPayments(payment.reverse(), unsyncedPayments));
@@ -141,9 +142,9 @@ export const getAllPaymentsAPI = (pageSize = 10, previousCursor = '', nextCursor
   };
 };
 
-export const getUnsyncedPayments = async() => {
+export const getUnsyncedPayments = async(division?: DivisionParams) => {
   try {
-    const response: any = await request('/getUnsyncedPayments', 'GET');
+    const response: any = await request('/getUnsyncedPayments', 'GET', undefined,undefined,undefined,undefined,undefined,division);
     const {status, message, payments} = response.data;
     if (status === 1) return payments.reverse();
     throw ({message});

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { withStyles } from '@material-ui/core';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
 
 import styles from './styles';
@@ -16,6 +16,7 @@ import {
 } from "actions/bc-modal/bc-modal.action";
 import { generateIncomeReport, getMemorizedReports } from 'api/reports.api';
 import { error as SnackBarError, info } from 'actions/snackbar/snackbar.action';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 interface RevenueMemorizedProps {
   classes: any;
@@ -33,6 +34,8 @@ const MORE_ITEMS = [
 ]
 
 const RevenueMemorizedReport = ({ classes }: RevenueMemorizedProps) => {
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
   const dispatch = useDispatch();
   const history = useHistory();
   const location:any = useLocation();
@@ -54,7 +57,7 @@ const RevenueMemorizedReport = ({ classes }: RevenueMemorizedProps) => {
   const getMemorizedReportsData = async () => {
     try {
       setIsLoading(true);
-      const result = await getMemorizedReports();
+      const result = await getMemorizedReports(currentDivision.params);
       if(result.status === 1) {
         setMemorizedReportData(result.memorizedReports)
       } else {

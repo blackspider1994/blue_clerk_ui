@@ -77,26 +77,6 @@ function BCHeader({ token, user, classes }: Props): JSX.Element {
     : undefined;
 
   const NAV_DATA = [
-    {
-      'label': 'Dashboard',
-      'link': '/main/dashboard'
-    },
-    {
-      'label': 'Customers',
-      'link': '/main/customers'
-    },
-    {
-      'label': 'Invoicing',
-      'link': '/main/invoicing'
-    },
-    {
-      'label': 'Tags',
-      'link': '/main/tags/purchasedtag'
-    },
-    {
-      'label': 'Payroll',
-      'link': '/main/payroll'
-    },
     /*
      * {
      *   'label': 'Inventory',

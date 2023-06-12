@@ -4,6 +4,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import {formatDateTimeYMD, formatDateYMD, parseISODate} from 'helpers/format';
 import {refreshServiceTickets} from 'actions/service-ticket/service-ticket.action';
 import styles from './bc-service-ticket-modal.styles';
+import BCEmailValidateInput from '../../components/bc-email-validate-input/bc-email-validate-input';
+import {FormDataModel} from '../../models/form-data';
+import BCPhoneNumberInput from '../../components/bc-phone-number-input/bc-phone-number-input';
 import {useFormik} from 'formik';
 import {
   Button,
@@ -55,6 +58,9 @@ import {stringSortCaseInsensitive} from '../../../helpers/sort';
 import BCDragAndDrop from '../../components/bc-drag-drop/bc-drag-drop';
 import {createFilterOptions} from '@material-ui/lab/Autocomplete';
 import {useHistory} from 'react-router-dom';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import { callCreateHomeOwner } from 'api/home-owner.api';
+import { getHomeOwnerAction, clearHomeOwnerStore } from 'actions/home-owner/home-owner.action';
 
 function BCServiceTicketModal(
   {
@@ -87,19 +93,30 @@ function BCServiceTicketModal(
   const dispatch = useDispatch();
   const [notesLabelState, setNotesLabelState] = useState(false);
   const [isHomeOccupied, setHomeOccupied] = useState(false);
+  const [homeOwnerId, setHomeOwnerId] = useState("");
   const [jobLocationValue, setJobLocationValue] = useState<any>([]);
   const [contactValue, setContactValue] = useState<any>([]);
   const [jobSiteValue, setJobSiteValue] = useState<any>([]);
   const [isLoadingDatas, setIsLoadingDatas] = useState(false);
   const [thumbs, setThumbs] = useState<any[]>([]);
   const isFieldsDisabled = !!ticket.jobCreated && !allowEditWithJob;
-
+  const [formDataPhone, setFormDataPhone] = useState<FormDataModel>({
+    'errorMsg': '',
+    'validate': true,
+    'value': ticket.homeOwner?.contact?.phone || '',
+  });
+  const [formDataEmail, setFormDataEmail] = useState<FormDataModel>({
+    'errorMsg': 'Occupied house must have email or phone number',
+    'validate': true,
+    'value': ticket.homeOwner?.info?.email || '',
+  });
   const {loading, data} = useSelector(
     ({employeesForJob}: any) => employeesForJob
   );
   const employeesForJob = [...data];
   const jobTypesInput = useRef<HTMLInputElement>(null);
   const history = useHistory();
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const filter = createFilterOptions();
 
@@ -117,6 +134,21 @@ function BCServiceTicketModal(
     await setJobLocationValue([]);
     await setContactValue([]);
     await setJobSiteValue([]);
+
+    // Clean homeowner fields on customer update
+    await setFieldValue('customerFirstName', '');
+    await setFieldValue('customerLastName', '');
+    await setFormDataEmail({
+      ...formDataEmail,
+      value: ''
+    });
+    await setFormDataPhone({
+      ...formDataPhone,
+      value: ''
+    });
+    await setHomeOwnerId(''); 
+    await setHomeOccupied(false);
+    await setFieldValue('isHomeOccupied', false);
 
     if (customerId !== '') {
       const data: any = {
@@ -171,6 +203,7 @@ function BCServiceTicketModal(
     setFieldValue: any,
     newValue: any
   ) => {
+    dispatch(getHomeOwnerAction(newValue?._id || FormikValues.jobSiteId, FormikValues.jobLocationId));
     if (newValue?._id) {
       setFieldValue(fieldName, newValue._id);
       setJobSiteValue(newValue);
@@ -270,10 +303,23 @@ function BCServiceTicketModal(
     );
   };
 
+  const checkValidHomeOwner = () => {
+    if(!jobSiteValue || jobSiteValue.length === 0) {
+      dispatch(SnackBarError("Address is required when house is occupied"));
+      return false;
+    }
+    if(!formDataPhone.value && !formDataEmail.value) {
+      dispatch(SnackBarError("Occupied house must have email or phone number"));
+      return false;
+    }
+    return true;
+  }
+
   useEffect(() => {
     if (!ticket.updateFlag) {
       dispatch(clearJobLocationStore());
       dispatch(clearJobSiteStore());
+      dispatch(clearHomeOwnerStore());
     }
   }, []);
 
@@ -284,7 +330,7 @@ function BCServiceTicketModal(
       });
     else return [];
   };
-
+  
   const {
     values: FormikValues,
     handleChange: formikChange,
@@ -312,11 +358,10 @@ function BCServiceTicketModal(
       customerPO: ticket?.customerPO !== undefined ? ticket?.customerPO : [],
       images: ticket.images !== undefined ? ticket.images : [],
       isHomeOccupied: ticket.isHomeOccupied || false,
-      customerName: ticket.customerName || '',
-      customerEmail: ticket.customerEmail || '',
-      customerPhone: ticket.customerPhone || ''
+      customerFirstName: ticket.homeOwner?.profile.firstName || '',
+      customerLastName: ticket.homeOwner?.profile.lastName || '',
     },
-    onSubmit: (values, {setSubmitting}) => {
+    onSubmit: async (values, {setSubmitting}) => {
       const tempData = {
         ...ticket,
         ...values,
@@ -325,6 +370,15 @@ function BCServiceTicketModal(
       tempData.images = tempData.images.filter(
         (image: any) => image instanceof File
       );
+
+      //add division and location field
+      if (currentDivision.data?.locationId) {
+        tempData.companyLocation = currentDivision.data?.locationId;
+      }
+      
+      if (currentDivision.data?.workTypeId) {
+        tempData.workType = currentDivision.data?.workTypeId;
+      }
 
       const editTicketObj = {...values, ticketId: ''};
       const updateHomeOccupationStatus = () => {
@@ -358,6 +412,40 @@ function BCServiceTicketModal(
               })
             )
           );
+
+          // Create home owner if it has been updated or added
+          if (formatedRequest.isHomeOccupied) {
+            if(!checkValidHomeOwner()) return;
+            if(!ticket.isHomeOccupied || 
+              formatedRequest.customerFirstName !== ticket.homeOwner.profile.firstName ||
+              formatedRequest.customerLastName !== ticket.homeOwner.profile.lastName ||
+              formDataEmail.value !== ticket.homeOwner.info?.email ||
+              formDataPhone.value !== ticket.homeOwner.contact?.phone
+            ){
+              let homeOwnerData : any = {
+                firstName: formatedRequest.customerFirstName ?? '',
+                lastName: formatedRequest.customerLastName ?? '',
+                address: formatedRequest.jobSiteId ?? '',
+                ...(
+                  (formatedRequest.jobLocationId && formatedRequest.jobLocationId.length > 0) &&
+                  {subdivision: formatedRequest.jobLocationId}
+                ),
+                ...((formDataEmail.value && formDataEmail.value.length > 0) && {email: formDataEmail.value}),
+                ...((formDataPhone.value && formDataPhone.value.length > 0) && {phone: formDataPhone.value}),
+
+              };
+              const homOwnerResult = await callCreateHomeOwner(homeOwnerData)
+                .then((response: any) => {
+                  if(response.status !== 1) {
+                    dispatch(SnackBarError("Could not create home owner"));
+                    return false;
+                  }
+                  formatedRequest.homeOwnerId = response.homeOwner._id;
+                  return true;
+                });
+              if(!homOwnerResult) { return; }
+            }
+          }
 
           callEditTicketAPI(formatedRequest)
             .then((response: any) => {
@@ -407,6 +495,42 @@ function BCServiceTicketModal(
             jobTypeId: jt._id,
           }))
         );
+        // Create home owner if needed
+        if (formatedRequest.isHomeOccupied) {
+          if(!checkValidHomeOwner()) return;
+          if(homeOwnerId !== '' && 
+            formatedRequest.customerFirstName === homeOwners[0].profile.firstName &&
+            formatedRequest.customerLastName === homeOwners[0].profile.lastName &&
+            formDataEmail.value === homeOwners[0].info.email &&
+            formDataPhone.value === homeOwners[0].contact.phone
+          ) {
+            formatedRequest.homeOwnerId = homeOwnerId;
+          }
+          else {
+            let homeOwnerData : any = {
+              firstName: formatedRequest.customerFirstName ?? '',
+              lastName: formatedRequest.customerLastName ?? '',
+              address: formatedRequest.jobSiteId ?? '',
+              ...(
+                (formatedRequest.jobLocationId && formatedRequest.jobLocationId.length > 0) &&
+                {subdivision: formatedRequest.jobLocationId}
+              ),
+              ...((formDataEmail.value && formDataEmail.value.length > 0) && {email: formDataEmail.value}),
+              ...((formDataPhone.value && formDataPhone.value.length > 0) && {phone: formDataPhone.value}),
+
+            };
+            const homeOwnerResult = await callCreateHomeOwner(homeOwnerData)
+              .then((response: any) => {
+                if(response.status !== 1) {
+                  dispatch(SnackBarError("Could not create home owner"));
+                  return false;
+                }
+                formatedRequest.homeOwnerId = response.homeOwner._id;
+                return true;
+              });
+            if(!homeOwnerResult) { return; }
+          }
+        }
         callCreateTicketAPI(formatedRequest)
           .then((response: any) => {
             if (response.status === 0) {
@@ -465,6 +589,28 @@ function BCServiceTicketModal(
   const jobTypes = useSelector((state: any) => state.jobTypes.data);
   const items = useSelector((state: any) => state.invoiceItems.items);
   const {contacts} = useSelector((state: any) => state.contacts);
+  const homeOwners = useSelector((state: any) => state.homeOwner.data);
+
+  useEffect(() => {
+    const filteredHomeOwners = homeOwners.filter((item: any) => {
+      return (item?.address === FormikValues.jobSiteId);
+    });
+    if (filteredHomeOwners && filteredHomeOwners.length > 0 && FormikValues.jobSiteId !== '') {
+      setFieldValue('customerFirstName', filteredHomeOwners[0].profile.firstName);
+      setFieldValue('customerLastName', filteredHomeOwners[0].profile.lastName);
+      setFormDataEmail({
+        ...formDataEmail,
+        value: filteredHomeOwners[0].info?.email || ''
+      });
+      setFormDataPhone({
+        ...formDataPhone,
+        value: filteredHomeOwners[0].contact?.phone || ''
+      });
+      setHomeOwnerId(filteredHomeOwners[0]._id); 
+      setHomeOccupied(true);
+      setFieldValue('isHomeOccupied', true);
+    }
+  }, [homeOwners]);
 
   const dateChangeHandler = (date: string) => {
     setFieldValue('dueDate', date);
@@ -485,6 +631,7 @@ function BCServiceTicketModal(
   };
 
   const closeModal = () => {
+    dispatch(clearHomeOwnerStore());
     dispatch(closeModalAction());
     setTimeout(() => {
       dispatch(
@@ -771,7 +918,13 @@ function BCServiceTicketModal(
               />
             </Grid>
             <Grid item xs>
-              <Typography variant={'caption'} className={'previewCaption'}>
+              <Typography 
+                variant={'caption'} 
+                className={
+                  FormikValues.isHomeOccupied || isHomeOccupied
+                  ? `required ${'previewCaption'}`
+                  : 'previewCaption'}
+                >
                 Job Address
               </Typography>
               <Autocomplete
@@ -983,13 +1136,30 @@ function BCServiceTicketModal(
                   </Label>
                 </Grid>
               </Grid>
-              <Grid container item xs>
+            </Grid>
+            <Grid item container xs={4} style={{paddingTop: 0}}>
+              <BCDragAndDrop
+                images={thumbs}
+                onDrop={(files) => handleImageDrop(files)}
+                onDelete={handleRemoveImage}
+                readonly={!!ticket.jobCreated}
+              />
+            </Grid>
+          </Grid>
+          <Grid
+            container
+            className={'modalContent'}
+            justify={'space-between'}
+            spacing={4}
+          >
+            <Grid container xs={3} spacing={4}>
+              <Grid container xs={12} spacing={4}>
                 <FormControlLabel
                   classes={{label: classes.checkboxLabel}}
                   control={
                     <Checkbox
                       color={'primary'}
-                      checked={jobSiteValue?.isHomeOccupied || isHomeOccupied}
+                      checked={FormikValues.isHomeOccupied || isHomeOccupied}
                       onChange={(e) => {
                         formikChange(e)
                         setHomeOccupied((v) => !v)
@@ -1001,47 +1171,75 @@ function BCServiceTicketModal(
                   label={`HOUSE IS OCCUPIED`}
                 />
               </Grid>
-
-              <Grid container>
-                <Grid justify={'space-between'} xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>
-                    Name
-                  </Typography>
-                  <BCInput
-                    disabled={detail || isFieldsDisabled}
-                    handleChange={formikChange}
-                    name={'customerName'}
-                    value={FormikValues?.customerName}
-                  />
-                </Grid>
-                <Grid justify={'space-between'} xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>Email</Typography>
-                  <BCInput
-                    disabled={detail || isFieldsDisabled}
-                    handleChange={formikChange}
-                    name={'customerEmail'}
-                    value={FormikValues?.customerEmail}
-                  />
-                </Grid>
-                <Grid justify={'space-between'} xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>Phone</Typography>
-                  <BCInput
-                    disabled={detail || isFieldsDisabled}
-                    handleChange={formikChange}
-                    name={'customerPhone'}
-                    value={FormikValues?.customerPhone}
-                  />
+            </Grid>
+            { 
+              FormikValues.isHomeOccupied || isHomeOccupied ? (
+              <Grid container xs={9} spacing={4}>
+                <Grid container xs={12} spacing={4}>
+                  <Grid item xs>
+                    <Typography 
+                      variant={'caption'} 
+                      className={`required ${'previewCaption'}`}
+                    >
+                      First name
+                    </Typography>
+                    <BCInput
+                      disabled={detail || isFieldsDisabled}
+                      handleChange={formikChange}
+                      name={'customerFirstName'}
+                      value={FormikValues?.customerFirstName}
+                      required={true}
+                    />
+                  </Grid>
+                  <Grid item xs>
+                    <Typography variant={'caption'} className={'previewCaption'}>
+                      Last name
+                    </Typography>
+                    <BCInput
+                      disabled={detail || isFieldsDisabled}
+                      handleChange={formikChange}
+                      name={'customerLastName'}
+                      value={FormikValues?.customerLastName}
+                    />
+                  </Grid>
+                  <Grid item xs>
+                    <Typography 
+                      variant={'caption'} 
+                      className={'previewCaption'}
+                    >
+                      Email
+                    </Typography>
+                    <BCEmailValidateInput
+                      id={'email'}
+                      inputData={formDataEmail}
+                      disabled={detail || isFieldsDisabled}
+                      label={''}
+                      onChange={(newEmail: FormDataModel) => setFormDataEmail(newEmail)}
+                      size={'small'}
+                      variant={'outlined'}
+                      required={false}
+                      referenceEmail=" "
+                    />  
+                  </Grid>
+                  <Grid item xs>
+                    <Typography 
+                        variant={'caption'}
+                        className={'previewCaption'}
+                      >
+                        Phone
+                    </Typography>
+                    <BCPhoneNumberInput
+                      changeData={(data: FormDataModel) => setFormDataPhone(data)}
+                      id={'phone_number'}
+                      inputData={formDataPhone}
+                      label={''}
+                      size={'small'}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-            <Grid item container xs={4} style={{paddingTop: 0}}>
-              <BCDragAndDrop
-                images={thumbs}
-                onDrop={(files) => handleImageDrop(files)}
-                onDelete={handleRemoveImage}
-                readonly={!!ticket.jobCreated}
-              />
-            </Grid>
+              ) : null
+            }
           </Grid>
 
           <DialogActions>

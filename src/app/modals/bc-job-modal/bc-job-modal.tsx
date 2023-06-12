@@ -22,6 +22,8 @@ import {
   TextField,
   Typography,
   withStyles,
+  FormControlLabel,
+  Checkbox,
 } from '@material-ui/core';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -66,6 +68,8 @@ import moment from 'moment';
 import BCDragAndDrop from '../../components/bc-drag-drop/bc-drag-drop';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import { DivisionParams } from 'app/models/division';
 
 const initialTask = {
   employeeType: 0,
@@ -187,6 +191,9 @@ function BCJobModal({
   const jobLocations = useSelector((state: any) => state.jobLocations.data);
   const isLoading = useSelector((state: any) => state.jobLocations.loading);
   const jobSites = useSelector((state: any) => state.jobSites.data);
+  const currentDivision: ISelectedDivision = useSelector(
+    (state: any) => state.currentDivision
+  );
   const { contacts } = useSelector((state: any) => state.contacts);
   const openServiceTicketFilter = useSelector(
     (state: any) => state.serviceTicket.filterTicketState
@@ -212,6 +219,12 @@ function BCJobModal({
   const employeeTypes = [
     { _id: 0, name: 'Employee' },
     { _id: 1, name: 'Contractor' },
+  ];
+
+  const timeRangeOptions = [
+    { name: 'N/A', index: 0 },
+    { name: 'AM', index: 1 },
+    { name: 'PM', index: 2 },
   ];
 
   /**
@@ -362,8 +375,16 @@ function BCJobModal({
         ? job.ticket.customer?._id
         : job.ticket.customer;
     dispatch(getInventory());
-    dispatch(getEmployeesForJobAction());
-    dispatch(getVendors());
+    let divisionParams: DivisionParams = {};
+    if (jobValue?.ticket && currentDivision.isDivisionFeatureActivated) {
+      divisionParams = {
+        workType: jobValue?.ticket?.workType,
+        companyLocation: jobValue?.ticket?.companyLocation,
+      };
+    }
+
+    dispatch(getEmployeesForJobAction(divisionParams));
+    dispatch(getVendors(divisionParams));
     dispatch(getAllJobTypesAPI());
     dispatch(getJobLocationsAction({ customerId: customerId }));
 
@@ -545,23 +566,34 @@ function BCJobModal({
         '',
       customerPO: jobValue.customerPO || ticket.customerPO,
       images: jobValue?.images?.length ? jobValue.images : ticket.images || [],
+      scheduleTimeAMPM: timeRangeOptions[jobValue?.scheduleTimeAMPM || 0],
+      isHomeOccupied:
+        jobValue?.isHomeOccupied ||
+        ticket?.isHomeOccupied ||
+        jobValue.ticket?.isHomeOccupied,
+      homeOwnerId:
+        jobValue?.homeOwner ||
+        ticket?.homeOwner?._id ||
+        jobValue.ticket?.homeOwner?._id ||
+        '',
     },
     validateOnMount: false,
     validateOnChange: false,
     validateOnBlur: false,
     onSubmit: (values: any, { setSubmitting }: any) => {
       const tempData = { ...values };
+      tempData.scheduleTimeAMPM = tempData.scheduleTimeAMPM?.index || 0;
       tempData.scheduleDate = moment(values.scheduleDate).format('YYYY-MM-DD');
       tempData.customerId = customer?._id;
 
       if (values.scheduledStartTime) {
-        // format local time as UTC without adjusting the time
+        // format local time as UTC without time adjustments (i.e. no timezone conversion)
         tempData.scheduledStartTime = moment(values.scheduledStartTime).format(
           'YYYY-MM-DDTHH:mm:ss.SSS[Z]'
         );
       }
       if (values.scheduledEndTime) {
-        // format local time as UTC without adjusting the time
+        // format local time as UTC without time adjustments (i.e. no timezone conversion)
         tempData.scheduledEndTime = moment(values.scheduledEndTime).format(
           'YYYY-MM-DDTHH:mm:ss.SSS[Z]'
         );
@@ -727,10 +759,10 @@ function BCJobModal({
   };
 
   /*  const disabledChips = job?._id
-    ? job.tasks.length
-      ? job.tasks.map(({ jobType }: any) => jobType._id)
-      : [job.type._id]
-    : [];*/
+      ? job.tasks.length
+        ? job.tasks.map(({ jobType }: any) => jobType._id)
+        : [job.type._id]
+      : [];*/
 
   useEffect(() => {
     if (FormikValues.images) {
@@ -899,7 +931,7 @@ function BCJobModal({
                 : displayName}
             </Typography>
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <Typography variant={'caption'} className={'previewCaption'}>
               due date
             </Typography>
@@ -941,6 +973,9 @@ function BCJobModal({
               minDateMessage={form?.errors?.scheduledStartTime || ''}
               value={FormikValues.scheduledStartTime}
               errorText={FormikErrors.scheduledStartTime}
+              disabled={
+                FormikValues.scheduleTimeAMPM?.index !== 0 ? true : false
+              }
             />
           </Grid>
           <Grid item xs={2}>
@@ -959,6 +994,33 @@ function BCJobModal({
               placeholder={'End Time'}
               value={FormikValues.scheduledEndTime}
               errorText={FormikErrors.scheduledEndTime}
+              disabled={
+                FormikValues.scheduleTimeAMPM?.index !== 0 ? true : false
+              }
+            />
+          </Grid>
+          <Grid item xs={1}>
+            <Typography variant={'caption'} className={'previewCaption'}>
+              AM/PM
+            </Typography>
+            <Autocomplete
+              disableClearable={true}
+              defaultValue={timeRangeOptions[0]}
+              disabled={
+                FormikValues.scheduledStartTime || FormikValues.scheduledEndTime
+                  ? true
+                  : false
+              }
+              getOptionLabel={(option) => (option.name ? option.name : '')}
+              id={'tags-standard'}
+              options={timeRangeOptions}
+              renderInput={(params) => (
+                <TextField {...params} variant={'outlined'} />
+              )}
+              value={FormikValues.scheduleTimeAMPM}
+              onChange={(ev: any, newValue: any) =>
+                setFieldValue('scheduleTimeAMPM', newValue)
+              }
             />
           </Grid>
           {/*          {headerError &&
@@ -1005,22 +1067,37 @@ function BCJobModal({
                 </Typography>
                 {task.employeeType ? (
                   <Autocomplete
-                    getOptionLabel={(option) =>
-                      option?.info?.companyName ? option.info.companyName : ''
-                    }
+                    getOptionLabel={(option) => {
+                      return option?.info?.displayName
+                        ? option.info.displayName
+                        : option?.info?.companyName
+                        ? option.info.companyName
+                        : '';
+                    }}
                     id={'tags-standard'}
                     onChange={(ev: any, newValue: any) =>
                       handleTaskChange('contractorId', newValue, index)
                     }
                     options={
                       vendorsList && vendorsList.length !== 0
-                        ? vendorsList.sort((a: any, b: any) =>
-                            a.info.companyName > b.info.companyName
-                              ? 1
-                              : b.info.companyName > a.info.companyName
-                              ? -1
-                              : 0
-                          )
+                        ? vendorsList.sort((a: any, b: any) => {
+                            /*
+                              Sort by display name if not then by company name
+                             */
+                            if (a?.info?.displayName && b?.info?.displayName) {
+                              return a.info.displayName < b.info.displayName
+                                ? -1
+                                : a.info.displayName > b.info.displayName
+                                ? 1
+                                : 0;
+                            } else {
+                              return a.info.companyName < b.info.companyName
+                                ? -1
+                                : a.info.companyName > b.info.companyName
+                                ? 1
+                                : 0;
+                            }
+                          })
                         : []
                     }
                     renderInput={(params) => (
@@ -1413,6 +1490,81 @@ function BCJobModal({
                 <Grid item style={{ width: '32%' }} />
               </Grid>
             )}
+            <Grid container item xs>
+              <FormControlLabel
+                classes={{ label: classes.checkboxLabel }}
+                control={
+                  <Checkbox
+                    color={'primary'}
+                    checked={FormikValues.isHomeOccupied}
+                    name="isHomeOccupied"
+                    classes={{ root: classes.checkboxInput }}
+                    disabled={true}
+                  />
+                }
+                label={`HOUSE IS OCCUPIED`}
+              />
+            </Grid>
+            {FormikValues.isHomeOccupied ? (
+              <Grid container>
+                <Grid justify={'space-between'} xs>
+                  <Typography variant={'caption'} className={'previewCaption'}>
+                    First name
+                  </Typography>
+                  <BCInput
+                    disabled={true}
+                    name={'customerFirstName'}
+                    value={
+                      jobValue?.ticket?.homeOwner?.profile?.firstName ||
+                      jobValue?.homeOwnerObj?.[0]?.profile?.firstName ||
+                      'N/A'
+                    }
+                  />
+                </Grid>
+                <Grid justify={'space-between'} xs>
+                  <Typography variant={'caption'} className={'previewCaption'}>
+                    Last name
+                  </Typography>
+                  <BCInput
+                    disabled={true}
+                    name={'customerLastName'}
+                    value={
+                      jobValue?.ticket?.homeOwner?.profile?.lastName ||
+                      jobValue?.homeOwnerObj?.[0]?.profile?.lastName ||
+                      'N/A'
+                    }
+                  />
+                </Grid>
+                <Grid justify={'space-between'} xs>
+                  <Typography variant={'caption'} className={'previewCaption'}>
+                    Email
+                  </Typography>
+                  <BCInput
+                    disabled={true}
+                    name={'customerEmail'}
+                    value={
+                      jobValue?.ticket?.homeOwner?.info?.email ||
+                      jobValue?.homeOwnerObj?.[0]?.info?.email ||
+                      'N/A'
+                    }
+                  />
+                </Grid>
+                <Grid justify={'space-between'} xs>
+                  <Typography variant={'caption'} className={'previewCaption'}>
+                    Phone
+                  </Typography>
+                  <BCInput
+                    disabled={true}
+                    name={'customerPhone'}
+                    value={
+                      jobValue?.ticket?.homeOwner?.contact?.phone ||
+                      jobValue?.homeOwnerObj?.[0]?.contact?.phone ||
+                      'N/A'
+                    }
+                  />
+                </Grid>
+              </Grid>
+            ) : null}
           </Grid>
 
           <DialogActions>
@@ -1480,19 +1632,24 @@ function BCJobModal({
 
 const DataContainer = styled.div`
   overflow-y: hidden;
+
   *:not(.MuiGrid-container) > .MuiGrid-container {
     width: 100%;
     padding: 0px 40px;
   }
+
   .MuiGrid-spacing-xs-4 > .MuiGrid-spacing-xs-4 {
     margin: 0;
   }
+
   .MuiGrid-root.MuiGrid-item > .MuiGrid-root.MuiGrid-container {
     padding: 0;
   }
+
   .MuiGrid-grid-xs-true {
     padding: 10px 16px;
   }
+
   .MuiOutlinedInput-root {
     border-radius: 8px;
     padding: 2px;

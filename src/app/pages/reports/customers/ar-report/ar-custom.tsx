@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {Popover, Popper, Typography, withStyles} from '@material-ui/core';
 
 import styles from './styles';
@@ -40,6 +40,7 @@ import BcReportSubSummary
   from "../../../../components/bc-data-grid/bc-report-subsummary";
 import styled from "styled-components";
 import {BcPopper} from "../../../../components/bc-data-grid/bc-popper";
+import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 
 const GRID_ROW_HEIGHT = 52.3;
 
@@ -77,6 +78,8 @@ const ARCustomReport = ({classes}: any) => {
 
   const [anchorEl, setAnchorEl] = React.useState<HTMLSpanElement | null>(null);
   const popUpData = useRef<{data: any, type: string}>({data: null, type:''});
+
+  const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const columnsBuckets: GridColDef[] = [
     {field: 'id', headerName: 'Id', hide: true},
@@ -552,7 +555,7 @@ const ARCustomReport = ({classes}: any) => {
         status,
         report,
         message
-      } = await generateAccountReceivableReport(2, formatDateYMD(asOf), customerIds);
+      } = await generateAccountReceivableReport(2, formatDateYMD(asOf), customerIds, currentDivision.params);
       if (status === 1) {
         setCurrentPage(0);
         setOriginalData(report);
@@ -575,7 +578,7 @@ const ARCustomReport = ({classes}: any) => {
         status,
         reportUrl,
         message
-      } = await generateAccountReceivablePdfReport(2, formatDateYMD(asOf), customerIds);
+      } = await generateAccountReceivablePdfReport(2, formatDateYMD(asOf), customerIds, currentDivision.params);
       if (status === 1) {
         window.open(reportUrl)
       } else {

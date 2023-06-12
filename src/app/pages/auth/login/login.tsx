@@ -12,7 +12,7 @@ import { FormDataModel } from '../../../models/form-data';
 import Grid from '@material-ui/core/Grid';
 import LogoSvg from '../../../../assets/img/Logo.svg';
 import Paper from '@material-ui/core/Paper';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import styles from './login.styles';
 import { useSnackbar } from 'notistack';
 import { withStyles } from '@material-ui/core/styles';
@@ -28,6 +28,7 @@ import {
 } from 'actions/bc-modal/bc-modal.action';
 import {error, info} from 'actions/snackbar/snackbar.action';
 import AuthTemplatePage from "../template";
+import { callSelectDivisionModal } from 'actions/filter-division/filter-division.action';
 
 const SOCIAL_FACEBOOK_CONNECT_TYPE = 0;
 const SOCIAL_GOOGLE_CONNECT_TYPE = 1;
@@ -68,6 +69,7 @@ function LoginPage({
       localStorage.setItem('token', token || '');
       localStorage.setItem('tokenCustomerAPI', tokenCustomerAPI || '');
       localStorage.setItem('user', JSON.stringify(user));
+      dispatch(callSelectDivisionModal(true));
     }
   }, [token,tokenCustomerAPI,  user]);
 

@@ -1,36 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
-import BCAdminProfile from '../../../../components/bc-admin-profile/bc-admin-profile';
+import BCAdminProfile
+  from '../../../../components/bc-admin-profile/bc-admin-profile';
 import BCTabs from '../../../../components/bc-tab/bc-tab';
 import BCBackButton from '../../../../components/bc-back-button/bc-back-button';
-import BCCircularLoader from 'app/components/bc-circular-loader/bc-circular-loader';
+import BCCircularLoader
+  from 'app/components/bc-circular-loader/bc-circular-loader';
 import BCAdminCard from '../../../../components/bc-admin-card/bc-admin-card';
 import ReportsIcon from 'assets/img/icons/customers/Reports';
 import JobsIcon from 'assets/img/icons/customers/Jobs';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import PaymentIcon from '@material-ui/icons/Payment';
 import validator from 'validator';
-import { useDispatch, useSelector } from 'react-redux';
-import { uploadImage } from 'actions/image/image.action';
-import { updateCompanyProfileAction } from 'actions/user/user.action';
-import { CompanyProfile } from 'actions/user/user.types'
-import { useLocation, useHistory } from "react-router-dom";
-import { getVendorDetailAction, loadingSingleVender } from 'actions/vendor/vendor.action';
-import {Grid, Switch, withStyles} from '@material-ui/core';
+import {useDispatch, useSelector} from 'react-redux';
+import {uploadImage} from 'actions/image/image.action';
+import {updateCompanyProfileAction} from 'actions/user/user.action';
+import {CompanyProfile} from 'actions/user/user.types'
+import {useLocation, useHistory} from "react-router-dom";
+import {
+  getVendorDetailAction,
+  loadingSingleVender
+} from 'actions/vendor/vendor.action';
+import {
+  Grid,
+  InputLabel,
+  Switch,
+  Typography,
+  withStyles
+} from '@material-ui/core';
 import SwipeableViews from 'react-swipeable-views';
 import styles from './view-more.styles';
-import BCBackButtonNoLink from '../../../../components/bc-back-button/bc-back-button-no-link';
-import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
+import BCBackButtonNoLink
+  from '../../../../components/bc-back-button/bc-back-button-no-link';
+import {
+  openModalAction,
+  setModalDataAction
+} from 'actions/bc-modal/bc-modal.action';
 import {callAddVendorAPI, finishVendorApi} from 'api/vendor.api';
 import {LIGHT_GREY, modalTypes, PRIMARY_GREEN} from '../../../../../constants';
 import VendorPayment from "./vendor-payment";
-import {error as errorSnackBar} from "../../../../../actions/snackbar/snackbar.action";
+import {
+  error as errorSnackBar
+} from "../../../../../actions/snackbar/snackbar.action";
+import BCInput from "../../../../components/bc-input/bc-input";
+import BCTextField from "../../../../components/bc-text-field/bc-text-field";
+import BCButtonDashboard
+  from "../../../../components/bc-button-dashboard/bc-button-dashboard";
+import {CSButton} from "../../../../../helpers/custom";
 
 
-function CompanyProfilePage({ classes }: any) {
+function CompanyProfilePage({classes}: any) {
   const dispatch = useDispatch();
   const image = useSelector((state: any) => state.image);
-  const { vendorObj, response, loading = true } = useSelector((state: any) => state.vendors);
+  const {
+    vendorObj,
+    response,
+    loading = true
+  } = useSelector((state: any) => state.vendors);
   const location = useLocation<any>();
   const history = useHistory();
   const [curTab, setCurTab] = useState(0);
@@ -54,9 +80,12 @@ function CompanyProfilePage({ classes }: any) {
   const [zipCode, setZipCode] = useState('');
   const [zipCodeValid, setZipCodeValid] = useState(true);
   const [vendorStatus, setVendorStatus] = useState(localStorage.getItem('companyContractStatus') === 'true');
+  const [displayName, setDisplayName] = useState('');
 
-  const cancel = () => { }
-  const apply = () => { }
+  const cancel = () => {
+  }
+  const apply = () => {
+  }
 
   const imageSelected = (f: File) => {
     if (!f) return;
@@ -95,6 +124,9 @@ function CompanyProfilePage({ classes }: any) {
       }
       if (vendorObj.info.logoUrl) {
         setCompanyLogo(vendorObj.info.logoUrl);
+      }
+      if (vendorObj.info.displayName) {
+        setDisplayName(vendorObj.info.displayName);
       }
       if (vendorObj.contact.phone) {
         setPhone(vendorObj.contact.phone);
@@ -142,8 +174,8 @@ function CompanyProfilePage({ classes }: any) {
     }, 200);
   }
 
-  const finishVendor =  () => {
-    return async() => {
+  const finishVendor = () => {
+    return async () => {
       const companyContractId = localStorage.getItem('companyContractId');
       const result: any = await finishVendorApi({
         contractId: companyContractId || '',
@@ -162,8 +194,8 @@ function CompanyProfilePage({ classes }: any) {
     }
   }
 
-  const startVendor =  () => {
-    return async() => {
+  const startVendor = () => {
+    return async () => {
       const result: any = await callAddVendorAPI({
         contractorId: vendorObj._id,
       });
@@ -182,7 +214,10 @@ function CompanyProfilePage({ classes }: any) {
 
   const editVendor = async () => {
     const companyContractId = localStorage.getItem('companyContractId');
-    const result: any = await finishVendorApi({ contractId: companyContractId || '', status: 'finish'});
+    const result: any = await finishVendorApi({
+      contractId: companyContractId || '',
+      status: 'finish'
+    });
     setVendorStatus(result?.status === 0);
     localStorage.setItem('companyContractStatus', (result?.status === 0).toString());
     dispatch(setModalDataAction({
@@ -202,6 +237,21 @@ function CompanyProfilePage({ classes }: any) {
       dispatch(openModalAction());
     }, 200);
   };
+
+  const setDisplayNameModal = () => {
+    dispatch(setModalDataAction({
+      data: {
+        modalTitle: 'Set Display Name',
+        contractorId: vendorObj._id,
+        displayName,
+        removeFooter: false
+      },
+      type: modalTypes.SET_DISPLAY_NAME_MODAL
+    }));
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
+  }
 
   return (
     <>
@@ -239,7 +289,7 @@ function CompanyProfilePage({ classes }: any) {
             </Grid>
 
             {loading ?
-              <BCCircularLoader heightValue={'200px'} />
+              <BCCircularLoader heightValue={'200px'}/>
               : <SwipeableViews index={curTab} className={'swipe_wrapper'}>
                 <div
                   className={`${classes.dataContainer} `}
@@ -251,14 +301,37 @@ function CompanyProfilePage({ classes }: any) {
                         container
                         spacing={0}
                         alignItems="center"
-                        justify="flex-end"
+                        justify="space-between"
                       >
+                        <Grid item className={classes.displayNameContainer}>
+                          <Grid>
+                            <Typography variant={'caption'}>Display
+                              Name</Typography>
+                            <BCInput
+                              readonly
+                              value={displayName}
+                              handleChange={() => {
+                              }}
+                              className={classes.displayNameInput}
+                              name={'displayName'}
+                            />
+                          </Grid>
+                          <CSButton
+                            aria-label={'display-name'}
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            className={'make-inactive'}
+                            onClick={() => setDisplayNameModal()}>
+                            {'Update'}
+                          </CSButton>
+                        </Grid>
                         <Grid item className={classes.switchContainer}>
                           <GreenSwitch
                             checked={vendorStatus}
                             onChange={requestVendorAction}
                             name="checkedA"
-                            inputProps={{ 'aria-label': 'secondary checkbox' }}
+                            inputProps={{'aria-label': 'secondary checkbox'}}
                           />
                           <span
                             className={vendorStatus ? classes.switchLabelActive : classes.switchLabelInActive}>
@@ -341,7 +414,7 @@ function CompanyProfilePage({ classes }: any) {
                               valid: zipCodeValid
                             }
                           },
-                        ]} />
+                        ]}/>
 
                     </PageContainer>
 
@@ -359,9 +432,10 @@ function CompanyProfilePage({ classes }: any) {
                       <BCAdminCard
                         cardText={'Reports'}
                         color={'primary'}
-                        func={() => { }}
+                        func={() => {
+                        }}
                       >
-                        <ReportsIcon />
+                        <ReportsIcon/>
                       </BCAdminCard>
                     </Grid>
 
@@ -369,9 +443,10 @@ function CompanyProfilePage({ classes }: any) {
                       <BCAdminCard
                         cardText={'Jobs'}
                         color={'secondary'}
-                        func={() => { }}
+                        func={() => {
+                        }}
                       >
-                        <JobsIcon />
+                        <JobsIcon/>
                       </BCAdminCard>
                     </Grid>
 
@@ -380,9 +455,10 @@ function CompanyProfilePage({ classes }: any) {
                       <BCAdminCard
                         cardText={'Invoices'}
                         color={'primary-orange'}
-                        func={() => { }}
+                        func={() => {
+                        }}
                       >
-                        <ReceiptIcon />
+                        <ReceiptIcon/>
                       </BCAdminCard>
                     </Grid>
 
@@ -391,9 +467,10 @@ function CompanyProfilePage({ classes }: any) {
                       <BCAdminCard
                         cardText={'Estimates'}
                         color={'primary-green'}
-                        func={() => { }}
+                        func={() => {
+                        }}
                       >
-                        <PaymentIcon />
+                        <PaymentIcon/>
                       </BCAdminCard>
                     </Grid>
 
@@ -405,7 +482,7 @@ function CompanyProfilePage({ classes }: any) {
                     'padding': '40px'
                   }}
                   id={'2'}>
-                  <VendorPayment />
+                  <VendorPayment/>
                 </div>
 
               </SwipeableViews>
@@ -433,12 +510,14 @@ const PageContainer = styled.div`
   /* padding-left: 65px; */
   padding-right: 65px;
   margin: 0 auto;
-  button:not(.make-inactive) {  {
+
+  button:not(.make-inactive) { {
     display: none;
   }
-  input {
-    color: black;
-  }
+
+    input {
+      color: black;
+    }
 `;
 
 const GreenSwitch = withStyles({
@@ -459,5 +538,5 @@ const GreenSwitch = withStyles({
 
 export default withStyles(
   styles,
-  { 'withTheme': true }
+  {'withTheme': true}
 )(CompanyProfilePage);

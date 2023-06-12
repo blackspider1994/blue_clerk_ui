@@ -9,7 +9,7 @@ import {ReactComponent as IconPending} from "../../../assets/img/icons/map/icon-
 import {ReactComponent as IconJobRequest} from "../../../assets/img/icons/map/icon-job-request.svg";
 import {ReactComponent as IconOpenServiceTicket} from "../../../assets/img/icons/map/icon-open-service-ticket.svg";
 
-import {modalTypes} from "../../../constants";
+import {AM_COLOR, NON_OCCUPIED_GREY, OCCUPIED_GREEN, OCCUPIED_ORANGE, PM_COLOR, modalTypes} from "../../../constants";
 import {Button, IconButton} from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import InfoIcon from "@material-ui/icons/InfoOutlined";
@@ -104,6 +104,25 @@ function BCMapMarker({
         return IconIncomplete;
       default:
         return IconPending;
+    }
+  }
+
+  const calculateMarkerBorder = (ticket : any) : string => {
+    if(!isTicket && ticket?.jobId) {
+      if(ticket?.scheduleTimeAMPM !== 0) {
+        switch(ticket?.scheduleTimeAMPM) {
+          case 1: return `3px solid ${AM_COLOR}`; 
+          case 2: return `3px solid ${PM_COLOR}`;
+          default: return '3px solid black';
+        }
+      }
+      return '3px solid black'
+    }
+    else if(isTicket && ticket?.jobId) {
+      return `3px solid ${technicianColor}`
+    }
+    else {
+      return ticket?.isHomeOccupied ? `3px solid ${OCCUPIED_ORANGE}` : 'none';
     }
   }
 
@@ -281,7 +300,11 @@ function BCMapMarker({
         text += ' - ' + formatTime(ticket.scheduledEndTime);
       }
     } else {
-      text += ' N/A';
+      switch(ticket.scheduleTimeAMPM) {
+        case 1: text += ' AM'; break;
+        case 2: text += ' PM'; break;
+        default: text += ' N/A'; break;
+      }
     }
     return text;
 }
@@ -290,7 +313,8 @@ function BCMapMarker({
     contractor?: {
       info: {
         companyName: string;
-        companyEmail: string
+        companyEmail: string,
+        displayName: string,
       };
     };
     technician?: {
@@ -303,7 +327,7 @@ function BCMapMarker({
   const techs = ticket.tasks.map((task:Task):string=>{
     let tech = '';
     if(task.employeeType && task.contractor){
-      tech = `${task.contractor.info.companyName}`
+      tech = `${task.contractor.info.displayName ? task.contractor.info.displayName : task.contractor.info.companyName} (${task.contractor.info.companyEmail})`;
     } else if(task.technician){
       tech = `${task.technician.profile.displayName}`
     }
@@ -326,7 +350,7 @@ function BCMapMarker({
     <span
       id={id}
       style={{
-        border: isTicket && ticket.jobId ? `3px solid ${technicianColor}` : 'none',
+        border: calculateMarkerBorder(ticket),
         borderRadius: '50%',
         width: 25,
         height: 25,
@@ -348,8 +372,29 @@ function BCMapMarker({
         </IconButton>
       </div>
       <div className={'title-container'}>
-        <CustomIcon />
+        <div>
+          <CustomIcon style={{
+            border: calculateMarkerBorder(ticket),
+            borderRadius: '50%',
+            width: 20,
+            height: 20,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}/>
+        </div>
         <span>{title}</span>
+        <span style={{
+          marginLeft: 5,
+          marginTop: 5,
+          height: "10px",
+          width: "10px",
+          backgroundColor: ticket.isHomeOccupied ? OCCUPIED_GREEN : NON_OCCUPIED_GREY,
+          borderRadius: "50%",
+          display: "flex", 
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}></span>
       </div>
       <span className={'company'}>
         {ticket.jobLocation && ticket.jobLocation.name ? ticket.jobLocation.name : ` `}

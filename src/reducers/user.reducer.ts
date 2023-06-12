@@ -6,6 +6,8 @@ export const CompanyProfileReducer: Reducer<any> = (state = initialCompanyProfil
   switch (action.type) {
     case CompanyProfileActonType.LOADING:
       return { ...state, isLoading: action.payload }
+    case CompanyProfileActonType.SET_LOCATIONS_LOADING:
+      return { ...state, isLocationLoading: action.payload }
     case CompanyProfileActonType.ONCHANGE: {
       const { id, value, inputError } = action.payload
 
@@ -14,7 +16,7 @@ export const CompanyProfileReducer: Reducer<any> = (state = initialCompanyProfil
     case CompanyProfileActonType.UPDATE_SUCCESS:
       return { ...state }
     case CompanyProfileActonType.FETCH_SUCCESS: {
-      const { address, contact, info, paymentTerm } = action.payload;
+      const { address, contact, info, paymentTerm, admin } = action.payload;
       const newState = {
         companyName: info.companyName,
         companyEmail: info.companyEmail,
@@ -26,9 +28,10 @@ export const CompanyProfileReducer: Reducer<any> = (state = initialCompanyProfil
         street: address.street,
         zipCode: address.zipCode,
         coordinates: address.coordinates || DEFAULT_COORD,
-        paymentTerm: paymentTerm
+        paymentTerm: paymentTerm,
+        companyAdmin: admin
       }
-      return { ...newState, locations: state.locations, inputError: {}, serverError: null }
+      return { ...newState, locations: state.locations, inputError: {}, serverError: null, isLocationLoading: state.isLocationLoading }
     }
     case CompanyProfileActonType.ON_UPDATE_ERROR:
       return {
