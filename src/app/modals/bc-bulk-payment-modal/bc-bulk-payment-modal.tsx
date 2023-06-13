@@ -213,7 +213,7 @@ function BCBulkPaymentModal({ classes, modalOptions, setModalOptions }: any): JS
   const debouncedFetchFunction = useCallback(
     debounce((value, FormikValues) => {
       setKeyword(value);
-      dispatch(getAllInvoicesForBulkPaymentsAPI(currentPageSize, prevCursor, nextCursor, value, undefined, FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid,currentDivision.params))
+      dispatch(getAllInvoicesForBulkPaymentsAPI(currentPageSize, currentPageIndex, value, undefined, FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid,currentDivision.params))
       dispatch(setCurrentPageIndex(0));
     }, 500),
     []
@@ -262,7 +262,7 @@ function BCBulkPaymentModal({ classes, modalOptions, setModalOptions }: any): JS
   };
 
   useEffect(() => {
-    dispatch(getAllInvoicesForBulkPaymentsAPI(currentPageSize, '', '', FormikValues.query, undefined, FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid,currentDivision.params));
+    dispatch(getAllInvoicesForBulkPaymentsAPI(currentPageSize, currentPageIndex, FormikValues.query, undefined, FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid,currentDivision.params));
     dispatch(setCurrentPageIndex(0));
   }, [FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid]);
 
@@ -581,15 +581,22 @@ function BCBulkPaymentModal({ classes, modalOptions, setModalOptions }: any): JS
                 isLoading={loading}
                 tableData={localInvoiceList}
                 manualPagination
-                fetchFunction={(num: number, isPrev: boolean, isNext: boolean) => {
-                    dispatch(getAllInvoicesForBulkPaymentsAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, FormikValues.query === '' ? '' : FormikValues.query || keyword, undefined, FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid, currentDivision.params))
-                  }
-                }
+                // fetchFunction={(num: number, isPrev: boolean, isNext: boolean) => {
+                //     dispatch(getAllInvoicesForBulkPaymentsAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, FormikValues.query === '' ? '' : FormikValues.query || keyword, undefined, FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid, currentDivision.params))
+                //   }
+                // }
                 total={total}
                 currentPageIndex={currentPageIndex}
-                setCurrentPageIndexFunction={(num: number) => dispatch(setCurrentPageIndex(num))}
+                setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
+                  dispatch(setCurrentPageIndex(num));
+                  if (apiCall)
+                    dispatch(getAllInvoicesForBulkPaymentsAPI(currentPageSize, num, keyword, undefined, FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid, currentDivision.params))
+                }}
                 currentPageSize={currentPageSize}
-                setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentPageSize(num))}
+                setCurrentPageSizeFunction={(num: number) => {
+                  dispatch(setCurrentPageSize(num));
+                  dispatch(getAllInvoicesForBulkPaymentsAPI(num || currentPageSize, currentPageIndex, keyword, undefined, FormikValues.customerId, FormikValues.dueDate, FormikValues.showPaid, currentDivision.params))
+                }}
                 setKeywordFunction={(query: string) => dispatch(setKeyword(query))}
               />
             </DialogContent>
