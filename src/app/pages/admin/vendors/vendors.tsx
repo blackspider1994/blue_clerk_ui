@@ -241,16 +241,14 @@ function AdminVendorsPage({ classes }: any) {
     },
     {
       Cell({ row }: any) {
-        return renderCommission(row.original);
-      },
-      Header: (
-        <div style={{ display: 'inline' }}>
-          <span>Type of Pay</span>
-        </div>
-      ),
-      accessor: 'commission',
-      className: 'font-bold',
-      sortable: true,
+        if (row.original?.contractor?.admin?.accountType == 4) {
+          //Vendor Type is Contractor
+          return ""  
+        }else{
+          //Vendor Type is Company
+          return <span> {row.original?.contractor?.info?.companyName || row.original?.contractorEmail}</span>;
+        }
+      }
     },
     {
       Header: 'Contact Name',
