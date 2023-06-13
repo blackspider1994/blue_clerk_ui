@@ -313,7 +313,7 @@ function BCInvoiceItemsTableRow({ classes, values, invoiceItems=[], handleChange
                         }),
                         input: invoiceTableStyle.bootstrapInput,
                       }}
-                      readOnly={user._id != profile.companyAdmin && !values.isDraft}
+                      // readOnly={user._id != profile.companyAdmin && !values.isDraft}
                       startAdornment={<InputAdornment position="start">$</InputAdornment>}
                     />
                   </FormControl>
