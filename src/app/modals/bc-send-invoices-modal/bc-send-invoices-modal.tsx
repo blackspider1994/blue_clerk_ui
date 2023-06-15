@@ -297,13 +297,13 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
     dispatch(resetEmailState());
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
   };
 
   const closeModal = () => {
 
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
     dispatch(closeModalAction());
     setTimeout(() => {
       dispatch(setModalDataAction({
@@ -621,12 +621,12 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
                   dispatch(setCurrentPageIndex(num));
                   if (apiCall)
-                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
+                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
                 }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => {
                   dispatch(setCurrentPageSize(num));
-                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
+                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
                 }}
                 setKeywordFunction={(query: string) => dispatch(setKeyword(query))}
               />
