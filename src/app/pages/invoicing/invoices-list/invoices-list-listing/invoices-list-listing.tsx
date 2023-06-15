@@ -206,7 +206,7 @@ function InvoicingListListing({ classes, theme }: any) {
   useEffect(() => {
     // dispatch(getInvoicingList());
     // dispatch(loadingInvoicingList());
-    dispatch(getAllInvoicesAPI(undefined, undefined, undefined, advanceFilterInvoiceData, undefined, undefined, undefined, undefined,undefined,undefined, currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined, undefined, undefined, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params));
     return () => {
       dispatch(setKeyword(''));
       dispatch(setCurrentPageIndex(currentPageIndex));
@@ -221,7 +221,7 @@ function InvoicingListListing({ classes, theme }: any) {
 
   useEffect(() => {
     if (fetchInvoices) {
-      dispatch(getAllInvoicesAPI(currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params));
+      dispatch(getAllInvoicesAPI(currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params));
       dispatch(setCurrentPageIndex(0));
     }
     setFetchInvoices(false);
@@ -231,19 +231,7 @@ function InvoicingListListing({ classes, theme }: any) {
     if (location?.state?.tab === 1 && (location?.state?.option?.search || location?.state?.option?.pageSize || location?.state?.option?.lastPrevCursor
       || location?.state?.option?.lastNextCursor || location?.state?.option?.currentPageIndex)) {
       dispatch(setKeyword(location.state.option.search));
-      dispatch(getAllInvoicesAPI(
-        location.state.option.pageSize,
-        location?.state?.option?.currentPageIndex,
-        location.state.option.search,
-        advanceFilterInvoiceData,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        currentDivision.params
-        ));
+      dispatch(getAllInvoicesAPI(location.state.option.pageSize, location.state.option.pageSizeIndex, location.state.option.search, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params));
       dispatch(setCurrentPageSize(location.state.option.pageSize));
       dispatch(setCurrentPageIndex(location?.state?.option?.currentPageIndex || 0));
       window.history.replaceState({}, document.title)
@@ -323,7 +311,7 @@ function InvoicingListListing({ classes, theme }: any) {
     dataModalFilter.data.loading = true;
     dataModalFilter.refresh = true;
     dispatch(setModalDataAction(dataModalFilter));
-    const { total } = await (getAllInvoicesAPI(currentPageSize, currentPageIndex, keyword, data, undefined, undefined,undefined,undefined,undefined, undefined, currentDivision.params))(dispatch);
+    const { total } = await (getAllInvoicesAPI(currentPageSize, currentPageIndex, keyword, data, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))(dispatch);
     if (total === 0 || total === undefined) {
       dataModalFilter.data.loading = false;
       dataModalFilter.refresh = false;
@@ -495,9 +483,6 @@ function InvoicingListListing({ classes, theme }: any) {
         setCurrentPageSizeFunction={(num: number) => {
           dispatch(setCurrentPageSize(num));
           dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
-        }}
-        setKeywordFunction={(query: string) => {
-          desbouncedSearchFunction(query);
         }}
         disableInitialSearch={location?.state?.tab !== 1}
         rowTooltip={rowTooltip}
