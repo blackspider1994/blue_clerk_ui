@@ -1,10 +1,9 @@
 import { Theme } from '@material-ui/core/styles';
-import * as CONSTANTS from "../../../constants";
+import * as CONSTANTS from '../../../constants';
 
 export default (theme: Theme): any => ({
   dialogActions: {
-    padding: '35px 60px !important',
-    backgroundColor: 'auto'
+    padding: '5px 10px !important',
   },
   dialogContent: {
     padding: '20px 80px !important',
@@ -28,7 +27,7 @@ export default (theme: Theme): any => ({
     height: '34px',
     fontSize: '14px !important',
     padding: '0 12px',
-    textTransform:'none',
+    textTransform: 'none',
   },
   submitButton: {
     color: CONSTANTS.PRIMARY_WHITE,
@@ -42,9 +41,9 @@ export default (theme: Theme): any => ({
     height: '34px',
     fontSize: '14px !important',
     padding: '0 12px',
-    textTransform:'none',
+    textTransform: 'none',
   },
-  submitButtonDisabled : {
+  submitButtonDisabled: {
     color: `${CONSTANTS.PRIMARY_WHITE}  !important`,
     backgroundColor: `${CONSTANTS.TABLE_HOVER} !important`,
   },
@@ -53,16 +52,17 @@ export default (theme: Theme): any => ({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
   },
   fullWidth: {
     width: '100%',
     marginBottom: '3px',
-    '& .MuiOutlinedInput-multiline' : {
+    '& .MuiOutlinedInput-multiline': {
       padding: '0 !important',
-    }
+    },
   },
-  grey4 : {
+  grey4: {
     color: '#BDBDBD',
-  }
+  },
 });
+

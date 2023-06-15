@@ -1,14 +1,14 @@
 export const types = {
-  'GET_CONTRACTORS': 'getContractors',
-  'SET_CONTRACTORS': 'setContractors',
-  'SET_CONTRACTOR': 'setContractor',
-  'UPDATE_CONTRACTOR': 'updateContractor',
-  'REMOVE_CONTRACTOR': 'removeContractor',
-  'SET_CONTRACTOR_LOADING': 'setContractorLoading',
-  'SET_CONTRACTOR_PAYMENTS': 'setContractorPayments',
-  'UPDATE_CONTRACTOR_PAYMENT': 'updateContractorPayment',
-  'REMOVE_CONTRACTOR_PAYMENT': 'removeContractorPayment',
-  'REFRESH_CONTRACTOR_PAYMENT': 'refreshContractorPayment',
+  GET_CONTRACTORS: 'getContractors',
+  SET_CONTRACTORS: 'setContractors',
+  SET_CONTRACTOR: 'setContractor',
+  UPDATE_CONTRACTOR: 'updateContractor',
+  REMOVE_CONTRACTOR: 'removeContractor',
+  SET_CONTRACTOR_LOADING: 'setContractorLoading',
+  SET_CONTRACTOR_PAYMENTS: 'setContractorPayments',
+  UPDATE_CONTRACTOR_PAYMENT: 'updateContractorPayment',
+  REMOVE_CONTRACTOR_PAYMENT: 'removeContractorPayment',
+  REFRESH_CONTRACTOR_PAYMENT: 'refreshContractorPayment',
 };
 
 export interface Contractor {
@@ -20,7 +20,7 @@ export interface Contractor {
   contact: {
     displayName: string;
     _id: string;
-    email:  string;
+    email: string;
     phone: string;
   };
   address: {
@@ -31,6 +31,8 @@ export interface Contractor {
   };
   balance: number;
   commission: number;
+  commissionType: string;
+  commissionTier: string;
   commissionTotal: number;
   invoiceIds: string[];
 }
@@ -47,24 +49,24 @@ export interface ContractorPayment {
   notes: string;
   contractor?: string;
   employee?: string;
-  payedPerson?: Contractor,
+  payedPerson?: Contractor;
   company: {
     _id: string;
     info: {
       companyName: string;
-    }
+    };
   };
 }
 
 export interface PayrollState {
-  readonly loading: boolean
-  readonly contractors: Contractor[]
-  readonly payments: ContractorPayment[]
-  readonly data?: any[]
-  readonly error?: string
+  readonly loading: boolean;
+  readonly contractors: Contractor[];
+  readonly payments: ContractorPayment[];
+  readonly data?: any[];
+  readonly error?: string;
   //readonly response?: string
-  readonly contractorObj?: Contractor | {}
-  readonly refresh?: boolean
+  readonly contractorObj?: Contractor | {};
+  readonly refresh?: boolean;
 }
 
 export enum PayrollActionType {
@@ -96,3 +98,4 @@ export enum PayrollActionType {
 //   commission: number;
 //   type: string;
 // }
+
