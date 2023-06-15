@@ -59,6 +59,7 @@ import { PaymentStatus } from 'app/pages/invoicing/invoices-list/invoices-list-l
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 import EmailInvoiceButton from 'app/pages/invoicing/invoices-list/email.invoice';
 import { MailOutlineOutlined } from '@material-ui/icons';
+import classNames from 'classnames';
 
 const SHOW_OPTIONS = [
   {
@@ -582,7 +583,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                   onSelect={(e, item) => setShowValue(item.value)}
                 />
               </Grid>
-              <Grid item xs={7}>
+              <Grid item xs={7} className={classes.invoiceCheckboxTopPadding}>
                 <Checkbox
                   color="primary"
                   className={classes.checkbox}
