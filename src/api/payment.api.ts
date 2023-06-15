@@ -28,7 +28,7 @@ export const recordPayment: any = (params = {}, division?:DivisionParams) => {
         .then((res: any) => {
           // dispatch(getInvoicingList());
           if (res.data.status === 1) {
-            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
             dispatch(getUnpaidInvoicesAPI(undefined,undefined,undefined,undefined,undefined,division));
             dispatch(getAllInvoicesForBulkPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
             dispatch(getAllPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
@@ -49,7 +49,7 @@ export const updatePayment: any = (params = {},  division?:DivisionParams) => {
         .then((res: any) => {
           // dispatch(getInvoicingList());
           if (res.data.status === 1) {
-            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
             dispatch(getAllInvoicesForBulkPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
             dispatch(getAllPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
           }
@@ -69,7 +69,7 @@ export const voidPayment: any = (params = {},  division?:DivisionParams) => {
         .then((res: any) => {
           if(res.data?.status === 1){
             dispatch(success("Payment voided succesfully"));
-            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
+            dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
             dispatch(getAllInvoicesForBulkPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
             dispatch(getAllPaymentsAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,division));
             return resolve(res.data);
