@@ -582,7 +582,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                   onSelect={(e, item) => setShowValue(item.value)}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={7}>
                 <Checkbox
                   color="primary"
                   className={classes.checkbox}
