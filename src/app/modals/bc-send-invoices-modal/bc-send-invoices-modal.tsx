@@ -321,8 +321,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
     dispatch(setCurrentPageIndex(0));
     dispatch(getAllInvoicesAPI(
       currentPageSize,
-      undefined,
-      undefined,
+      currentPageIndex,
       '',
       { invoiceDateRange: selectionRange },
       customerValue?._id,
@@ -604,9 +603,8 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 manualPagination
                 fetchFunction={(num: number, isPrev: boolean, isNext: boolean) => {
                   dispatch(getAllInvoicesAPI(
-                    num || currentPageSize,
-                    isPrev ? prevCursor : undefined,
-                    isNext ? nextCursor : undefined,
+                    currentPageSize,
+                    num,
                     '',
                     { invoiceDateRange: selectionRange },
                     customerValue?._id,
@@ -620,9 +618,16 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 }}
                 total={total}
                 currentPageIndex={currentPageIndex}
-                setCurrentPageIndexFunction={(num: number) => dispatch(setCurrentPageIndex(num))}
+                setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
+                  dispatch(setCurrentPageIndex(num));
+                  if (apiCall)
+                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
+                }}
                 currentPageSize={currentPageSize}
-                setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentPageSize(num))}
+                setCurrentPageSizeFunction={(num: number) => {
+                  dispatch(setCurrentPageSize(num));
+                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
+                }}
                 setKeywordFunction={(query: string) => dispatch(setKeyword(query))}
               />
             </DialogContent>

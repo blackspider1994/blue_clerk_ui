@@ -435,7 +435,8 @@ function JobsPage({ classes, hidden, currentPage, setCurrentPage }: any) {
 
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
-    dispatch(getAllJobsAPI(currentPageSize, currentPageIndex, selectedStatus, keyword, selectionRange, currentDivision.params))
+    dispatch(setCurrentPageIndex(0));
+    dispatch(getAllJobsAPI(currentPageSize, 0, selectedStatus, keyword, selectionRange, currentDivision.params))
   }, 500);
   return (
     <div className={classes.pageMainContainer}>
