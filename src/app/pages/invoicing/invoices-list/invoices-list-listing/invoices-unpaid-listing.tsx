@@ -110,6 +110,14 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
       'sortable': true,
     },
     {
+      'Header': 'Job ID',
+      Cell({ row }: any) {
+        return <span>{row.original.job?.jobId?.substring(4)}</span>
+      },
+      'className': 'font-bold',
+      'sortable': true
+    },
+    {
       'accessor': (originalRow: any) => formatCurrency(originalRow.total),
       'Header': 'Total',
       'sortable': true,
@@ -162,7 +170,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
 
   useEffect(() => {
     if (!currentDivision.isDivisionFeatureActivated || (currentDivision.isDivisionFeatureActivated && ((currentDivision.params?.workType || currentDivision.params?.companyLocation) || currentDivision.data?.name == "All"))) {
-      dispatch(getUnpaidInvoicesAPI(currentPageSize, undefined, undefined, keyword, selectionRange, false, currentDivision.params));
+      dispatch(getUnpaidInvoicesAPI(currentPageSize, currentPageIndex, keyword, selectionRange, false, currentDivision.params));
       dispatch(setCurrentUnpaidPageIndex(0));
       return () => {
         dispatch(setUnpaidKeyword(''));
@@ -176,7 +184,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
     if (location?.state?.tab === 0 && (location?.state?.option?.search || location?.state?.option?.pageSize
       || location?.state?.option?.currentPageIndex || location?.state?.option?.lastNextCursor || location?.state?.option?.lastPrevCursor)) {
       dispatch(setUnpaidKeyword(location.state.option.search));
-      dispatch(getUnpaidInvoicesAPI(location.state.option.pageSize, location?.state?.option?.lastPrevCursor, location?.state?.option?.lastNextCursor, location.state.option.search, selectionRange, undefined,currentDivision.params));
+      dispatch(getUnpaidInvoicesAPI(location.state.option.pageSize, location?.state?.option?.pageSizeIndex, location.state.option.search, selectionRange, undefined,currentDivision.params));
       dispatch(setCurrentUnpaidPageSize(location.state.option.pageSize));
       dispatch(setCurrentUnpaidPageIndex(location?.state?.option?.currentPageIndex || 0));
       setSelectionRange(location?.state?.option?.selectionRange)
@@ -232,16 +240,23 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
         toolbarPositionLeft={true}
         toolbar={Toolbar()}
         manualPagination
-        fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
-          setLastPrevCursor(isPrev ? prevCursor : undefined)
-          setLastNextCursor(isNext ? nextCursor : undefined)
-          dispatch(getUnpaidInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, selectionRange,undefined,currentDivision.params))
-        }}
+        // fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
+        //   setLastPrevCursor(isPrev ? prevCursor : undefined)
+        //   setLastNextCursor(isNext ? nextCursor : undefined)
+        //   dispatch(getUnpaidInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, selectionRange,undefined,currentDivision.params))
+        // }}
         total={total}
         currentPageIndex={currentPageIndex}
-        setCurrentPageIndexFunction={(num: number) => dispatch(setCurrentUnpaidPageIndex(num))}
+        setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
+          dispatch(setCurrentUnpaidPageIndex(num));
+          if (apiCall)
+            dispatch(getUnpaidInvoicesAPI(currentPageSize, num, keyword, selectionRange,undefined,currentDivision.params))
+        }}
         currentPageSize={currentPageSize}
-        setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentUnpaidPageSize(num))}
+        setCurrentPageSizeFunction={(num: number) => {
+          dispatch(setCurrentUnpaidPageSize(num));
+          dispatch(getUnpaidInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, selectionRange,undefined,currentDivision.params))
+        }}
         setKeywordFunction={(query: string) => dispatch(setUnpaidKeyword(query))}
         disableInitialSearch={location?.state?.tab !== 0}
         rowTooltip={rowTooltip}

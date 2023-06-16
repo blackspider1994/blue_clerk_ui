@@ -126,7 +126,7 @@ function SignUpDetail({formData, onChange, classes }: Props): JSX.Element {
           <BCEmailValidateInput
             id={'recoveryEmail'}
             inputData={formData.recoveryEmail}
-            disabled={formData.isci.value}
+            // disabled={formData.isci.value}
             label={'Recovery Email'}
             onChange={(newEmail: FormDataModel) => onChange('recoveryEmail', newEmail)}
             size={'small'}

@@ -159,7 +159,10 @@ function ServiceTicket({ classes, hidden }: any) {
         control={
           <Checkbox
             checked={showAllTickets}
-            onChange={() => toggleShowAllTickets(!showAllTickets)}
+            onChange={() => {
+              dispatch(setCurrentPageIndex(0))
+              toggleShowAllTickets(!showAllTickets)
+            }}
             name="checkedB"
             color="primary"
           />
@@ -168,7 +171,10 @@ function ServiceTicket({ classes, hidden }: any) {
       />
       <BCDateRangePicker
         range={selectionRange}
-        onChange={setSelectionRange}
+        onChange={(range: Range | null)=>{
+          dispatch(setCurrentPageIndex(0))
+          setSelectionRange(range);
+        }}
         showClearButton={true}
         title={'Filter by Due Date...'}
       />
@@ -381,6 +387,7 @@ function ServiceTicket({ classes, hidden }: any) {
                 setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentPageSize(num))}
                 setKeywordFunction={(query: string) => {
                     dispatch(setKeyword(query));
+                    dispatch(setCurrentPageIndex(0))
                     dispatch(getAllServiceTicketsAPI(currentPageSize, currentPageIndex, showAllTickets, query, selectionRange, currentDivision.params));
                   }}
               />

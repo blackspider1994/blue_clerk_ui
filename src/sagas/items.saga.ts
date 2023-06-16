@@ -2,8 +2,7 @@ import { getItemTierList, getItems, getJobCostingList, updateItem } from 'api/it
 import { loadInvoiceItems, loadJobCostingList, loadTierListItems, updateInvoiceItem } from 'actions/invoicing/items/items.action';
 import { all, call, cancelled, put, takeLatest } from 'redux-saga/effects';
 
-
-export function *handleGetItems() {
+export function* handleGetItems() {
   try {
     const [itemsResult, tierListResult, jobCostingListResult]:any = yield all([
       call(getItems),
@@ -28,8 +27,7 @@ export function *handleGetItems() {
   }
 }
 
-
-export function *handleGetTiers() {
+export function* handleGetTiers() {
   try {
     const result = yield call(getItemTierList);
     yield put(loadTierListItems.success(result.itemTierList));
@@ -55,7 +53,7 @@ export function* handleGetJobCosting() {
   }
 }
 
-export function *handleUpdateItem(action: { payload:any }) {
+export function* handleUpdateItem(action: { payload: any }) {
   try {
     yield call(updateItem, action.payload);
     yield put(updateInvoiceItem.success(action.payload));
@@ -68,8 +66,7 @@ export function *handleUpdateItem(action: { payload:any }) {
   }
 }
 
-
-export default function *watchInvoiceItemsLoad() {
+export default function* watchInvoiceItemsLoad() {
   yield all([
     takeLatest(updateInvoiceItem.fetch, handleUpdateItem),
     takeLatest(loadInvoiceItems.fetch, handleGetItems),
@@ -77,5 +74,4 @@ export default function *watchInvoiceItemsLoad() {
     takeLatest(loadJobCostingList.fetch, handleGetJobCosting),
   ]);
 }
-
 

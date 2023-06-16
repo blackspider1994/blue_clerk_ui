@@ -200,7 +200,7 @@ function BCMapMarker({
               updatedJobSite = {...data.jobSite}
             }
           }
-          const { customer, customerContactId, customerPO, dueDate, images, note, tasks, track } = data;
+          const { customer, customerContactId, customerPO, dueDate, images, note, tasks, track, homeOwner, isHomeOccupied } = data;
           const updatedTickets = tickets.map((ticket:any, index: number)=>{
             if(ticket._id === ticketId){
               const newTicket = {
@@ -213,6 +213,8 @@ function BCMapMarker({
                 note,
                 tasks,
                 track,
+                isHomeOccupied,
+                homeOwner,
               };
               if(updatedJobLocation){
                 newTicket.jobLocation = updatedJobLocation;

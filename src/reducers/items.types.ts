@@ -10,10 +10,10 @@ export interface Item {
 }
 
 export interface InvoiceItemsState {
-    loading: boolean;
-    loadingObj: boolean;
-    error: string;
-    items: Item[];
-    itemObj: Item;
+  loading: boolean;
+  loadingObj: boolean;
+  error: string;
+  items: Item[];
+  itemObj: Item;
 }
 
