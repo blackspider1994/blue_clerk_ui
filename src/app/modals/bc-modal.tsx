@@ -541,7 +541,7 @@ function BCModal() {
           'disableBackdropClick': true,
           'disableEscapeKeyDown': true,
           'fullWidth': true,
-          'maxWidth': 'xl'
+          'maxWidth': 'md'
         });
         setComponent(<BCInvoiceEditModal item={data.item} />);
         break;
@@ -550,7 +550,7 @@ function BCModal() {
           'disableBackdropClick': true,
           'disableEscapeKeyDown': true,
           'fullWidth': true,
-          'maxWidth': 'xl'
+          'maxWidth': 'md'
         });
         setComponent(<BCInvoiceEditModal item={data.item} />);
         break;

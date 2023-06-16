@@ -241,16 +241,7 @@ function AdminVendorsPage({ classes }: any) {
       },
       Header: (
         <div style={{ display: 'inline' }}>
-          <span>Commission</span>
-          <Tooltip
-            title="Percentage rate is based on the invoice total"
-            placement="top-start"
-            arrow
-          >
-            <IconButton aria-label="delete" style={{ padding: 4 }}>
-              <HelpIcon fontSize={'small'} style={{ color: '#BDBDBD' }} />
-            </IconButton>
-          </Tooltip>
+          <span>Type of Pay</span>
         </div>
       ),
       accessor: 'commission',

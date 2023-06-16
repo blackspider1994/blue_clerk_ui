@@ -6,7 +6,7 @@ export default (theme: Theme): any => ({
     padding: '5px 10px !important',
   },
   dialogContent: {
-    padding: '20px 80px !important',
+    padding: '10px 0px !important',
   },
   messageBox: {
     height: '400px',
@@ -64,5 +64,21 @@ export default (theme: Theme): any => ({
   grey4: {
     color: '#BDBDBD',
   },
+  grid : {
+    padding: '0 20px'
+  },
+  tiers : {
+    background: '#EAECF3',
+    padding: '20px'
+  },
+  label: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  labelText: {
+    color: '#4F4F4F',
+    fontWeight: 500,
+    minWidth: '25%'
+  }
 });
 
