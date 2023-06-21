@@ -124,3 +124,31 @@ export const requestApiV2 = (uri: string, type: Method, data?: any, cancelTokenS
   }
   return makeRequest(request);
 };
+
+/**
+ * Download file from specific uri
+ * @param uri uri where is located the file
+ * @param type type of HTTP method used to download the file
+ * @param data extra data to be sent on the request
+ * @returns Promise<AxiosResponse<any>>
+ */
+export const downloadFile = (uri: string, type: Method, data?: any): Promise<AxiosResponse<any>> => {
+  const token = fetchToken(false);
+  const request: AxiosRequestConfig = {
+    'headers': { 'Authorization': token },
+    'method': type === 'OPTIONS'
+      ? 'get'
+      : type,
+    'url': `${api}${uri}`,
+    responseType: 'blob',
+  };
+
+  if (type !== 'get') {
+    if (type === 'OPTIONS') {
+      request.params = data;
+    } else {
+      request.data = data;
+    }
+  }
+  return makeRequest(request);
+};

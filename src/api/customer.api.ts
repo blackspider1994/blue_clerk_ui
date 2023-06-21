@@ -1,4 +1,5 @@
-import request from 'utils/http.service';
+import { AxiosResponse } from 'axios';
+import request, { downloadFile } from 'utils/http.service';
 
 export const getCustomers = async (active = true, inactive = false) => {
   const body = {
@@ -28,7 +29,7 @@ export const getCustomers = async (active = true, inactive = false) => {
   return responseData;
 };
 
-export const getCustomersContact = async (customerId:string) => {
+export const getCustomersContact = async (customerId: string) => {
   const body = {
     'customerId': customerId,
   };
@@ -118,10 +119,12 @@ export const createCustomer = async (data: any) => {
   return responseData;
 };
 
-export const updateCustomPrices = async (customerId: string, customPrices:any) => {
+export const updateCustomPrices = async (customerId: string, customPrices: any) => {
   try {
-    const response: any = await request('/updateCustomPrices', 'POST', { customerId,
-      'customPrices': JSON.stringify(customPrices) }, false);
+    const response: any = await request('/updateCustomPrices', 'POST', {
+      customerId,
+      'customPrices': JSON.stringify(customPrices)
+    }, false);
     if (response.data.status === 0) {
       throw new Error('Quantity must be in sequence');
     }
@@ -134,5 +137,24 @@ export const updateCustomPrices = async (customerId: string, customPrices:any) =
     }
   }
 };
+
+/**
+ * Do the call to the endpoint for download the customer as excel file
+ * @returns { data: Blob, fileName: string }
+ */
+export const exportCustomersToExcel = async (): Promise<{ data: Blob, fileName: string }> => {
+  return new Promise((resolve, reject) => {
+    downloadFile('/customers/export', 'GET').then((value: AxiosResponse<any>) => {
+      let fileName = '';
+      const contentDisposition = value.headers['content-disposition'];
+      if (contentDisposition) {
+        fileName = contentDisposition.split('=')[1].replace(/"/g, '');
+      }
+      resolve({ data: value.data, fileName });
+    }).catch((error) => {
+      reject(error);
+    })
+  });
+}
 
 
