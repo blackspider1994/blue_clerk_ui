@@ -7,6 +7,8 @@ export interface Item {
     name: string,
     tiers: any[],
     costingList: any[];
+    costing?: any[];
+    jobType?: string
 }
 
 export interface InvoiceItemsState {
