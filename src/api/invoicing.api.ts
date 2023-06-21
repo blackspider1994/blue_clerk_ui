@@ -102,7 +102,7 @@ export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor =
 };
 
 let cancelTokenGetAllInvoicesAPI: any;
-export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, advanceFilterInvoiceData?: any, customerId?: string, dueDate?: Date | null, showPaid?: boolean, division?: DivisionParams) => {
+export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, advanceFilterInvoiceData?: any, customerId?: string, customerContactId?: string, checkMissingPo?: boolean, invoicingModal?: boolean, dueDate?: Date | null, showPaid?: boolean, division?: DivisionParams) => {
   return (dispatch: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       dispatch(setInvoicesLoading(true));
@@ -175,6 +175,12 @@ export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor
       }
       if (customerId) {
         optionObj.customerId = customerId;
+      }
+      if (invoicingModal) {
+        optionObj.missingPO = checkMissingPo;
+      }
+      if (customerContactId) {
+        optionObj.customerContactId = customerContactId;
       }
       if (dueDate) {
         optionObj.dueDate = moment(dueDate).format('YYYY-MM-DD');
