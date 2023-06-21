@@ -464,6 +464,21 @@ export const updateInvoice = (data: any) => {
   });
 };
 
+export const updateInvoiceMessages = ({invoiceId, notes, images}: any) => {
+  return new Promise((resolve, reject) => {
+    request(`/updateInvoiceMessages`, 'post', {
+      invoiceId,
+      technicianMessages: {notes, images}
+    })
+      .then((res: any) => {
+        return resolve(res.data);
+      })
+      .catch(err => {
+        return reject(err);
+      });
+  });
+};
+
 export const voidInvoice = (data: any) => {
   return new Promise((resolve, reject) => {
     request(`/voidInvoice`, 'delete', data)

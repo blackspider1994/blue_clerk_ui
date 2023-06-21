@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, createStyles, withStyles, Grid, Paper } from "@material-ui/core";
+import { Button, createStyles, withStyles, Grid, Paper, Badge} from "@material-ui/core";
 import styles from "../customer.styles";
 import BCInvoice from "../../../components/bc-invoice/bc-invoice";
 import IconButton from '@material-ui/core/IconButton';
@@ -16,10 +16,7 @@ import { loadInvoiceDetail } from "../../../../actions/invoicing/invoicing.actio
 import { getCompanyProfileAction } from "../../../../actions/user/user.action";
 import BCCircularLoader from "../../../components/bc-circular-loader/bc-circular-loader";
 import {CSChip} from "../../../../helpers/custom";
-import {
-  generateInvoicePdfAPI,
-  updateInvoice
-} from "../../../../api/invoicing.api";
+import { generateInvoicePdfAPI, updateInvoice } from "../../../../api/invoicing.api";
 import {error} from "../../../../actions/snackbar/snackbar.action";
 import EmailInvoiceButton from "../../invoicing/invoices-list/email.invoice";
 import { modalTypes } from "../../../../constants";
@@ -62,7 +59,7 @@ function ViewInvoice({ classes, theme }: any) {
   let history = useHistory();
   const location = useLocation<any>();
   let { invoice } = useParams<any>();
-  const { user } = useSelector(({ auth }:any) => auth);
+  const { user } = useSelector(({ auth }: any) => auth);
   const { 'data': invoiceDetail, 'loading': loadingInvoiceDetail, 'error': invoiceDetailError } = useSelector(({ invoiceDetail }:any) => invoiceDetail);
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
@@ -176,9 +173,9 @@ function ViewInvoice({ classes, theme }: any) {
   // });
 
   const handleBackButtonClick = () => {
-    if(location?.state?.keyword || location?.state?.currentPageSize  || location?.state?.currentPageIndex 
+    if (location?.state?.keyword || location?.state?.currentPageSize  || location?.state?.currentPageIndex
       || location?.state?.lastNextCursor || location?.state?.lastPrevCursor || location?.state?.selectionRange
-      ){
+    ) {
       history.replace({
         'pathname': currentDivision.urlParams ? `/main/invoicing/invoices-list/${currentDivision.urlParams}` : `/main/invoicing/invoices-list`,
         'state': {
@@ -198,18 +195,18 @@ function ViewInvoice({ classes, theme }: any) {
     }
   }
 
-/*  const goToEditNew = () => {
-    history.push({
-      'pathname': `/main/invoicing/update-invoice/${invoice}`,
-      'state': {
-        'customerId': invoiceDetail.customer?._id,
-        'customerName': invoiceDetail.customer?.profile?.displayName,
-        'jobId': invoiceDetail?._id,
-        'jobType': invoiceDetail.job?.type?._id,
-        'invoiceDetail': invoiceDetail
-      }
-    });
-  }*/
+  /*  const goToEditNew = () => {
+      history.push({
+        'pathname': `/main/invoicing/update-invoice/${invoice}`,
+        'state': {
+          'customerId': invoiceDetail.customer?._id,
+          'customerName': invoiceDetail.customer?.profile?.displayName,
+          'jobId': invoiceDetail?._id,
+          'jobType': invoiceDetail.job?.type?._id,
+          'invoiceDetail': invoiceDetail
+        }
+      });
+    }*/
 
   const generatePDF = async() => {
     generateInvoicePdfAPI(invoiceDetail.customer?._id, invoice).then((response: any) => {
@@ -220,6 +217,44 @@ function ViewInvoice({ classes, theme }: any) {
         dispatch(error(message));
       }
     }).catch(e => dispatch(error(e.message)))
+  }
+
+
+
+  const comments = (invoiceDetail.job?.tasks || [])
+    .filter((task: any) => task.comment)
+    .map((task: any) => {
+      return {
+        comment: task.comment,
+        id: task._id,
+      };
+    });
+  const technicianImages =
+    invoiceDetail.job?.technicianImages?.map((image: any) => ({
+      date: image.createdAt,
+      imageUrl: image.imageUrl,
+      uploader: image.uploadedBy?.profile?.displayName,
+    })) || [];
+  const technicianData = {
+    commentValues: comments,
+    images: technicianImages,
+  };
+
+
+  const handleTicketClick = () => {
+    dispatch(setModalDataAction({
+      data: {
+        removeFooter: false,
+        maxHeight: '100%',
+        modalTitle: 'Job Details',
+        invoiceData: invoiceDetail,
+        isEditing: false
+      },
+      type: modalTypes.TICKET_DETAILS_MODAL
+    }));
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
   }
 
   return (
@@ -253,6 +288,36 @@ function ViewInvoice({ classes, theme }: any) {
             )}
           </div>
           <div>
+            {invoiceDetail && (
+              <>
+                {technicianData.commentValues.length > 0 || technicianData.images.length > 0 ? (
+                  <Badge
+                    badgeContent={1}
+                    color="secondary"
+                    overlap="rectangle"
+                    anchorOrigin={{vertical: 'top', horizontal: 'left'}}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      className={classNames(invoiceStyles.white)}
+                      onClick={handleTicketClick}
+                    >
+                      Job Details
+                    </Button>
+                  </Badge>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    className={classNames(invoiceStyles.margin, invoiceStyles.white)}
+                    onClick={handleTicketClick}
+                  >
+                    Job Details
+                  </Button>
+                )}
+              </>
+            )}
             {invoiceDetail && <EmailInvoiceButton
               showLoader={false}
               Component={<Button
