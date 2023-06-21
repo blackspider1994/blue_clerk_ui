@@ -11,6 +11,7 @@ import '../../../scss/job-poup.scss';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'reducers';
 import BcInput from 'app/components/bc-input/bc-input';
+import { replaceAmountToDecimal } from 'utils/validation';
 
 const initialJobState = {
   customer: {
@@ -49,7 +50,7 @@ function BCEditJobCostingModal({
   classes,
   job = initialJobState,
 }: any): JSX.Element {
-  console.log("JOB", JSON.stringify(job))
+  console.log("JOB", job)
   const costingList = useSelector(
     ({ InvoiceJobCosting }: any) => InvoiceJobCosting.costingList
   );
@@ -121,7 +122,19 @@ function BCEditJobCostingModal({
           <Grid container alignItems='center' spacing={2}>
             {Object.keys(updateFields).map((key) => {
               const { amount, note } = update[key],
-                handleChange = ({ target }: { target: any }) => setUpdates(i => ({ ...i, [key]: { ...update[key], [target.name]: target.value } }))
+                handleChange =
+                  (e: any, isBlur: boolean) => {
+                    const { target }: { target: any } = e
+                    return setUpdates(i => ({
+                      ...i, [key]: {
+                        ...update[key],
+                        [target.name]:
+                          isBlur && target.name === 'amount' ?
+                            replaceAmountToDecimal(target.value)
+                            : target.value
+                      }
+                    }))
+                  }
               return <Grid item xs={12} key={key}>
                 <Grid container alignItems='center' spacing={4}>
                   <Grid item xs={3}>
@@ -129,8 +142,9 @@ function BCEditJobCostingModal({
                   </Grid>
                   <Grid item xs={3}>
                     <BcInput
+                      onBlur={(e: any) => handleChange(e, true)}
                       handleChange={handleChange}
-                      name={'amount'}
+                      name='amount'
                       value={amount}
                       type="number"
                       margin={'none'}
@@ -149,6 +163,7 @@ function BCEditJobCostingModal({
                   </Grid>
                   <Grid item xs={5}>
                     <BcInput
+                      onBlur={handleChange}
                       handleChange={handleChange}
                       name={'note'}
                       value={note}
