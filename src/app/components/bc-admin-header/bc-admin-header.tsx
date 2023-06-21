@@ -155,8 +155,7 @@ function BCAdminHeader({
   const headerStyles = useHeaderStyles();
   const searchStyles = useSearchStyles();
 
-  const { notifications, loading, notificationOpen } = notificationsFromRedux;
-  const activeNotifications = notifications.filter((notification:NotificationItem) => !notification.dismissedStatus.isDismissed);
+  const { notifications, loading, notificationOpen, totalUnread } = notificationsFromRedux;
   const location = useLocation();
   const pathName = location.pathname;
   const urlParams = pathName?.split('/').slice(-2);
@@ -502,11 +501,11 @@ function BCAdminHeader({
             onClick={() => showNotificationDetails()}
             target={'_blank'}>
             <Badge
-              badgeContent={computeUnreadNotifications(notifications)}
+              badgeContent={totalUnread}
               color={'secondary'}
-              invisible={computeUnreadNotifications(notifications) === 0}>
+              invisible={totalUnread === 0}>
               <NotificationsIcon
-                color={computeUnreadNotifications(notifications) === 0 ? 'action' : 'primary'}
+                color={totalUnread === 0 ? 'action' : 'primary'}
               />
             </Badge>
           </Button>
@@ -537,7 +536,7 @@ function BCAdminHeader({
                   <Paper className={classes.bcAdminDropdown}>
                     <HeaderNotifications
                       close={handleClose}
-                      items={activeNotifications}
+                      items={notifications}
                       loading={loading}
                       openModalHandler={openModalHandler}
                       jobRequests={jobRequests}
