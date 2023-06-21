@@ -43,6 +43,9 @@ export default (theme: Theme): any => ({
   checkbox: {
     padding: '0 10px 0 0',
   },
+  invoiceCheckboxTopPadding: {
+    paddingTop: '2.5em !important',
+  },
   submitButton: {
     color: CONSTANTS.PRIMARY_WHITE,
     backgroundColor: `${CONSTANTS.TABLE_ACTION_BUTTON} !important`,
