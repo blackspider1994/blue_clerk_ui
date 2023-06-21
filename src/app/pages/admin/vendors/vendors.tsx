@@ -126,8 +126,13 @@ function AdminVendorsPage({ classes }: any) {
       'className': 'font-bold',
       'sortable': true,
       Cell({ row }: any) {
-        return <span> 
-            {row.original?.contractor?.info?.companyName || row.original?.contractorEmail}</span>;
+        if (row.original?.contractor?.admin?.accountType == 4) {
+          //Vendor Type is Contractor
+          return ""  
+        }else{
+          //Vendor Type is Company
+          return <span> {row.original?.contractor?.info?.companyName || row.original?.contractorEmail}</span>;
+        }
       }
     },
     {
