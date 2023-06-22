@@ -224,7 +224,7 @@ function BCEditJobCostingModal({
         <Grid container alignItems='center' justify='space-between' direction={editing ? `row-reverse` : 'row'}>
           <Button
             color='primary'
-            disabled={loading || (editing && (!update.addition.amount || !update.deduction.amount))}
+            disabled={loading || (editing && (!update.addition.amount && !update.deduction.amount))}
             onClick={async () => {
               if (!editing) return setEdit(true)
               try {
