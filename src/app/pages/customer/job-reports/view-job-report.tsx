@@ -1,5 +1,5 @@
 import BCCircularLoader from 'app/components/bc-circular-loader/bc-circular-loader';
-import BCJobReport from '../../../components/bc-job-report/bc-job-report';
+import BCJobReport from '../../../components/bc-job-report/bc-job-report-v2';
 import { loadJobReportActions } from 'actions/customer/job-report/job-report.action';
 import {error as errorSnackBar, success} from "actions/snackbar/snackbar.action";
 import { useParams, useHistory } from 'react-router-dom';

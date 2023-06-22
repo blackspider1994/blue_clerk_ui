@@ -14,8 +14,8 @@ import { getNotifications, updateNotification } from 'api/notifications.api';
 export function *handleGetNotifications(action: { payload: any }) {
   yield put(loadNotificationsActions.fetching());
   try {
-    const result = yield call(getNotifications);
-    yield put(loadNotificationsActions.success(result.notifications));
+    const result = yield call(getNotifications, action.payload?.pageSize, action.payload?.currentPage, action.payload?.search);
+    yield put(loadNotificationsActions.success(result));
   } catch (error) {
     yield put(loadNotificationsActions.fault(error.toString()));
   } finally {

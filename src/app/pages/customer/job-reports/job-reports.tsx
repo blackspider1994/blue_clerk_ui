@@ -89,7 +89,7 @@ function JobReportsPage({ classes, theme }: any) {
     {
       'Header': 'Technician',
       'accessor': (originalRow: any) => {
-        return originalRow?.contractorsObj?.length === 1 ? originalRow?.contractorsObj[0]?.info?.displayName : 'N/A';
+        return originalRow?.contractorsObj?.length === 1 ? originalRow?.contractorsObj[0]?.info?.displayName || originalRow?.contractorsObj[0]?.info?.companyName : 'N/A';
       },
       'className': 'font-bold',
       'sortable': true

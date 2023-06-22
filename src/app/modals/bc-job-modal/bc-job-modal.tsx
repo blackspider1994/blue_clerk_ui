@@ -72,7 +72,7 @@ import { ISelectedDivision } from 'actions/filter-division/fiter-division.types'
 import { DivisionParams } from 'app/models/division';
 
 const initialTask = {
-  employeeType: 0,
+  employeeType: 1,
   contractor: null,
   employee: null,
   jobTypes: [],
@@ -149,19 +149,12 @@ const getJobTasks = (job: any, items: any) => {
     }));
     return tasks;
   } else {
-    return [
-      {
-        employeeType: 0,
-        contractor: null,
-        employee: null,
-        jobTypes: getJobData(
-          job.ticket.tasks.map(
-            (task: any) => task.jobType?._id || task.jobType || task._id
-          ),
-          items
-        ),
-      },
-    ];
+    return [{
+      employeeType: 1,
+      contractor: null,
+      employee: null,
+      jobTypes: getJobData(job.ticket.tasks.map((task: any) => task.jobType?._id || task.jobType || task._id), items),
+    }]
   }
 };
 
@@ -234,7 +227,7 @@ function BCJobModal({
     const tasks = [...FormikValues.tasks];
     switch (fieldName) {
       case 'employeeType':
-        const _id = data ? data._id : 0;
+        const _id = data ? data._id : 1;
         tasks[index].employeeType = _id;
         tasks[index].contractor = null;
         tasks[index].employee = null;
