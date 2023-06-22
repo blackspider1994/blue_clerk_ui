@@ -458,7 +458,7 @@ function InvoicingListListing({ classes, theme }: any) {
         tableData={invoiceList}
         toolbarPositionLeft={true}
         toolbar={Toolbar()}
-        // manualPagination
+        manualPagination
         // fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
         //   setLastPrevCursor(isPrev ? prevCursor : undefined)
         //   setLastNextCursor(isNext ? nextCursor : undefined)
