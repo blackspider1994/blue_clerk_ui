@@ -13,8 +13,8 @@ export default function JobRescheduledNotication(item :NotificationItemWithHandl
     };
     openModalHandler('JobRescheduled', data, item?._id)
   };
-  const filteredHistory: {note: string}[] = item.metadata.track.filter((history:any)=>history.action.includes('rescheduling'))
-  const rescheduleNote: string = filteredHistory.length ? filteredHistory[filteredHistory.length-1].note: '-'
+  const filteredHistory: {note: string}[] = item.metadata ? item.metadata.track.filter((history:any)=>history.action.includes('rescheduling')) : []
+  const rescheduleNote: string = filteredHistory?.length ? filteredHistory[filteredHistory.length-1].note: '-'
   return <MenuItem
     className={readStatus.isRead
       ? ''
@@ -26,7 +26,7 @@ export default function JobRescheduledNotication(item :NotificationItemWithHandl
       {message?.title}
       {' - '}
       <strong>
-        {metadata.jobId}
+        {metadata?.jobId}
       </strong>
       <span className='note'>
         {`Note: ${shortenStringWithElipsis(rescheduleNote || '', 24)}`}

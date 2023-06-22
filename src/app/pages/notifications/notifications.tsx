@@ -1,20 +1,15 @@
-import BCCircularLoader from 'app/components/bc-circular-loader/bc-circular-loader';
 import BCTableContainer from 'app/components/bc-table-container/bc-table-container';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { fromNow } from 'helpers/format';
-import { PRIMARY_BLUE, modalTypes } from '../../../constants';
 import styled from 'styled-components';
 import styles from './notification.styles';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Fab, Grid, IconButton, Typography, withStyles } from '@material-ui/core';
-import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
+import { Button, Grid, withStyles } from '@material-ui/core';
 import AlertDialogSlide from 'app/components/bc-dialog/bc-dialog';
-import { dismissNotificationAction } from 'actions/notifications/notifications.action';
-import { NotificationItem } from 'app/components/bc-header/bc-header-notification';
-import { Notification, NotificationTypeTypes } from 'reducers/notifications.types';
-import { openContractModal, openDetailJobModal } from './notification-click-handlers';
+import { loadNotificationsActions } from 'actions/notifications/notifications.action';
+import { Notification } from 'reducers/notifications.types';
 import { getNotificationMethods, getNotificationValues } from './notification-dict';
-
+import { updateNotification } from 'api/notifications.api';
 
 const NoticationPageContainer = styled.div`
     flex: 1 1 100%;
@@ -45,15 +40,31 @@ const NoticationPageContainer = styled.div`
 function NotificationPage() {
   const dispatch = useDispatch();
 
-  const handleClick = (notificationType:string, original: Notification) => {
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [currentPageSize, setCurrentPageSize] = useState(10);
+  const { notifications, total, loading } = useSelector((state: any) => state.notifications);
+  const [searchText, setSearchText] = useState('');
+
+
+  const handleClick = (notificationType: string, original: Notification) => {
     const clickHandler = getNotificationMethods(dispatch, notificationType, original);
     clickHandler();
   };
 
+
+  useEffect(() => {
+    if (!loading) {
+      dispatch(loadNotificationsActions.fetch({
+        pageSize: currentPageSize,
+        currentPage: currentPageIndex, search: searchText
+      }));
+    }
+  }, [currentPageIndex, currentPageSize, searchText]);
+
   const columns: any = [
 
     {
-      'Cell'({ 'row': { original } }: {row: {original: Notification } }) {
+      'Cell'({ 'row': { original } }: { row: { original: Notification } }) {
         const { typeText } = getNotificationValues(original.notificationType, original);
         return (
           <div className={'type'}>
@@ -67,7 +78,7 @@ function NotificationPage() {
       'width': 70
     },
     {
-      'Cell'({ 'row': { original } }: {row: {original: Notification } }) {
+      'Cell'({ 'row': { original } }: { row: { original: Notification } }) {
         const { notificationType } = original;
         const { details } = getNotificationValues(notificationType, original);
         return (
@@ -84,7 +95,7 @@ function NotificationPage() {
 
     },
     {
-      'Cell'({ 'row': { original } }: {row: {original: Notification } }) {
+      'Cell'({ 'row': { original } }: { row: { original: Notification } }) {
         const { readStatus } = original;
         const date = new Date(readStatus.readAt);
         return (
@@ -102,7 +113,7 @@ function NotificationPage() {
 
     },
     {
-      Cell({ 'row': { original } }: {row: {original: Notification } }) {
+      Cell({ 'row': { original } }: { row: { original: Notification } }) {
         return (
           <div className={'actions'}>
             <Button
@@ -115,12 +126,21 @@ function NotificationPage() {
             <AlertDialogSlide
               buttonText={'Dismiss'}
               color={'secondary'}
-              confirmMethod={() => dispatch(dismissNotificationAction.fetch({ 'id': original._id,
-                'isDismissed': true }))}
+              confirmMethod={async () => {
+                await updateNotification({
+                  id: original._id,
+                  isDismissed: true
+                });
+                dispatch(loadNotificationsActions.fetch({
+                  pageSize: currentPageSize,
+                  currentPage: 0, search: searchText
+                }));
+                setCurrentPageIndex(0);
+              }}
               confirmText={'Dismiss'}
               size={'small'}
               variant={'outlined'}>
-              <span style={{fontSize: 20, fontWeight: 500}}>
+              <span style={{ fontSize: 20, fontWeight: 500 }}>
                 {'Are you sure you want to dismiss this notification?'}
               </span>
             </AlertDialogSlide>
@@ -133,10 +153,6 @@ function NotificationPage() {
       'width': 20
     }
   ];
-
-
-  const { notifications, error, loading } = useSelector((state: any) => state.notifications);
-  const activeNotifications = notifications.filter((notification:NotificationItem) => !notification.dismissedStatus.isDismissed);
 
   return (
     <NoticationPageContainer>
@@ -156,11 +172,25 @@ function NotificationPage() {
             hover
             initialMsg={'No notificatons'}
             isLoading={loading}
-            pageSize={activeNotifications.length}
-            pagination
+            manualPagination
+            total={total}
+            currentPageIndex={currentPageIndex}
+            setCurrentPageIndexFunction={(num: number, apiCall: Boolean = false) => {
+              if (apiCall) {
+                setCurrentPageIndex(num)
+              }
+            }}
+            currentPageSize={currentPageSize}
+            setCurrentPageSizeFunction={(num: number) => {
+              setCurrentPageSize(num);
+            }}
+            setKeywordFunction={(query: string) => {
+              setCurrentPageIndex(0);
+              setSearchText(query);
+            }}
             search
             searchPlaceholder={'Search Notifications'}
-            tableData={activeNotifications}
+            tableData={notifications}
           />
         </Grid>
       </Grid>
