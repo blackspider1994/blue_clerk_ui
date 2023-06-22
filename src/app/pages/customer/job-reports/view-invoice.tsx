@@ -182,6 +182,7 @@ function ViewInvoice({ classes, theme }: any) {
           'option': {
             search: location?.state?.keyword || '',
             pageSize: location?.state?.currentPageSize || 10,
+            pageSizeIndex: location?.state?.currentPageIndex || 0,
             currentPageIndex: location?.state?.currentPageIndex || 0,
             lastNextCursor: location?.state?.lastNextCursor,
             lastPrevCursor: location?.state?.lastPrevCursor,
