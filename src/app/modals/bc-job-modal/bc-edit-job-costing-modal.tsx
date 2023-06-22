@@ -74,8 +74,6 @@ function BCEditJobCostingModal({
     jobCostingCharge = items?.find(({ jobType }) => jobType === job.tasks[0]?.jobTypes[0]?.jobType?._id)?.costing?.find(({ tier }) => tier?._id === technicianTier?._id)?.charge || "0",
     technicianAmount = jobCostingCharge + Number(update.addition.amount) - Number(update.deduction.amount)
 
-  console.log("jobCostingCharge", jobCostingCharge)
-
   const openDetailJobModal = () => {
     dispatch(
       setModalDataAction({
