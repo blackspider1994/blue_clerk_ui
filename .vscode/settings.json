@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSaveMode": "modifications",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "vscode.typescript-language-features"
+}
+
+

@@ -263,10 +263,36 @@ function BCViewJobModal({
       SetIsSubmitting(false);
     })
   }
-
+  const openEditJobCostingModal = () => {
+    dispatch(
+      setModalDataAction({
+        data: {
+          job,
+          removeFooter: false,
+          maxHeight: '100%',
+          modalTitle: 'Job Costing'
+        },
+        type: modalTypes.EDIT_JOB_COSTING_MODAL,
+      })
+    );
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
+  };
+  
   return (
     <DataContainer className={'new-modal-design'}>
       <Grid container className={'modalPreview'} justify={'space-around'}>
+        <Grid item xs={12}>
+          <Button
+            color='primary'
+            variant="outlined"
+            className='whiteButtonBg'
+            onClick={openEditJobCostingModal}
+          >
+            Job Costing
+          </Button>
+        </Grid>
         <Grid item style={{width: '40%'}}>
           {canEdit &&
             <>
@@ -321,7 +347,7 @@ function BCViewJobModal({
               <Typography variant={'h6'} className={'previewText'} style={{borderTop: 1}}>{task.technician?.profile?.displayName || 'N/A'}</Typography>
               </Grid>
               <Grid item xs>
-              <Typography variant={'h6'} className={'previewText'} style={{borderTop: 1}}>{calculateJobType(task).map((type:string) => <span className={'jobTypeText'}>{type}</span>)}</Typography>
+                  <Typography variant={'h6'} className={'previewText'} style={{ borderTop: 1 }}>{calculateJobType(task).map((type: string, i: number) => <span key={i} className={'jobTypeText'}>{type}</span>)}</Typography>
               </Grid>
               <Grid item style={{width: 100}}>
                 <BCJobStatus status={task.status || 0} size={'small'}/>
@@ -494,6 +520,12 @@ const DataContainer = styled.div`
 
   .MuiTableCell-sizeSmall {
     padding: 0px 16px;
+  }
+
+  .whiteButtonBg {
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 10px
   }
 
   .MuiButton-containedSecondary {

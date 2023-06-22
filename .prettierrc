@@ -3,4 +3,6 @@
   "useTabs": false,
   "printWidth": 80,
   "singleQuote": true,
+  "requirePragma": true,
+  "proseWrap": "preserve"
 }
