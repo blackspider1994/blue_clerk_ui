@@ -15,5 +15,13 @@ export default (theme: Theme): any => ({
     'position': 'absolute',
     'right': '0',
     'zIndex': '120',
+  },
+  'smsStatusCell': {
+    'display': 'flex',
+  },
+  'smsStatusText': {
+    'display': 'flex',
+    'alignItems': 'center',
+    'paddingLeft': '10px',
   }
 });

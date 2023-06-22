@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {
   Accordion,
   AccordionDetails,
-  AccordionSummary,
+  AccordionSummary, Badge,
   Button,
   Card,
   CardContent,
@@ -15,7 +15,7 @@ import {
   withStyles
 } from '@material-ui/core';
 import styles from './bc-invoice.styles';
-import {createMuiTheme, makeStyles, MuiThemeProvider, Theme} from '@material-ui/core/styles';
+import {createMuiTheme,makeStyles,MuiThemeProvider,Theme} from '@material-ui/core/styles';
 import * as CONSTANTS from '../../../constants';
 import styled from 'styled-components';
 import InputBase from '@material-ui/core/InputBase';
@@ -44,8 +44,20 @@ import {CSChip} from "../../../helpers/custom";
 import BCButtonGroup from "../bc-button-group";
 import BCMiniSidebar from "app/components/bc-mini-sidebar/bc-mini-sidebar";
 import {formatCurrency} from "../../../helpers/format";
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import {modalTypes} from "../../../constants";
+import {
+  openModalAction,
+  setModalDataAction
+} from "../../../actions/bc-modal/bc-modal.action";
+import BCTicketMessagesNotes
+  from "../../modals/bc-add-ticket-details-modal/bc-ticket-messages-notes";
+import {getContacts} from "../../../api/contacts.api";
+import {
+  getEmployeesForJobAction
+} from "../../../actions/employees-for-job/employees-for-job.action";
+import {getVendors} from "../../../actions/vendor/vendor.action";
 
 interface Props {
   classes?: any;
@@ -465,10 +477,10 @@ interface Props {
   customer: any;
   customersData: any;
   taxes: any;
-  showSendInvoiceModalHandler: (invoiceId:string, customerId:string) => void;
-  updateInvoiceHandler: (data:any) => Promise<any>;
-  createInvoiceHandler: (data:any) => Promise<any>;
-  voidInvoiceHandler: (invoiceId:string) => void;
+  showSendInvoiceModalHandler: (invoiceId: string, customerId: string) => void;
+  updateInvoiceHandler: (data: any) => Promise<any>;
+  createInvoiceHandler: (data: any) => Promise<any>;
+  voidInvoiceHandler: (invoiceId: string) => void;
   getItems: (includeDiscountItems?: boolean) => Promise<any>;
 }
 
@@ -481,8 +493,8 @@ const InvoiceValidationSchema = Yup.object().shape({
     }),
   invoice_title: Yup.string()
     .required('Required'),
-/*  customer_po: Yup.string()
-    .required('Required'),*/
+  /*  customer_po: Yup.string()
+      .required('Required'),*/
   invoice_date: Yup.string()
     .required('Required'),
   due_date: Yup.string()
@@ -508,11 +520,12 @@ function BCEditInvoice({
   createInvoiceHandler,
   voidInvoiceHandler,
   getItems,
-}: Props) {
+  }: Props) {
   const invoiceStyles = invoicePageStyles();
   const invoiceTableStyle = useInvoiceTableStyles();
 
   const history = useHistory();
+  const dispatch = useDispatch();
   const simplifiedItems = invoiceData.items.map((item: any) => {
     const newItem = {...item.item, ...item};
     delete newItem.item;
@@ -521,7 +534,11 @@ function BCEditInvoice({
   })
   const [invoiceItems, setInvoiceItems] = useState(simplifiedItems);
 
-  const { itemTier, isCustomPrice, paymentTerm: customerPaymentTerm } = useMemo(() => customer, [customer]);
+  const {
+    itemTier,
+    isCustomPrice,
+    paymentTerm: customerPaymentTerm
+  } = useMemo(() => customer, [customer]);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [duedatePickerOpen, setDueDatePickerOpen] = useState(false);
   const [subTotal, setSubTotal] = useState(invoiceData?.subTotal || 0);
@@ -537,6 +554,9 @@ function BCEditInvoice({
   });
 
   const [options, setOptions] =  React.useState(['Save and Continue', 'Save and Send', 'Save as Draft']);
+
+  const [selectedComments, setSelectedComments] = useState<any[]>([]);
+  const [selectedImages, setSelectedImages] = useState<any[]>([]);
 
   let serviceAddressLocation: any = invoiceData?.job?.jobLocation ? ({
     name: invoiceData?.job?.jobLocation?.name || '',
@@ -570,6 +590,22 @@ function BCEditInvoice({
 
   const handleVoidInvoice = () => {
     voidInvoiceHandler(invoiceData._id)
+  }
+
+  const handleTicketClick = () => {
+    dispatch(setModalDataAction({
+      data: {
+        removeFooter: false,
+        maxHeight: '100%',
+        modalTitle: 'Job Details',
+        invoiceData,
+        isEditing: true
+      },
+      type: modalTypes.TICKET_DETAILS_MODAL
+    }));
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
   }
 
   const handleFormSubmit = (data: any) => {
@@ -654,7 +690,55 @@ function BCEditInvoice({
     return invoiceData.createdAt?.split('T')[0];
   }
 
-  useEffect(()=>{
+  const comments = (invoiceData.job?.tasks || [])
+    .filter((task: any) => task.comment)
+    .map((task: any) => {
+      return {
+        comment: task.comment,
+        id: task._id,
+      };
+    });
+  const technicianImages =
+    invoiceData.job?.technicianImages?.map((image: any) => ({
+      date: image.createdAt,
+      imageUrl: image.imageUrl,
+      uploader: image.uploadedBy?.profile?.displayName,
+    })) || [];
+
+  const technicianData = {
+    commentValues: comments,
+    images: technicianImages,
+  };
+
+  const jobData = {
+    commentValues: [{
+      comment: invoiceData?.job?.ticket?.note,
+      id: invoiceData?.job?.ticket?._id
+    }] || [],
+    images: invoiceData?.job?.ticket?.images || []
+  };
+  var isEditing = false;
+
+  const allComments = [...jobData.commentValues, ...technicianData.commentValues];
+  const allImages = [...jobData.images, ...technicianData.images];
+
+  jobData.commentValues = jobData.commentValues.filter((c: any) =>  invoiceData?.technicianMessages?.notes.filter((comment: any) => comment.id === c.id)?.length > 0);
+  jobData.images = jobData.images.filter((i: any) => invoiceData?.technicianMessages?.images.filter((image: any) => image === i.imageUrl)?.length > 0);
+
+  technicianData.commentValues = technicianData.commentValues.filter((c: any) => invoiceData?.technicianMessages?.notes.filter((comment: any) => comment.id === c.id)?.length > 0);
+  technicianData.images = technicianData.images.filter((i: any) => invoiceData?.technicianMessages?.images?.filter((image: any) => image === i.imageUrl)?.length > 0);
+
+
+  useEffect(() => {
+
+    // Set selected comments all if isEditing is true otherwise set selected comments to invoiceData.technicianMessages.notes
+    if (isEditing) {
+      setSelectedComments(allComments.filter((comment: any) => invoiceData.technicianMessages.notes.filter((c: any) => c.id === comment.id)?.length > 0));
+      setSelectedImages(allImages.filter((image: any) => invoiceData.technicianMessages.images.filter((i: any) => i === image.imageUrl)?.length > 0));
+    }
+  }, [])
+
+  useEffect(() => {
     if (invoiceData.locations?.length && currentDivision.data?.locationId) {
       let filteredLocation = invoiceData.locations.find((res: any) => res._id === currentDivision.data?.locationId);
       if (filteredLocation) {
@@ -667,7 +751,7 @@ function BCEditInvoice({
       }
     }else{
       setBillingAddress({
-        street : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.street ?? '' : invoiceData?.companyLocation?.billingAddress?.street ?? '') : invoiceData?.company?.address?.street,
+        street :  invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.street ?? '' : invoiceData?.companyLocation?.billingAddress?.street ?? '') : invoiceData?.company?.address?.street,
         city : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.city ?? '' : invoiceData?.companyLocation?.billingAddress?.city ?? '') : invoiceData?.company?.address?.city,
         state : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.state ?? '' : invoiceData?.companyLocation?.billingAddress?.state ?? '') : invoiceData?.company?.address?.state,
         zipCode : invoiceData?.companyLocation ? (invoiceData?.companyLocation?.isAddressAsBillingAddress ? invoiceData?.companyLocation?.address?.zipCode ?? '' : invoiceData?.companyLocation?.billingAddress?.zipCode ?? '') : invoiceData?.company?.address?.zipCode,
@@ -677,7 +761,6 @@ function BCEditInvoice({
 
   return (
     <MuiThemeProvider theme={theme}>
-      <BCMiniSidebar data={invoiceData} />
       <Formik
         initialValues={{
           invoice_id: invoiceData?._id,
@@ -697,14 +780,14 @@ function BCEditInvoice({
         }}
         validationSchema={InvoiceValidationSchema}
         validate ={(values: any) => {
-            const errors: any = {};
-            const indices = values.items.reduce((acc: any[], item:any, index:number) => {
-              if (item.name === '') acc.push(index)
-              return acc;
-            },[]);
-            if (indices.length > 0) errors.itemsNames = indices;
-            return errors;
-          }
+          const errors: any = {};
+          const indices = values.items.reduce((acc: any[], item:any, index:number) => {
+            if (item.name === '') acc.push(index)
+            return acc;
+          },[]);
+          if (indices.length > 0) errors.itemsNames = indices;
+          return errors;
+        }
         }
         onSubmit={(values, actions) => {
           switch (values.selectedSubmitAction) {
@@ -740,13 +823,39 @@ function BCEditInvoice({
                     <ArrowBackIcon/>
                   </IconButton>
                   {invoiceData?.isDraft &&
-                  <CSChip
-                    label={'Draft'}
-                    className={invoiceStyles.draftChip}
-                  />
+                    <CSChip
+                      label={'Draft'}
+                      className={invoiceStyles.draftChip}
+                    />
                   }
                 </div>
                 <div>
+                  {technicianData.commentValues.length > 0 || technicianData.images.length > 0 ? (
+                    <Badge
+                      badgeContent={1}
+                      color="secondary"
+                      overlap="rectangle"
+                      anchorOrigin={{vertical: 'top', horizontal: 'left'}}
+                    >
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        className={classNames(invoiceStyles.bcButton, invoiceStyles.bcTransparentBorder, invoiceStyles.bcRMargin)}
+                        onClick={handleTicketClick}
+                      >
+                        Job Details
+                      </Button>
+                    </Badge>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      className={classNames(invoiceStyles.bcButton, invoiceStyles.bcTransparentBorder, invoiceStyles.bcRMargin)}
+                      onClick={handleTicketClick}
+                    >
+                      Job Details
+                    </Button>
+                  )}
                   {!invoiceData?.isDraft && (
                     <Button
                       variant="contained"
@@ -1058,9 +1167,12 @@ function BCEditInvoice({
                         <Grid container spacing={1} className={invoiceStyles.customerBox}>
                           <Grid item xs={3} justify="flex-end" container>
                             <div>
-                              <div><span><PhoneIcon className={invoiceStyles.storeIcons}/></span></div>
-                              <div><span><MailOutlineIcon className={invoiceStyles.storeIcons}/></span></div>
-                              <div><span><StorefrontIcon className={invoiceStyles.storeIcons}/></span></div>
+                              <div><span><PhoneIcon className={invoiceStyles.storeIcons}/></span>
+                              </div>
+                              <div><span><MailOutlineIcon className={invoiceStyles.storeIcons}/></span>
+                              </div>
+                              <div><span><StorefrontIcon className={invoiceStyles.storeIcons}/></span>
+                              </div>
                             </div>
                           </Grid>
                           <Grid item xs={4}>
@@ -1177,6 +1289,66 @@ function BCEditInvoice({
                     </AccordionDetails>
                   </Accordion>
                 </Card>
+                {
+                  jobData && (jobData.commentValues?.length > 0 || jobData.images?.length > 0) &&
+                  <>
+                    <Card elevation={2}>
+                      <Accordion defaultExpanded>
+                        <AccordionSummary
+                          className={invoiceStyles.bgGray25}
+                          expandIcon={<ArrowDropDownIcon/>}
+                          aria-controls="technican-notes-to-customer"
+                        >
+                          JOB/TICKET DETAILS
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <BCTicketMessagesNotes invoiceData={jobData}
+                                                 selectedComments={selectedComments}
+                                                 setSelectedComments={setSelectedComments}
+                                                 selectedImages={selectedImages}
+                                                 setSelectedImages={setSelectedImages}
+                                                 isEditing={isEditing}
+                                                 isJob={true}
+                                                 isInvoiceMainView={true}
+                                                 isPadding={true}
+                                                 classes={classes.width100}
+                          />
+                        </AccordionDetails>
+                      </Accordion>
+                    </Card>
+                  </>
+                }
+
+                {
+                  technicianData && (technicianData.commentValues?.length > 0 || technicianData.images?.length > 0) &&
+                  <>
+                    <Card elevation={2}>
+                      <Accordion defaultExpanded>
+                        <AccordionSummary
+                          className={invoiceStyles.bgGray25}
+                          expandIcon={<ArrowDropDownIcon/>}
+                          aria-controls="technican-notes-to-customer"
+                        >
+                          TECHNICIAN NOTES/PICTURES
+                        </AccordionSummary>
+                        <AccordionDetails>
+
+                          <BCTicketMessagesNotes invoiceData={technicianData}
+                                                 selectedComments={selectedComments}
+                                                 setSelectedComments={setSelectedComments}
+                                                 selectedImages={selectedImages}
+                                                 setSelectedImages={setSelectedImages}
+                                                 isEditing={isEditing}
+                                                 isJob={false}
+                                                 isInvoiceMainView={true}
+                                                 isPadding={true}
+                                                 classes={classes.width100}
+                          />
+                        </AccordionDetails>
+                      </Accordion>
+                    </Card>
+                  </>
+                }
 
                 {/*                <Card elevation={2}>
                   <Accordion defaultExpanded>
@@ -1228,6 +1400,32 @@ function BCEditInvoice({
                   }
                 </div>
                 <div>
+                  {technicianData.commentValues.length > 0 || technicianData.images.length > 0 ? (
+                    <Badge
+                      badgeContent={1}
+                      color="secondary"
+                      overlap="rectangle"
+                      anchorOrigin={{vertical: 'top', horizontal: 'left'}}
+                    >
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        className={classNames(invoiceStyles.bcButton, invoiceStyles.bcTransparentBorder, invoiceStyles.bcRMargin)}
+                        onClick={handleTicketClick}
+                      >
+                        Job Details
+                      </Button>
+                    </Badge>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      className={classNames(invoiceStyles.bcButton, invoiceStyles.bcTransparentBorder, invoiceStyles.bcRMargin)}
+                      onClick={handleTicketClick}
+                    >
+                      Job Details
+                    </Button>
+                  )}
                   {!invoiceData?.isDraft && (
                     <Button
                       variant="contained"

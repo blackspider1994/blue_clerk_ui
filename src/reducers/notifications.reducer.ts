@@ -1,10 +1,10 @@
 import { NotificationState } from './notifications.types';
 import { Reducer } from 'redux';
-import { 
-  acceptOrRejectContractNotificationAction, 
-  dismissNotificationAction, 
-  loadNotificationsActions, 
-  markNotificationAsRead, 
+import {
+  acceptOrRejectContractNotificationAction,
+  dismissNotificationAction,
+  loadNotificationsActions,
+  markNotificationAsRead,
   showNotificationPopup,
 } from 'actions/notifications/notifications.action';
 import { NotificationItem } from 'app/components/bc-header/bc-header-notification';
@@ -21,7 +21,10 @@ const initialNotificationState: NotificationState = {
   },
   'notifications': [],
   'notificationOpen': false,
-
+  total: 0,
+  totalUnread: 0,
+  currentPage: 0,
+  pageSize: 10
 };
 
 export const NotificationsReducer: Reducer<any> = (
@@ -43,7 +46,9 @@ export const NotificationsReducer: Reducer<any> = (
       return {
         ...state,
         'loading': false,
-        'notifications': action.payload
+        'notifications': action.payload.notifications,
+        total: action.payload.total,
+        totalUnread: action.payload.totalUnread || 0
       };
     case loadNotificationsActions.fault.toString():
       return {
@@ -60,10 +65,10 @@ export const NotificationsReducer: Reducer<any> = (
     case dismissNotificationAction.success.toString():
       return {
         ...state,
-        'notifications': state.notifications.map((notification:NotificationItem) => {
-          if(notification._id === action.payload._id){
+        'notifications': state.notifications.map((notification: NotificationItem) => {
+          if (notification._id === action.payload._id) {
             const returnedNotification = action.payload;
-            if(notification?.metadata?.jobRequest?.requestId){
+            if (notification?.metadata?.jobRequest?.requestId) {
               returnedNotification.metadata.jobRequest = {
                 _id: notification.metadata.jobRequest._id,
                 requestId: notification.metadata.jobRequest.requestId

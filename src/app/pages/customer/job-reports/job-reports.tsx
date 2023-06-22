@@ -89,7 +89,7 @@ function JobReportsPage({ classes, theme }: any) {
     {
       'Header': 'Technician',
       'accessor': (originalRow: any) => {
-        return originalRow?.contractorsObj?.length === 1 ? originalRow?.contractorsObj[0]?.info?.displayName : 'N/A';
+        return originalRow?.contractorsObj?.length === 1 ? originalRow?.contractorsObj[0]?.info?.displayName || originalRow?.contractorsObj[0]?.info?.companyName : 'N/A';
       },
       'className': 'font-bold',
       'sortable': true
@@ -215,6 +215,7 @@ function JobReportsPage({ classes, theme }: any) {
     return  <BCDateRangePicker
       range={dateFilterRange}
       onChange={(range: Range | null) => {
+        dispatch(setCurrentPageIndex(0));
         dispatch(setDateFilterRange(range));
       }}
       showClearButton={true}
@@ -282,11 +283,13 @@ function JobReportsPage({ classes, theme }: any) {
                 }}
                 setKeywordFunction={(query: string) => {
                   dispatch(setKeyword(query));
-                  dispatch(getAllJobReportsAPI(currentPageSize, currentPageIndex,query, dateFilterRange, currentDivision.params))
+                  dispatch(setCurrentPageIndex(0));
+                  dispatch(getAllJobReportsAPI(currentPageSize, 0,query, dateFilterRange, currentDivision.params))
                 }}
                 setDateFilterRangeFunction={(range: Range) => {
                   dispatch(setDateFilterRange(range));
-                  dispatch(getAllJobReportsAPI(currentPageSize, currentPageIndex, keyword, range, currentDivision.params))
+                  dispatch(setCurrentPageIndex(0));
+                  dispatch(getAllJobReportsAPI(currentPageSize, 0, keyword, range, currentDivision.params))
                 }}
               />
             </div>

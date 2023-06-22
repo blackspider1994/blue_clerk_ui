@@ -166,7 +166,7 @@ function BCViewJobModal({
   // Format time
   const startTime = job.scheduledStartTime ? formatTime(job.scheduledStartTime) : 'N/A';
   const endTime = job.scheduledEndTime ? formatTime(job.scheduledEndTime) : 'N/A';
-  const scheduleTimeAMPM = job.scheduleTimeAMPM ? 
+  const scheduleTimeAMPM = job.scheduleTimeAMPM ?
     job.scheduleTimeAMPM === 1 ? 'AM' :
       job.scheduleTimeAMPM === 2 ? 'PM' :
         job.scheduleTimeAMPM === 3 ? 'All day' : 'N/A'
@@ -263,7 +263,7 @@ function BCViewJobModal({
       SetIsSubmitting(false);
     })
   }
-  
+
   return (
     <DataContainer className={'new-modal-design'}>
       <Grid container className={'modalPreview'} justify={'space-around'}>
@@ -385,8 +385,8 @@ function BCViewJobModal({
               }
               label={`HOUSE IS OCCUPIED`}
             />
-          </Grid> 
-          { 
+          </Grid>
+          {
             job.isHomeOccupied ? (
             <Grid container xs={12}>
               <Grid justify={'space-between'} xs>
