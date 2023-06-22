@@ -44,14 +44,13 @@ export const getTodos = async (params = {}) => {
 };
 
 let cancelTokenGetAllInvoicesForBulkPaymentsAPI: any;
-export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, selectionRange?: { startDate: Date; endDate: Date } | null, customerId?: string, dueDate?: Date | null, showPaid?: boolean, division?: DivisionParams) => {
+export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, currentPageIndex = 0, keyword?: string, selectionRange?: { startDate: Date; endDate: Date } | null, customerId?: string, dueDate?: Date | null, showPaid?: boolean, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setInvoicesForBulkPaymentsLoading(true));
       const optionObj: any = {
         pageSize,
-        previousCursor,
-        nextCursor,
+        currentPage: currentPageIndex,
         'isDraft': false
       };
       if (keyword) {
@@ -84,8 +83,6 @@ export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor =
         .then((res: any) => {
           const tempInvoices = res.data.invoices;
           dispatch(setInvoicesForBulkPayments(tempInvoices.reverse()));
-          dispatch(setPreviousInvoicesForBulkPaymentsCursor(res.data?.pagination?.previousCursor ? res.data?.pagination?.previousCursor : ''));
-          dispatch(setNextInvoicesForBulkPaymentsCursor(res.data?.pagination?.nextCursor ? res.data?.pagination?.nextCursor : ''));
           dispatch(setInvoicesForBulkPaymentsTotal(res.data?.total ? res.data?.total : 0));
           dispatch(setInvoicesForBulkPaymentsLoading(false));
           return resolve(res.data);
@@ -102,14 +99,13 @@ export const getAllInvoicesForBulkPaymentsAPI = (pageSize = 10, previousCursor =
 };
 
 let cancelTokenGetAllInvoicesAPI: any;
-export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, advanceFilterInvoiceData?: any, customerId?: string, customerContactId?: string, checkMissingPo?: boolean, invoicingModal?: boolean, dueDate?: Date | null, showPaid?: boolean, division?: DivisionParams) => {
+export const getAllInvoicesAPI = (pageSize = 10, currentPageIndex = 0, keyword?: string, advanceFilterInvoiceData?: any, customerId?: string, customerContactId?: string, checkMissingPo?: boolean, invoicingModal?: boolean, dueDate?: Date | null, showPaid?: boolean, division?: DivisionParams) => {
   return (dispatch: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       dispatch(setInvoicesLoading(true));
       const optionObj: any = {
         pageSize,
-        previousCursor,
-        nextCursor,
+        currentPage: currentPageIndex,
         'isDraft': false
       };
       if (keyword) {
@@ -201,8 +197,6 @@ export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor
         .then((res: any) => {
           const tempInvoices = res.data.invoices || [];
           dispatch(setInvoices(tempInvoices.reverse()));
-          dispatch(setPreviousInvoicesCursor(res.data?.pagination?.previousCursor ? res.data?.pagination?.previousCursor : ''));
-          dispatch(setNextInvoicesCursor(res.data?.pagination?.nextCursor ? res.data?.pagination?.nextCursor : ''));
           dispatch(setInvoicesTotal(res.data?.total ? res.data?.total : 0));
           dispatch(setUnsyncedInvoicesCount(res.data?.unsyncedInvoices));
           dispatch(setInvoicesLoading(false));
@@ -220,14 +214,13 @@ export const getAllInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor
 };
 
 let cancelTokenGetAllDraftInvoicesAPI: any;
-export const getAllDraftInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, recentOnly = false, division?: DivisionParams) => {
+export const getAllDraftInvoicesAPI = (pageSize = 10, currentPageIndex = 0, keyword?: string, recentOnly = false, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setDraftInvoicesLoading(true));
       const optionObj: any = {
         pageSize,
-        previousCursor,
-        nextCursor,
+        currentPage: currentPageIndex,
         'isDraft': true
       };
       if (keyword) {
@@ -249,8 +242,6 @@ export const getAllDraftInvoicesAPI = (pageSize = 10, previousCursor = '', nextC
         .then((res: any) => {
           const tempDraftInvoices = res.data.invoices;
           dispatch(setDraftInvoices(tempDraftInvoices.reverse()));
-          dispatch(setPreviousDraftInvoicesCursor(res.data?.pagination?.previousCursor ? res.data?.pagination?.previousCursor : ''));
-          dispatch(setNextDraftInvoicesCursor(res.data?.pagination?.nextCursor ? res.data?.pagination?.nextCursor : ''));
           dispatch(setDraftInvoicesTotal(res.data?.total ? res.data?.total : 0));
           dispatch(setDraftInvoicesLoading(false));
           return resolve(res.data);
@@ -267,14 +258,13 @@ export const getAllDraftInvoicesAPI = (pageSize = 10, previousCursor = '', nextC
 };
 
 let cancelTokenGetUnpaidInvoicesAPI: any;
-export const getUnpaidInvoicesAPI = (pageSize = 10, previousCursor = '', nextCursor = '', keyword?: string, selectionRange?: { startDate: Date; endDate: Date } | null, recentOnly = false, division?: DivisionParams) => {
+export const getUnpaidInvoicesAPI = (pageSize = 10, currentPageIndex = 0, keyword?: string, selectionRange?: { startDate: Date; endDate: Date } | null, recentOnly = false, division?: DivisionParams) => {
   return (dispatch: any) => {
     return new Promise((resolve, reject) => {
       dispatch(setUnpaidInvoicesLoading(true));
       const optionObj: any = {
         pageSize,
-        previousCursor,
-        nextCursor,
+        currentPage: currentPageIndex,
         'status': JSON.stringify(['UNPAID']),
         'isDraft': false
       };

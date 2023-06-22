@@ -297,13 +297,13 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
     dispatch(resetEmailState());
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
   };
 
   const closeModal = () => {
 
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
     dispatch(closeModalAction());
     setTimeout(() => {
       dispatch(setModalDataAction({
@@ -321,8 +321,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
     dispatch(setCurrentPageIndex(0));
     dispatch(getAllInvoicesAPI(
       currentPageSize,
-      undefined,
-      undefined,
+      currentPageIndex,
       '',
       { invoiceDateRange: selectionRange },
       customerValue?._id,
@@ -602,27 +601,34 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 tableData={localInvoiceList}
                 onRowClick={handleRowClick}
                 manualPagination
-                fetchFunction={(num: number, isPrev: boolean, isNext: boolean) => {
-                  dispatch(getAllInvoicesAPI(
-                    num || currentPageSize,
-                    isPrev ? prevCursor : undefined,
-                    isNext ? nextCursor : undefined,
-                    '',
-                    { invoiceDateRange: selectionRange },
-                    customerValue?._id,
-                    customerContactValue?.value,
-                    checkMissingPo,
-                    true,
-                    isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
-                    showValue === 'all',
-                    currentDivision.params
-                  ))
-                }}
+                // fetchFunction={(num: number, isPrev: boolean, isNext: boolean) => {
+                //   dispatch(getAllInvoicesAPI(
+                //     num || currentPageSize,
+                //     isPrev ? prevCursor : undefined,
+                //     isNext ? nextCursor : undefined,
+                //     '',
+                //     { invoiceDateRange: selectionRange },
+                //     customerValue?._id,
+                //     customerContactValue?.value,
+                //     checkMissingPo,
+                //     true,
+                //     isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
+                //     showValue === 'all',
+                //     currentDivision.params
+                //   ))
+                // }}
                 total={total}
                 currentPageIndex={currentPageIndex}
-                setCurrentPageIndexFunction={(num: number) => dispatch(setCurrentPageIndex(num))}
+                setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
+                  dispatch(setCurrentPageIndex(num));
+                  if (apiCall)
+                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, undefined, currentDivision.params))
+                }}
                 currentPageSize={currentPageSize}
-                setCurrentPageSizeFunction={(num: number) => dispatch(setCurrentPageSize(num))}
+                setCurrentPageSizeFunction={(num: number) => {
+                  dispatch(setCurrentPageSize(num));
+                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, undefined, currentDivision.params))
+                }}
                 setKeywordFunction={(query: string) => dispatch(setKeyword(query))}
               />
             </DialogContent>
