@@ -12,6 +12,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'reducers';
 import BcInput from 'app/components/bc-input/bc-input';
 import { replaceAmountToDecimal } from 'utils/validation';
+import { updateJobCommission } from 'api/invoicing.api';
+import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
+import { modalTypes } from '../../../constants';
+import {
+  error as errorSnackBar,
+  success,
+} from 'actions/snackbar/snackbar.action';
 
 const initialJobState = {
   customer: {
@@ -50,7 +57,6 @@ function BCEditJobCostingModal({
   classes,
   job = initialJobState,
 }: any): JSX.Element {
-  console.log("JOB", job)
   const costingList = useSelector(
     ({ InvoiceJobCosting }: any) => InvoiceJobCosting.costingList
   );
@@ -58,13 +64,34 @@ function BCEditJobCostingModal({
     ({ invoiceItems }: RootState) => invoiceItems
   ),
     dispatch = useDispatch(),
+    [editing, setEdit] = useState(false),
+    [loading, setLoading] = useState(false),
     updateFields: {
       [key: string]: any;
-    } = { additions: { amount: 0, note: "" }, deductions: { amount: 0, note: "" } },
+    } = { addition: { amount: 0, note: "" }, deduction: { amount: 0, note: "" } },
     [update, setUpdates] = useState(updateFields),
     technicianTier = costingList?.find(({ tier }: { tier: any }) => tier?._id === job.contractorsObj[0]?.commissionTier)?.tier,
-    jobCostingCharge = items?.find(({ jobType }) => jobType === job.tasks[0]?.jobTypes[0]?.jobType?._id)?.costing?.find(({ tier }) => tier?._id === technicianTier?._id)?.charge,
-    technicianAmount = jobCostingCharge + Number(update.additions.amount) - Number(update.deductions.amount)
+    jobCostingCharge = items?.find(({ jobType }) => jobType === job.tasks[0]?.jobTypes[0]?.jobType?._id)?.costing?.find(({ tier }) => tier?._id === technicianTier?._id)?.charge || "0",
+    technicianAmount = jobCostingCharge + Number(update.addition.amount) - Number(update.deduction.amount)
+
+  console.log("jobCostingCharge", jobCostingCharge)
+
+  const openDetailJobModal = () => {
+    dispatch(
+      setModalDataAction({
+        data: {
+          job: job,
+          removeFooter: false,
+          maxHeight: '100%',
+          modalTitle: 'View Job',
+        },
+        type: modalTypes.VIEW_JOB_MODAL,
+      })
+    );
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
+  };
 
   return (
     <DataContainer className={'new-modal-design'}>
@@ -111,13 +138,13 @@ function BCEditJobCostingModal({
               </Grid>
               <Grid item xs={12}>
                 <Typography variant={'body1'}>
-                  ${jobCostingCharge}
+                  ${replaceAmountToDecimal(String(jobCostingCharge))}
                 </Typography>
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={12} className='additions'>
-            <Typography variant={'body1'} className={'previewCaption'}>additions and deductions</Typography>
+          <Grid item xs={12} className='addition'>
+            <Typography variant={'body1'} className={'previewCaption'}>addition and deduction</Typography>
           </Grid>
           <Grid container alignItems='center' spacing={2}>
             {Object.keys(updateFields).map((key) => {
@@ -138,17 +165,18 @@ function BCEditJobCostingModal({
               return <Grid item xs={12} key={key}>
                 <Grid container alignItems='center' spacing={4}>
                   <Grid item xs={3}>
-                    <Typography variant={'body1'} className={'previewCaption'}>{key}</Typography>
+                    <Typography variant={'body1'} className={'previewCaption'}>{key}s</Typography>
                   </Grid>
                   <Grid item xs={3}>
                     <BcInput
-                      onBlur={(e: any) => handleChange(e, true)}
-                      handleChange={handleChange}
                       name='amount'
                       value={amount}
                       type="number"
                       margin={'none'}
                       placeholder="$0.00"
+                      disabled={!editing}
+                      handleChange={handleChange}
+                      onBlur={(e: any) => handleChange(e, true)}
                       inputProps={{
                         style: {
                           padding: '12px 14px',
@@ -163,12 +191,13 @@ function BCEditJobCostingModal({
                   </Grid>
                   <Grid item xs={5}>
                     <BcInput
-                      onBlur={handleChange}
-                      handleChange={handleChange}
                       name={'note'}
                       value={note}
                       margin={'none'}
                       placeholder="Note"
+                      disabled={!editing}
+                      onBlur={handleChange}
+                      handleChange={handleChange}
                       inputProps={{
                         style: {
                           padding: '12px 14px',
@@ -186,29 +215,44 @@ function BCEditJobCostingModal({
             })}
           </Grid>
           <hr />
-          <Grid item xs={12} className='additions'>
+          <Grid item xs={12} className='addition'>
             <Grid container justify='flex-end'>
-              <Typography variant={'body1'}>Technician Amount: ${technicianAmount}</Typography>
+              <Typography variant={'body1'}>Technician Amount: ${replaceAmountToDecimal(String((technicianAmount)))}</Typography>
             </Grid>
           </Grid>
         </Grid>
       </div>
       <DialogActions>
-        <Grid container alignItems='center' justify='space-between'>
+        <Grid container alignItems='center' justify='space-between' direction={editing ? `row-reverse` : 'row'}>
           <Button
-            color={'primary'}
-            onClick={() => console.log("BIG")}
-            variant={'contained'}
-          >Complete</Button>
+            color='primary'
+            disabled={loading || (editing && (!update.addition.amount || !update.deduction.amount))}
+            onClick={async () => {
+              if (!editing) return setEdit(true)
+              try {
+                setLoading(true)
+                await updateJobCommission(job.contractorsObj[0]?._id, { ...update, balance: technicianAmount })
+                dispatch(success(`Update successful`));
+                setEdit(false)
+              } catch (error) {
+                dispatch(errorSnackBar('Error updating commission'));
+              }
+              setLoading(false)
+            }}
+            variant='contained'
+          >{editing ? 'Complete' : 'Edit'}</Button>
           <Button
-            aria-label={'record-payment'}
-            onClick={() => console.log("CLOSING")}
+            aria-label='update-job-costing'
+            onClick={async () => {
+              if (editing) return setEdit(false)
+              openDetailJobModal()
+            }}
             classes={{
               root: classes.closeButton,
             }}
-            variant={'outlined'}
+            variant='outlined'
           >
-            Go Back
+            {editing ? 'Cancel' : 'Go Back'}
           </Button>
         </Grid>
       </DialogActions>
@@ -223,7 +267,7 @@ const DataContainer = styled.div`
     padding-top: 15px !important;
   }
 
-  .additions {
+  .addition {
     margin-top: 25px !important;
   }
 
