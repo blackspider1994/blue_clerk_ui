@@ -514,7 +514,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
   }, 500);
 
   return (
@@ -632,6 +632,9 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 setCurrentPageSizeFunction={(num: number) => {
                   dispatch(setCurrentPageSize(num));
                   dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+                }}
+                setKeywordFunction={(query: string) => {
+                  desbouncedSearchFunction(query);
                 }}
               />
             </DialogContent>

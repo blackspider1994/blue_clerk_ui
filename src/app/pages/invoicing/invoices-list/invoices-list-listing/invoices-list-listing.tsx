@@ -452,7 +452,7 @@ function InvoicingListListing({ classes, theme }: any) {
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
   }, 500);
 
   return (
@@ -483,6 +483,9 @@ function InvoicingListListing({ classes, theme }: any) {
         setCurrentPageSizeFunction={(num: number) => {
           dispatch(setCurrentPageSize(num));
           dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+        }}
+        setKeywordFunction={(query: string) => {
+          desbouncedSearchFunction(query);
         }}
         disableInitialSearch={location?.state?.tab !== 1}
         rowTooltip={rowTooltip}
