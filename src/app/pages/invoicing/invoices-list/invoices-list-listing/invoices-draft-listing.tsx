@@ -125,7 +125,7 @@ function InvoicingDraftListing({ classes, theme }: any) {
 
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setDraftKeyword(keyword));
-    dispatch(setCurrentDraftPageSize(0));
+    dispatch(setCurrentDraftPageIndex(0));
     dispatch(getAllDraftInvoicesAPI(currentPageSize, 0, keyword, undefined,currentDivision.params))
   }, 500);
 
