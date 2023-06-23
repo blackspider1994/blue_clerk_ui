@@ -15,6 +15,7 @@ import {
   setDraftKeyword,
 } from 'actions/invoicing/invoicing.action';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import debounce from 'lodash.debounce';
 
 const getFilteredList = (state: any) => {
   const sortedInvoices = TableFilterService.filterByDateDesc(state?.invoiceList.draft);
@@ -121,6 +122,13 @@ function InvoicingDraftListing({ classes, theme }: any) {
     }
   }
 
+
+  const desbouncedSearchFunction = debounce((keyword: string) => {
+    dispatch(setDraftKeyword(keyword));
+    dispatch(setCurrentDraftPageSize(0));
+    dispatch(getAllDraftInvoicesAPI(currentPageSize, 0, keyword, undefined,currentDivision.params))
+  }, 500);
+
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -148,7 +156,9 @@ function InvoicingDraftListing({ classes, theme }: any) {
           dispatch(setCurrentDraftPageSize(num))
           dispatch(getAllDraftInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, undefined,currentDivision.params))
         }}
-        setKeywordFunction={(query: string) => dispatch(setDraftKeyword(query))}
+        setKeywordFunction={(query: string) => {
+          desbouncedSearchFunction(query);
+        }}
         disableInitialSearch={location?.state?.tab !== 2}
         rowTooltip={rowTooltip}
       />
