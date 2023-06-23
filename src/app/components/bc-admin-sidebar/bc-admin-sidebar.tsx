@@ -344,11 +344,11 @@ function BCAdminSidebar({
       'link': '/main/admin/vendors',
       'flag': currentDivision.isDivisionFeatureActivated && vendors.unsignedVendorsFlag
     },
-    {
-      'label': 'Payroll',
-      'icon': <PaymentIcon />,
-      'link': '/main/admin/payroll'
-    },
+    // {
+    //   'label': 'Payroll',
+    //   'icon': <PaymentIcon />,
+    //   'link': '/main/admin/payroll'
+    // },
     {
       'label': 'Integrations',
       'icon': <SettingsApplicationsIcon />,
