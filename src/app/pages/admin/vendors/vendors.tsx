@@ -231,7 +231,7 @@ function AdminVendorsPage({ classes }: any) {
       sortable: true,
       Cell({ row }: any) {
         return (
-          <span>{row.original?.vendor || row.original?.contractorEmail}</span>
+          <span>{(row.original?.vendor || row.original?.contractorEmail).substring(0, 20)}</span>
         );
       },
     },
@@ -253,12 +253,22 @@ function AdminVendorsPage({ classes }: any) {
       accessor: 'contact.displayName',
       className: 'font-bold',
       sortable: true,
+      Cell({ row }: any) {
+        return (
+          <span>{row.original?.contact?.displayName?.substring(0, 20)}</span>
+        );
+      },
     },
     {
       Header: 'Contact Email',
       accessor: 'contact.email',
       className: 'font-bold',
       sortable: true,
+      Cell({ row }: any) {
+        return (
+          <span>{row.original?.contact?.email?.substring(0, 20)}</span>
+        );
+      },
     },
     {
       Header: 'Contact Phone',
