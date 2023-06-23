@@ -127,7 +127,8 @@ function BCServiceTicketModal(
     newValue: any
   ) => {
     const customerId = newValue ? newValue._id : '';
-    await setFieldValue(fieldName, '');
+    // await setFieldValue(fieldName, '');
+    await setFieldValue(fieldName, customerId);
     await setFieldValue('jobLocationId', '');
     await setFieldValue('jobSiteId', '');
     await setFieldValue('customerContactId', '');
@@ -160,7 +161,7 @@ function BCServiceTicketModal(
       await dispatch(getJobLocationsAction({customerId, isActive: true}));
     }
 
-    await setFieldValue(fieldName, customerId);
+    // await setFieldValue(fieldName, customerId);
   };
 
   const handleContactChange = (
