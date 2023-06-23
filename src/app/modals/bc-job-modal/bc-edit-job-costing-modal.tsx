@@ -70,7 +70,8 @@ function BCEditJobCostingModal({
       [key: string]: any;
     } = { addition: { amount: 0, note: "" }, deduction: { amount: 0, note: "" } },
     [update, setUpdates] = useState(updateFields),
-    technicianTier = costingList?.find(({ tier }: { tier: any }) => tier?._id === job.contractorsObj[0]?.commissionTier)?.tier,
+    commissionTier = job?.tasks?.length ? job?.tasks[0].contractor?.commissionTier : job.contractorsObj[0]?.commissionTier,
+    technicianTier = costingList?.find(({ tier }: { tier: any }) => tier?._id === (commissionTier))?.tier,
     jobCostingCharge = items?.find(({ jobType }) => jobType === job.tasks[0]?.jobTypes[0]?.jobType?._id)?.costing?.find(({ tier }) => tier?._id === technicianTier?._id)?.charge || "0",
     technicianAmount = jobCostingCharge + Number(update.addition.amount) - Number(update.deduction.amount)
 
