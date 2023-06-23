@@ -19,6 +19,7 @@ import { setCurrentUnpaidPageIndex, setCurrentUnpaidPageSize, setUnpaidKeyword }
 import moment from "moment";
 import TableFilterService from 'utils/table-filter';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import debounce from 'lodash.debounce';
 
 const getSortedInvoices = (state: any) => {
   return TableFilterService.filterByDateDesc(state?.invoiceList.unpaid);
@@ -228,6 +229,12 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
     }
   }
   
+  const desbouncedSearchFunction = debounce((keyword: string) => {
+    dispatch(setUnpaidKeyword(keyword));
+    dispatch(setCurrentUnpaidPageIndex(0));
+    dispatch(getUnpaidInvoicesAPI(currentPageSize, 0, keyword, selectionRange,undefined,currentDivision.params))
+  }, 500);
+
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -257,7 +264,9 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
           dispatch(setCurrentUnpaidPageSize(num));
           dispatch(getUnpaidInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, selectionRange,undefined,currentDivision.params))
         }}
-        setKeywordFunction={(query: string) => dispatch(setUnpaidKeyword(query))}
+        setKeywordFunction={(query: string) => {
+          desbouncedSearchFunction(query);
+        }}
         disableInitialSearch={location?.state?.tab !== 0}
         rowTooltip={rowTooltip}
       />
