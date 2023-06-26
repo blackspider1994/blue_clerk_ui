@@ -231,7 +231,19 @@ function InvoicingListListing({ classes, theme }: any) {
     if (location?.state?.tab === 1 && (location?.state?.option?.search || location?.state?.option?.pageSize || location?.state?.option?.lastPrevCursor
       || location?.state?.option?.lastNextCursor || location?.state?.option?.currentPageIndex)) {
       dispatch(setKeyword(location.state.option.search));
-      dispatch(getAllInvoicesAPI(location.state.option.pageSize,  location?.state?.option?.pageSizeIndex, location.state.option.search, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params));
+      dispatch(getAllInvoicesAPI(
+        location.state.option.pageSize,
+        location?.state?.option?.currentPageIndex,
+        location.state.option.search,
+        advanceFilterInvoiceData,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        currentDivision.params
+        ));
       dispatch(setCurrentPageSize(location.state.option.pageSize));
       dispatch(setCurrentPageIndex(location?.state?.option?.currentPageIndex || 0));
       window.history.replaceState({}, document.title)
@@ -477,12 +489,12 @@ function InvoicingListListing({ classes, theme }: any) {
         setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
           dispatch(setCurrentPageIndex(num));
           if (apiCall)
-            dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, advanceFilterInvoiceData,  undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
+            dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
         }}
         currentPageSize={currentPageSize}
         setCurrentPageSizeFunction={(num: number) => {
           dispatch(setCurrentPageSize(num));
-          dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData,  undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
+          dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
         }}
         setKeywordFunction={(query: string) => {
           desbouncedSearchFunction(query);
