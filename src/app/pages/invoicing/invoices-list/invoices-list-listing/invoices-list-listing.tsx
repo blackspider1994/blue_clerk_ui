@@ -29,6 +29,8 @@ import {
 import { resetAdvanceFilterInvoice } from 'actions/advance-filter/advance-filter.action'
 import { initialAdvanceFilterInvoiceState } from 'reducers/advance-filter.reducer';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import debounce from 'lodash.debounce';
+
 const getFilteredList = (state: any) => {
   const sortedInvoices = TableFilterService.filterByDateDesc(state?.invoiceList.data);
   return sortedInvoices.filter((invoice: any) => !invoice.isDraft);
@@ -447,6 +449,12 @@ function InvoicingListListing({ classes, theme }: any) {
     }
   }
 
+  const desbouncedSearchFunction = debounce((keyword: string) => {
+    dispatch(setKeyword(keyword));
+    dispatch(setCurrentPageIndex(0));
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData,  undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
+  }, 500);
+
   return (
     <DataContainer id={'0'}>
       <BCTableContainer
@@ -460,11 +468,9 @@ function InvoicingListListing({ classes, theme }: any) {
         toolbar={Toolbar()}
         manualPagination
         // fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
-        //   console.log(nextCursor);
-          
         //   setLastPrevCursor(isPrev ? prevCursor : undefined)
         //   setLastNextCursor(isNext ? nextCursor : undefined)
-        //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+        //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
         // }}
         total={total}
         currentPageIndex={currentPageIndex}
@@ -476,9 +482,11 @@ function InvoicingListListing({ classes, theme }: any) {
         currentPageSize={currentPageSize}
         setCurrentPageSizeFunction={(num: number) => {
           dispatch(setCurrentPageSize(num));
-          dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+          dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData,  undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
         }}
-        setKeywordFunction={(query: string) => dispatch(setKeyword(query))}
+        setKeywordFunction={(query: string) => {
+          desbouncedSearchFunction(query);
+        }}
         disableInitialSearch={location?.state?.tab !== 1}
         rowTooltip={rowTooltip}
       />

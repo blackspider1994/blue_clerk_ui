@@ -103,6 +103,7 @@ const PayrollReportsPage = React.lazy(() => import('../payroll/reports/reports')
 const RevenueReportsPage = React.lazy(() => import('../reports/customers/revenue-reports/revenue'));
 const ARReportsPage = React.lazy(() => import('../reports/customers/ar-report'));
 const NewPayrollReportsPage = React.lazy(() => import('../reports/vendors/payroll-reports/payroll'));
+const DataPage = React.lazy(() => import('../admin/data/data'))
 
 const activeJobRequest = process.env.REACT_APP_JOB_REQUEST_ACTIVE
 
@@ -754,7 +755,12 @@ function Main(): any {
                   path={'/main/admin/vendors/:contractorName'}
                   title={'Admin'}
                 />
-
+                <AuthRoute
+                  Component={DataPage}
+                  exact
+                  path={'/main/admin/data'}
+                  title={'Data'}
+                />
                 <Redirect
                   exact
                   from={`/main/reports`}

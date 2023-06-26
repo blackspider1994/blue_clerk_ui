@@ -510,6 +510,13 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
     }
   }, [invoiceList])
 
+
+  const desbouncedSearchFunction = debounce((keyword: string) => {
+    dispatch(setKeyword(keyword));
+    dispatch(setCurrentPageIndex(0));
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, undefined, currentDivision.params))
+  }, 500);
+
   return (
     <DataContainer className={'new-modal-design'}>
       {isSuccess ? (
@@ -601,34 +608,37 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 tableData={localInvoiceList}
                 onRowClick={handleRowClick}
                 manualPagination
-                fetchFunction={(num: number, isPrev: boolean, isNext: boolean) => {
-                  dispatch(getAllInvoicesAPI(
-                    currentPageSize,
-                    num,
-                    '',
-                    { invoiceDateRange: selectionRange },
-                    customerValue?._id,
-                    customerContactValue?.value,
-                    checkMissingPo,
-                    true,
-                    isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
-                    showValue === 'all',
-                    currentDivision.params
-                  ))
-                }}
+                // fetchFunction={(num: number, isPrev: boolean, isNext: boolean) => {
+                //   dispatch(getAllInvoicesAPI(
+                //     num || currentPageSize,
+                //     isPrev ? prevCursor : undefined,
+                //     isNext ? nextCursor : undefined,
+                //     '',
+                //     { invoiceDateRange: selectionRange },
+                //     customerValue?._id,
+                //     customerContactValue?.value,
+                //     checkMissingPo,
+                //     true,
+                //     isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
+                //     showValue === 'all',
+                //     currentDivision.params
+                //   ))
+                // }}
                 total={total}
                 currentPageIndex={currentPageIndex}
                 setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
                   dispatch(setCurrentPageIndex(num));
                   if (apiCall)
-                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, showValue === 'all', currentDivision.params))
                 }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => {
                   dispatch(setCurrentPageSize(num));
-                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, showValue === 'all', currentDivision.params))
                 }}
-                setKeywordFunction={(query: string) => dispatch(setKeyword(query))}
+                setKeywordFunction={(query: string) => {
+                  desbouncedSearchFunction(query);
+                }}
               />
             </DialogContent>
           </>

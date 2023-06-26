@@ -1,5 +1,5 @@
-import React from "react";
-import { Chip, createStyles, Divider, Grid, withStyles } from "@material-ui/core";
+import React, {useEffect, useState} from "react";
+import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, CardHeader, Chip, createStyles, Divider, Grid, withStyles, Typography } from "@material-ui/core";
 import styles from "./bc-invoice.styles";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import * as CONSTANTS from "../../../constants";
@@ -8,6 +8,10 @@ import moment from "moment";
 
 import classNames from "classnames";
 import {formatCurrency} from "../../../helpers/format";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import BCTicketMessagesNotes
+  from "../../modals/bc-add-ticket-details-modal/bc-ticket-messages-notes";
+import {LABEL_GREY} from "../../../constants";
 
 interface Props {
   classes?: any;
@@ -190,6 +194,12 @@ const invoicePageStyles = makeStyles((theme: Theme) =>
         }
       }
     },
+    bgGray: {
+      border: '1px solid #f5f5f5;'
+    },
+    marginBottom40Px :{
+      marginBottom: '40px'
+    },
     invoiceBottomInfo: {
       '& > p': {
         marginTop: theme.spacing(2),
@@ -260,11 +270,62 @@ const invoiceTableStyles = makeStyles((theme: Theme) =>
 function BCInvoice({ classes, invoiceDetail }: Props) {
   const invoiceStyles = invoicePageStyles();
   const invoiceTableStyle = invoiceTableStyles();
-/*  const dispatch = useDispatch();
-  if (invoiceDetail.customer) {
-    dispatch(getCustomerDetailAction({customerId: invoiceDetail.customer._id}));
-  }
-  dispatch(getAllSalesTaxAPI());*/
+  /*  const dispatch = useDispatch();
+    if (invoiceDetail.customer) {
+      dispatch(getCustomerDetailAction({customerId: invoiceDetail.customer._id}));
+    }
+    dispatch(getAllSalesTaxAPI());*/
+
+  const [selectedComments, setSelectedComments] = useState<any[]>([]);
+  const [selectedImages, setSelectedImages] = useState<any[]>([]);
+
+  const comments = (invoiceDetail.job?.tasks || [])
+    .filter((task: any) => task.comment)
+    .map((task: any) => {
+      return {
+        comment: task.comment,
+        id: task._id,
+      };
+    });
+  const technicianImages =
+    invoiceDetail.job?.technicianImages?.map((image: any) => ({
+      date: image.createdAt,
+      imageUrl: image.imageUrl,
+      uploader: image.uploadedBy?.profile?.displayName,
+    })) || [];
+
+  const technicianData = {
+    commentValues: comments,
+    images: technicianImages,
+  };
+
+  const jobData = {
+    commentValues: [{
+      comment:  invoiceDetail?.job?.description|| invoiceDetail?.job?.ticket?.note || '',
+      id: invoiceDetail?.job?.ticket?._id
+    }] || [],
+    images: invoiceDetail?.job?.ticket?.images || []
+  };
+  var isEditing = false;
+
+  const allComments = [...jobData.commentValues, ...technicianData.commentValues];
+  const allImages = [...jobData.images, ...technicianData.images];
+
+  jobData.commentValues = jobData.commentValues.filter((c: any) => invoiceDetail?.technicianMessages?.notes.filter((comment: any) => comment.id === c.id)?.length > 0);
+  jobData.images = jobData.images.filter((i: any) => invoiceDetail?.technicianMessages?.images.filter((image: any) => image === i.imageUrl)?.length > 0);
+
+  technicianData.commentValues = technicianData.commentValues.filter((c: any) => invoiceDetail?.technicianMessages?.notes.filter((comment: any) => comment.id === c.id)?.length > 0);
+  technicianData.images = technicianData.images.filter((i: any) => invoiceDetail?.technicianMessages?.images?.filter((image: any) => image === i.imageUrl)?.length > 0);
+
+  useEffect(() => {
+
+    // Set selected comments all if isEditing is true otherwise set selected comments to invoiceData.technicianMessages.notes
+    if (isEditing) {
+      setSelectedComments(allComments.filter((comment: any) => invoiceDetail.technicianMessages.notes.filter((c: any) => c.id === comment.id)?.length > 0));
+      setSelectedImages(allImages.filter((image: any) => invoiceDetail.technicianMessages.images.filter((i: any) => i === image.imageUrl)?.length > 0));
+    }
+  }, [])
+
   const composeAddress = () => {
     let address = '';
     if (invoiceDetail?.customer?.contact?.phone)  address+= invoiceDetail?.customer?.contact?.phone + '\n';
@@ -320,6 +381,9 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
   return (
     <DataContainer>
       <div className={invoiceStyles.invoiceTop}>
+        {invoiceDetail?.job?._id &&
+          <Typography variant={'caption'} className={'jobIdText'}>{invoiceDetail?.job?.jobId}</Typography>
+        }
         <Grid container>
           <Grid item xs={12} sm={6}>
             <Grid container spacing={4}>
@@ -377,7 +441,7 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
                 <div className={invoiceStyles.companyDetails}>
                   <div className={invoiceStyles.companyInfo}>
                     <small>CONTACT DETAILS</small>
-                    {invoiceDetail?.customerContactId && composeContactDetail().split('\n').map((detail,index)=>(
+                    {invoiceDetail?.customerContactId && composeContactDetail().split('\n').map((detail, index) => (
                       <span key={index} style={{color: '#000000'}}>{detail}</span>
                     ))}
                   </div>
@@ -429,7 +493,7 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
                     <VerticalCenterLabel>CUSTOMER P.O. : <FixedWidthSpan>{invoiceDetail.customerPO}</FixedWidthSpan></VerticalCenterLabel>
                     <VerticalCenterLabel>Payment Terms : <FixedWidthSpan>{invoiceDetail?.paymentTerm?.name}</FixedWidthSpan></VerticalCenterLabel>
                   </div>
-                  <Divider className={invoiceStyles.divider} orientation="vertical" flexItem />
+                  <Divider className={invoiceStyles.divider} orientation="vertical" flexItem/>
                   <div>
                     <label>INVOICE DATE #: <span>{moment(invoiceDetail.issuedDate?.split('T')[0] || invoiceDetail.createdAt?.split('T')[0]).format('MMM. DD, YYYY')}</span></label>
                     <label>DUE DATE #: <span>{moment(invoiceDetail.dueDate?.split('T')[0]).format('MMM. DD, YYYY')}</span></label>
@@ -556,7 +620,42 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
             </div>
           </div>
         </div>
-        <Divider/>
+        <Divider className={invoiceStyles.marginBottom40Px}/>
+
+        {
+          jobData && (jobData.commentValues?.length > 0 || jobData.images?.length > 0) &&
+          <>
+            <BCTicketMessagesNotes invoiceData={jobData}
+               selectedComments={selectedComments}
+               setSelectedComments={setSelectedComments}
+               selectedImages={selectedImages}
+               setSelectedImages={setSelectedImages}
+               isEditing={isEditing}
+               isJob={true}
+               isInvoiceMainView={false}
+               isPadding={false}
+               classes={classes.width100}
+            />
+          </>
+        }
+        <hr className={invoiceStyles.bgGray}/>
+        {
+          technicianData && (technicianData.commentValues?.length > 0 || technicianData.images?.length > 0) &&
+          <>
+            <BCTicketMessagesNotes invoiceData={technicianData}
+               selectedComments={selectedComments}
+               setSelectedComments={setSelectedComments}
+               selectedImages={selectedImages}
+               setSelectedImages={setSelectedImages}
+               isEditing={isEditing}
+               isJob={false}
+               isInvoiceMainView={false}
+               isPadding={false}
+               classes={classes.width100}
+            />
+          </>
+        }
+
       </div>
     </DataContainer>
   )
