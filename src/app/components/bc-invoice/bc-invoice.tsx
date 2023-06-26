@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, CardHeader, Chip, createStyles, Divider, Grid, withStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, CardHeader, Chip, createStyles, Divider, Grid, withStyles, Typography } from "@material-ui/core";
 import styles from "./bc-invoice.styles";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import * as CONSTANTS from "../../../constants";
@@ -301,7 +301,7 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
 
   const jobData = {
     commentValues: [{
-      comment: invoiceDetail?.job?.ticket?.note,
+      comment:  invoiceDetail?.job?.description|| invoiceDetail?.job?.ticket?.note || '',
       id: invoiceDetail?.job?.ticket?._id
     }] || [],
     images: invoiceDetail?.job?.ticket?.images || []
@@ -381,6 +381,9 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
   return (
     <DataContainer>
       <div className={invoiceStyles.invoiceTop}>
+        {invoiceDetail?.job?._id &&
+          <Typography variant={'caption'} className={'jobIdText'}>{invoiceDetail?.job?.jobId}</Typography>
+        }
         <Grid container>
           <Grid item xs={12} sm={6}>
             <Grid container spacing={4}>
@@ -623,15 +626,15 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
           jobData && (jobData.commentValues?.length > 0 || jobData.images?.length > 0) &&
           <>
             <BCTicketMessagesNotes invoiceData={jobData}
-                                   selectedComments={selectedComments}
-                                   setSelectedComments={setSelectedComments}
-                                   selectedImages={selectedImages}
-                                   setSelectedImages={setSelectedImages}
-                                   isEditing={isEditing}
-                                   isJob={true}
-                                   isInvoiceMainView={false}
-                                   isPadding={false}
-                                   classes={classes.width100}
+               selectedComments={selectedComments}
+               setSelectedComments={setSelectedComments}
+               selectedImages={selectedImages}
+               setSelectedImages={setSelectedImages}
+               isEditing={isEditing}
+               isJob={true}
+               isInvoiceMainView={false}
+               isPadding={false}
+               classes={classes.width100}
             />
           </>
         }
@@ -640,15 +643,15 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
           technicianData && (technicianData.commentValues?.length > 0 || technicianData.images?.length > 0) &&
           <>
             <BCTicketMessagesNotes invoiceData={technicianData}
-                                   selectedComments={selectedComments}
-                                   setSelectedComments={setSelectedComments}
-                                   selectedImages={selectedImages}
-                                   setSelectedImages={setSelectedImages}
-                                   isEditing={isEditing}
-                                   isJob={false}
-                                   isInvoiceMainView={false}
-                                   isPadding={false}
-                                   classes={classes.width100}
+               selectedComments={selectedComments}
+               setSelectedComments={setSelectedComments}
+               selectedImages={selectedImages}
+               setSelectedImages={setSelectedImages}
+               isEditing={isEditing}
+               isJob={false}
+               isInvoiceMainView={false}
+               isPadding={false}
+               classes={classes.width100}
             />
           </>
         }
