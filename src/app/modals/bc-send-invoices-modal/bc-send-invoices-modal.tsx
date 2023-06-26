@@ -33,10 +33,12 @@ import {
   formatDatTimelll,
   formatShortDateNoDay
 } from 'helpers/format';
+import { useCustomStyles } from "helpers/custom";
 import {
   getAllInvoicesAPI,
   getAllInvoicesForBulkPaymentsAPI
 } from 'api/invoicing.api';
+import { getContacts } from 'api/contacts.api';
 import {
   setCurrentPageIndex,
   setCurrentPageSize,
@@ -55,6 +57,9 @@ import { resetEmailState } from "../../../actions/email/email.action";
 import { setTimeout } from 'timers';
 import { PaymentStatus } from 'app/pages/invoicing/invoices-list/invoices-list-listing/invoices-unpaid-listing';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import EmailInvoiceButton from 'app/pages/invoicing/invoices-list/email.invoice';
+import { MailOutlineOutlined } from '@material-ui/icons';
+import classNames from 'classnames';
 
 const SHOW_OPTIONS = [
   {
@@ -106,12 +111,18 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
   const [invoicesToDispatch, setInvoicesToDispatch] = useState<any[]>([]);
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
   const [customerValue, setCustomerValue] = useState<any>(null);
+  const [checkMissingPo, setMissingPO] = useState<any>(null);
+  const [customerContactValue, setCustomerContactValue] = useState<any>(null);
   const [showValue, setShowValue] = useState<string>('unpaid');
   const [localInvoiceList, setLocalInvoiceList] = useState<any[]>([]);
   const [isSuccess, setIsSuccess] = useState(false);
   const customers = useSelector(({ customers }: any) => customers.data);
+  const contacts: any[] = useSelector(({ contacts }: any) => contacts.contacts);
   const debounceInputStyles = useDebounceInputStyles();
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+
+  const contactOptions = contacts.map((contact: any) => ({ value: contact._id, label: contact.name }))
+  contactOptions.sort((a, b) => a.label.localeCompare(b.label))
 
   const getFilteredList = (state: any) => {
     return TableFilterService.filterByDateDesc(state?.invoiceList.data);
@@ -130,6 +141,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
     })
   );
 
+  const customStyles = useCustomStyles();
   const handleRowClick = (event: any, row: any) => {
 
     // if (selectedInvoices.length === 0 && !customerValue) setCustomerValue(row.original.customer);
@@ -163,6 +175,16 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
   const handleCustomerChange = (event: any, newValue: any) => {
     setCustomerValue(newValue);
+    if (!newValue) setSelectedInvoices([]);
+  };
+
+  const handleCustomerContactChange = (event: any, newValue: any) => {
+    setCustomerContactValue(newValue);
+    if (!newValue) setSelectedInvoices([]);
+  };
+
+  const handleMissingPO = (event: any, newValue: any) => {
+    setMissingPO(newValue);
     if (!newValue) setSelectedInvoices([]);
   };
 
@@ -275,13 +297,13 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
 
     dispatch(resetEmailState());
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
   };
 
   const closeModal = () => {
 
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,currentDivision.params));
     dispatch(closeModalAction());
     setTimeout(() => {
       dispatch(setModalDataAction({
@@ -291,6 +313,10 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
     }, 200);
   };
 
+  const getContactsData = async (data: any) => {
+    const res: any = await dispatch(getContacts(data));
+  }
+
   useEffect(() => {
     dispatch(setCurrentPageIndex(0));
     dispatch(getAllInvoicesAPI(
@@ -299,11 +325,21 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
       '',
       { invoiceDateRange: selectionRange },
       customerValue?._id,
+      customerContactValue?.value,
+      checkMissingPo,
+      true,
       isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
       showValue === 'all',
       currentDivision.params
     ));
-  }, [customerValue, selectionRange, showValue]);
+
+    const data: any = {
+      'type': 'Customer',
+      'referenceNumber': customerValue?._id
+    };
+
+    getContactsData(data);
+  }, [customerValue, customerContactValue, selectionRange, showValue, checkMissingPo]);
 
 
   const HtmlTooltip = withStyles((theme) => ({
@@ -379,6 +415,23 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
     },
     {
       Cell({ row }: any) {
+        return <div style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <HtmlTooltip
+            placement='bottom-start'
+            title={
+              row.original.customerPO || row.original.job?.customerPO || row.original.job?.ticket?.customerPO || '-'
+            }
+          >
+            <span>
+              {row.original.customerPO || row.original.job?.customerPO || row.original.job?.ticket?.customerPO || '-'}
+            </span>
+          </HtmlTooltip>
+        </div>
+      },
+      'Header': 'Customer PO',
+    },
+    {
+      Cell({ row }: any) {
         return <div>
           <span>
             {formatCurrency(row.original.balanceDue ?? row.original.total)}
@@ -408,6 +461,33 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
       'className': 'font-bold',
       'sortable': true
     },
+    {
+      Cell({ row }: any) {
+        // return <div className={customStyles.centerContainer}>
+        return <EmailInvoiceButton
+          Component={
+          <Button
+            variant="contained"
+            classes={{
+              'root': classes.emailButton
+            }}
+            color="primary"
+            size="small"
+            >
+              <MailOutlineOutlined
+              className={customStyles.iconBtn}
+              />
+          </Button>}
+          invoice={row.original}
+        />;
+        // </div>;
+      },
+      'Header': 'Actions',
+      'id': 'action-send-email',
+      'sortable': false,
+      'width': 60
+    }
+
   ];
 
   useEffect(() => {
@@ -434,7 +514,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, undefined, currentDivision.params))
   }, 500);
 
   return (
@@ -444,7 +524,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
       ) : (
           <>
             <Grid container className={'modalPreview'} justify={'space-between'} spacing={2} style={{ width: '100%', paddingLeft: 65, paddingRight: 45 }}>
-              <Grid item xs={5}>
+              <Grid item xs={4}>
                 <Typography variant={'caption'} className={'previewCaption'}>Customer</Typography>
                 <Autocomplete
                   disabled={loading}
@@ -467,6 +547,29 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 <div style={{ width: 10 }} >&nbsp;</div>
               </Grid>
 
+              <Grid item xs={4}>
+                <Typography variant={'caption'} className={'previewCaption'}>Customer Contact</Typography>
+                <Autocomplete
+                  disabled={loading}
+                  getOptionLabel={option => option.label ? option.label : ''}
+                  getOptionDisabled={(option) => option.isActive}
+                  id={'tags-standard'}
+                  onChange={(ev: any, newValue: any) => handleCustomerContactChange(ev, newValue)}
+                  disableClearable={customerContactValue !== null}
+                  options={contactOptions}
+                  renderInput={params => <TextField
+                    {...params}
+                    InputProps={{ ...params.InputProps, style: { background: '#fff' } }}
+                    variant={'outlined'}
+                  // error={isCustomerErrorDisplayed}
+                  // helperText={isCustomerErrorDisplayed && 'Please Select A Customer'}
+                  />
+                  }
+                  value={customerContactValue}
+                />
+                <div style={{ width: 10 }} >&nbsp;</div>
+              </Grid>
+
               <Grid item xs={4} >
                 <Typography variant={'caption'} className={'previewCaption'} style={{ marginLeft: 12 }}>Date Range</Typography>
                 <BCDateRangePicker
@@ -478,7 +581,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 />
               </Grid>
 
-              <Grid item xs={2}>
+              <Grid item xs={4}>
                 <Typography variant={'caption'} className={'previewCaption'}>SHOW</Typography>
                 <DropDownMenu
                   // minwidth='180px'
@@ -486,6 +589,15 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                   items={SHOW_OPTIONS}
                   onSelect={(e, item) => setShowValue(item.value)}
                 />
+              </Grid>
+              <Grid item xs={7} className={classes.invoiceCheckboxTopPadding}>
+                <Checkbox
+                  color="primary"
+                  className={classes.checkbox}
+                  checked={checkMissingPo}
+                  onChange={(ev: any, newValue: any) => handleMissingPO(ev, newValue)}
+                />
+                MISSING P.O.
               </Grid>
               <Grid item xs={1} />
             </Grid>
@@ -504,6 +616,9 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 //     '',
                 //     { invoiceDateRange: selectionRange },
                 //     customerValue?._id,
+                //     customerContactValue?.value,
+                //     checkMissingPo,
+                //     true,
                 //     isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
                 //     showValue === 'all',
                 //     currentDivision.params
@@ -514,12 +629,12 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
                   dispatch(setCurrentPageIndex(num));
                   if (apiCall)
-                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
+                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, undefined, currentDivision.params))
                 }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => {
                   dispatch(setCurrentPageSize(num));
-                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
+                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, undefined, currentDivision.params))
                 }}
                 setKeywordFunction={(query: string) => {
                   desbouncedSearchFunction(query);

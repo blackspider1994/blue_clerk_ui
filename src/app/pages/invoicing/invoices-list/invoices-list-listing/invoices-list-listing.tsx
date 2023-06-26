@@ -206,7 +206,7 @@ function InvoicingListListing({ classes, theme }: any) {
   useEffect(() => {
     // dispatch(getInvoicingList());
     // dispatch(loadingInvoicingList());
-    dispatch(getAllInvoicesAPI(undefined, undefined, undefined, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params));
+    dispatch(getAllInvoicesAPI(undefined, undefined, undefined, advanceFilterInvoiceData, undefined, undefined, undefined, undefined,undefined,undefined, currentDivision.params));
     return () => {
       dispatch(setKeyword(''));
       dispatch(setCurrentPageIndex(currentPageIndex));
@@ -221,7 +221,7 @@ function InvoicingListListing({ classes, theme }: any) {
 
   useEffect(() => {
     if (fetchInvoices) {
-      dispatch(getAllInvoicesAPI(currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params));
+      dispatch(getAllInvoicesAPI(currentPageSize, undefined, keyword, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params));
       dispatch(setCurrentPageIndex(0));
     }
     setFetchInvoices(false);
@@ -231,7 +231,7 @@ function InvoicingListListing({ classes, theme }: any) {
     if (location?.state?.tab === 1 && (location?.state?.option?.search || location?.state?.option?.pageSize || location?.state?.option?.lastPrevCursor
       || location?.state?.option?.lastNextCursor || location?.state?.option?.currentPageIndex)) {
       dispatch(setKeyword(location.state.option.search));
-      dispatch(getAllInvoicesAPI(location.state.option.pageSize, location.state.option.pageSizeIndex, location.state.option.search, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params));
+      dispatch(getAllInvoicesAPI(location.state.option.pageSize,  location?.state?.option?.pageSizeIndex, location.state.option.search, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params));
       dispatch(setCurrentPageSize(location.state.option.pageSize));
       dispatch(setCurrentPageIndex(location?.state?.option?.currentPageIndex || 0));
       window.history.replaceState({}, document.title)
@@ -311,7 +311,7 @@ function InvoicingListListing({ classes, theme }: any) {
     dataModalFilter.data.loading = true;
     dataModalFilter.refresh = true;
     dispatch(setModalDataAction(dataModalFilter));
-    const { total } = await (getAllInvoicesAPI(currentPageSize, currentPageIndex, keyword, data, undefined, undefined, undefined, currentDivision.params))(dispatch);
+    const { total } = await (getAllInvoicesAPI(currentPageSize, undefined, keyword, data, undefined, undefined,undefined,undefined,undefined, undefined, currentDivision.params))(dispatch);
     if (total === 0 || total === undefined) {
       dataModalFilter.data.loading = false;
       dataModalFilter.refresh = false;
@@ -452,7 +452,7 @@ function InvoicingListListing({ classes, theme }: any) {
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData,  undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
   }, 500);
 
   return (
@@ -470,19 +470,19 @@ function InvoicingListListing({ classes, theme }: any) {
         // fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
         //   setLastPrevCursor(isPrev ? prevCursor : undefined)
         //   setLastNextCursor(isNext ? nextCursor : undefined)
-        //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+        //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
         // }}
         total={total}
         currentPageIndex={currentPageIndex}
         setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
           dispatch(setCurrentPageIndex(num));
           if (apiCall)
-            dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+            dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, advanceFilterInvoiceData,  undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
         }}
         currentPageSize={currentPageSize}
         setCurrentPageSizeFunction={(num: number) => {
           dispatch(setCurrentPageSize(num));
-          dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+          dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData,  undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
         }}
         setKeywordFunction={(query: string) => {
           desbouncedSearchFunction(query);
