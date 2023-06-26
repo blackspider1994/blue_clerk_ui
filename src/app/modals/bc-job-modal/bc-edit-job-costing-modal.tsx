@@ -70,7 +70,7 @@ function BCEditJobCostingModal({
       [key: string]: any;
     } = { addition: { amount: 0, note: "" }, deduction: { amount: 0, note: "" } },
     [update, setUpdates] = useState(updateFields),
-    contractorId = job.tasks?.length && job.tasks[0]?.contractor._id || job.contractorsObj?.length && job.contractorsObj[0]?._id,
+    contractorId = job.tasks?.length && job.tasks[0]?.contractor?._id || job.contractorsObj?.length && job.contractorsObj[0]?._id,
     commissionTier = job?.tasks?.length ? job?.tasks[0].contractor?.commissionTier : job.contractorsObj[0]?.commissionTier,
     technicianTier = costingList?.find(({ tier }: { tier: any }) => tier?._id === (commissionTier))?.tier,
     jobCostingCharge = items?.find(({ jobType }) => jobType === job.tasks[0]?.jobTypes[0]?.jobType?._id)?.costing?.find(({ tier }) => tier?._id === technicianTier?._id)?.charge || "0",
@@ -240,7 +240,7 @@ function BCEditJobCostingModal({
               if (!editing) return setEdit(true)
               try {
                 setLoading(true)
-                await updateJobCommission(contractorId, { ...update, balance: technicianAmount })
+                await updateJobCommission(job._id, { ...update, balance: technicianAmount })
                 dispatch(success(`Update successful`));
                 setEdit(false)
                 dispatch(closeModalAction())
