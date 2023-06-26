@@ -305,7 +305,7 @@ function InvoicingListListing({ classes, theme }: any) {
 
   /**
    * Receive the event when the modal filter is sumited by the user
-   * @param data 
+   * @param data
    */
   const handleFilterSubmit = async (data: any) => {
     dataModalFilter.data.loading = true;
@@ -452,7 +452,7 @@ function InvoicingListListing({ classes, theme }: any) {
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
   }, 500);
 
   return (
