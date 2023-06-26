@@ -13,7 +13,7 @@ import { RootState } from 'reducers';
 import BcInput from 'app/components/bc-input/bc-input';
 import { replaceAmountToDecimal } from 'utils/validation';
 import { updateJobCommission } from 'api/invoicing.api';
-import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
+import { closeModalAction, openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
 import { modalTypes } from '../../../constants';
 import {
   error as errorSnackBar,
@@ -70,6 +70,7 @@ function BCEditJobCostingModal({
       [key: string]: any;
     } = { addition: { amount: 0, note: "" }, deduction: { amount: 0, note: "" } },
     [update, setUpdates] = useState(updateFields),
+    contractorId = job.tasks?.length && job.tasks[0]?.contractor?._id || job.contractorsObj?.length && job.contractorsObj[0]?._id,
     commissionTier = job?.tasks?.length ? job?.tasks[0].contractor?.commissionTier : job.contractorsObj[0]?.commissionTier,
     technicianTier = costingList?.find(({ tier }: { tier: any }) => tier?._id === (commissionTier))?.tier,
     jobCostingCharge = items?.find(({ jobType }) => jobType === job.tasks[0]?.jobTypes[0]?.jobType?._id)?.costing?.find(({ tier }) => tier?._id === technicianTier?._id)?.charge || "0",
@@ -89,6 +90,15 @@ function BCEditJobCostingModal({
     );
     setTimeout(() => {
       dispatch(openModalAction());
+    }, 200);
+  };
+  const handleClose = () => {
+    dispatch(closeModalAction());
+    setTimeout(() => {
+      dispatch(setModalDataAction({
+        'data': {},
+        'type': ''
+      }));
     }, 200);
   };
 
@@ -230,9 +240,10 @@ function BCEditJobCostingModal({
               if (!editing) return setEdit(true)
               try {
                 setLoading(true)
-                await updateJobCommission(job.contractorsObj[0]?._id, { ...update, balance: technicianAmount })
+                await updateJobCommission(job._id, { ...update, balance: technicianAmount })
                 dispatch(success(`Update successful`));
                 setEdit(false)
+                dispatch(closeModalAction())
               } catch (error) {
                 dispatch(errorSnackBar('Error updating commission'));
               }
@@ -243,6 +254,7 @@ function BCEditJobCostingModal({
           <Button
             aria-label='update-job-costing'
             onClick={async () => {
+              if (job.isInvoice) return handleClose()
               if (editing) return setEdit(false)
               openDetailJobModal()
             }}
