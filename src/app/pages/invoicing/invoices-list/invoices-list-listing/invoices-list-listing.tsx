@@ -317,13 +317,13 @@ function InvoicingListListing({ classes, theme }: any) {
 
   /**
    * Receive the event when the modal filter is sumited by the user
-   * @param data 
+   * @param data
    */
   const handleFilterSubmit = async (data: any) => {
     dataModalFilter.data.loading = true;
     dataModalFilter.refresh = true;
     dispatch(setModalDataAction(dataModalFilter));
-    const { total } = await (getAllInvoicesAPI(currentPageSize, undefined, keyword, data, undefined, undefined,undefined,undefined,undefined, undefined, currentDivision.params))(dispatch);
+    const { total } = await (getAllInvoicesAPI(currentPageSize, currentPageIndex, keyword, data, undefined, undefined,undefined,undefined,undefined, undefined, currentDivision.params))(dispatch);
     if (total === 0 || total === undefined) {
       dataModalFilter.data.loading = false;
       dataModalFilter.refresh = false;
@@ -464,7 +464,7 @@ function InvoicingListListing({ classes, theme }: any) {
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
   }, 500);
 
   return (
@@ -482,7 +482,7 @@ function InvoicingListListing({ classes, theme }: any) {
         // fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
         //   setLastPrevCursor(isPrev ? prevCursor : undefined)
         //   setLastNextCursor(isNext ? nextCursor : undefined)
-        //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+        //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
         // }}
         total={total}
         currentPageIndex={currentPageIndex}

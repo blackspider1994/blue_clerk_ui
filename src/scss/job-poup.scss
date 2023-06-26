@@ -1,4 +1,4 @@
-@import "variable";
+@import 'variable';
 
 .modal_heading {
   font-style: normal;
@@ -45,7 +45,7 @@
 
 .MuiPaper-root {
   .MuiDialogTitle-root {
-    padding: 40px 15px 40px;
+    padding: 10px 0px 0px;
     h6 {
       text-align: center;
       font-style: normal;
@@ -57,7 +57,7 @@
   }
 
   .MuiDialogTitle-root.new-modal-design {
-    background-color: #EAECF3;
+    background-color: #eaecf3;
     padding-top: 25px;
   }
 
@@ -85,9 +85,8 @@
     }
   }
 
-
   .new-modal-design {
-    .modalDataContainer{
+    .modalDataContainer {
       overflow-y: auto;
       max-height: 72vh;
 
@@ -105,7 +104,7 @@
       }
 
       &::-webkit-scrollbar-thumb {
-        background: #BDBDBD;
+        background: #bdbdbd;
         border-radius: 4px;
         border: solid 3px transparent;
       }
@@ -115,12 +114,12 @@
       }
     }
     .modalPreview {
-      background-color: #EAECF3;
+      background-color: #eaecf3;
       padding: 35px 50px;
       margin: 0;
     }
     .modalContent {
-      background-color: #FFF;
+      background-color: #fff;
       padding: 35px 50px 0 50px;
       margin: 0;
     }
@@ -130,17 +129,17 @@
       text-transform: uppercase;
     }
     .bigText {
-      fontSize: 30px;
-      fontWeight: bold;
+      fontsize: 30px;
+      fontweight: bold;
       color: $primary-blue;
     }
     .previewTextTitle {
       margin-top: 8px;
-      color: #4F4F4F;
+      color: #4f4f4f;
       font-size: 16px;
     }
     .previewText {
-      color: #4F4F4F;
+      color: #4f4f4f;
       font-size: 16px;
     }
     .jobIdText {
@@ -151,7 +150,7 @@
     }
     .jobTypeText {
       font-size: 12px;
-      background-color: #F2F2F2;
+      background-color: #f2f2f2;
       margin-right: 2px;
       padding: 4px 8px;
       border-radius: 8px;
@@ -168,12 +167,11 @@
       /* Track */
       &::-webkit-scrollbar-track {
         background: #f1f1f1;
-
       }
 
       /* Handle */
       &::-webkit-scrollbar-thumb {
-        background: #BDBDBD;
+        background: #bdbdbd;
         border-radius: 4px;
         border: solid 3px transparent;
       }
@@ -186,7 +184,7 @@
     .MuiDialogActions-root {
       border-top: 1px solid #bdbdbd;
       text-align: right;
-      padding: 25px  56px;
+      padding: 25px 56px;
       margin: 20px 0 0 0;
 
       .MuiButton-root {
@@ -218,3 +216,4 @@
     }
   }
 }
+

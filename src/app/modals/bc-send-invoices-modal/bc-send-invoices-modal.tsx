@@ -514,7 +514,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
   const desbouncedSearchFunction = debounce((keyword: string) => {
     dispatch(setKeyword(keyword));
     dispatch(setCurrentPageIndex(0));
-    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, currentDivision.params))
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
   }, 500);
 
   return (
@@ -616,6 +616,9 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 //     '',
                 //     { invoiceDateRange: selectionRange },
                 //     customerValue?._id,
+                //     customerContactValue?.value,
+                //     checkMissingPo,
+                //     true,
                 //     isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
                 //     showValue === 'all',
                 //     currentDivision.params
@@ -626,12 +629,12 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
                   dispatch(setCurrentPageIndex(num));
                   if (apiCall)
-                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, customerValue?._id, undefined, currentDivision.params))
                 }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => {
                   dispatch(setCurrentPageSize(num));
-                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, undefined, currentDivision.params))
                 }}
                 setKeywordFunction={(query: string) => {
                   desbouncedSearchFunction(query);

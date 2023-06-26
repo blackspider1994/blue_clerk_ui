@@ -6,13 +6,16 @@ export interface Item {
     _id: string,
     name: string,
     tiers: any[],
+    costingList: any[];
+    costing?: any[];
+    jobType?: string
 }
 
 export interface InvoiceItemsState {
-    loading: boolean;
-    loadingObj: boolean;
-    error: string;
-    items: Item[];
-    itemObj: Item;
+  loading: boolean;
+  loadingObj: boolean;
+  error: string;
+  items: Item[];
+  itemObj: Item;
 }
 

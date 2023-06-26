@@ -454,6 +454,21 @@ export const updateInvoice = (data: any) => {
   });
 };
 
+export const updateInvoiceMessages = ({invoiceId, notes, images}: any) => {
+  return new Promise((resolve, reject) => {
+    request(`/updateInvoiceMessages`, 'post', {
+      invoiceId,
+      technicianMessages: {notes, images}
+    })
+      .then((res: any) => {
+        return resolve(res.data);
+      })
+      .catch(err => {
+        return reject(err);
+      });
+  });
+};
+
 export const voidInvoice = (data: any) => {
   return new Promise((resolve, reject) => {
     request(`/voidInvoice`, 'delete', data)
@@ -519,6 +534,18 @@ export const generateInvoicePdfAPI = (customerId: string, invoiceId: string) => 
 export const callCreateEstimatesAPI = (data: any) => {
   return new Promise((resolve, reject) => {
     request(`/createEstimate`, 'post', data)
+      .then((res: any) => {
+        return resolve(res.data);
+      })
+      .catch(err => {
+        return reject(err);
+      });
+  });
+};
+
+export const updateJobCommission = (id: string, data: any) => {
+  return new Promise((resolve, reject) => {
+    request(`/updateJobCommission/` + id, 'put', data)
       .then((res: any) => {
         return resolve(res.data);
       })
