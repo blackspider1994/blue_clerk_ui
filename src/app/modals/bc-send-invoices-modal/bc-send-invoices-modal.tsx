@@ -629,7 +629,7 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
                   dispatch(setCurrentPageIndex(num));
                   if (apiCall)
-                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, customerValue?._id, undefined, currentDivision.params))
+                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, undefined, currentDivision.params))
                 }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => {
