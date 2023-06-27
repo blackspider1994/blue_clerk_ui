@@ -22,7 +22,7 @@ export default (theme: Theme): any => ({
     'flexGrow': 1
   },
   'subTitle': {
-    'fontSize': '18px',
+    'fontSize': '14px',
     'fontWeight': 'bold',
     'lineHeight': '26px',
     'textDecorationLine': 'underline',
@@ -79,7 +79,7 @@ export default (theme: Theme): any => ({
 
   'reportTag': {
     'color': CONSTANTS.PRIMARY_BLUE,
-    'fontSize': '28px !important',
+    'fontSize': '22px !important',
     'fontWeight': 'bold',
     'margin': '5px',
   },
@@ -136,30 +136,30 @@ export default (theme: Theme): any => ({
   },
   'companyName': {
     'color': CONSTANTS.GRAY2,
-    'fontSize': '28px !important',
+    'fontSize': '22px !important',
     'fontWeight': 'bold',
     'margin': 0
   },
   'grayBoldTextM_0': {
     'color': CONSTANTS.GRAY2,
-    'fontSize': '18px !important',
+    'fontSize': '14px !important',
     'fontWeight': 'bold',
     'margin': 0
   },
   'grayBoldText': {
     'color': CONSTANTS.GRAY2,
-    'fontSize': '18px !important',
+    'fontSize': '14px !important',
     'fontWeight': 'bold',
     'marginTop': 1,
   },
   'grayNormalText': {
     'color': CONSTANTS.GRAY2,
-    'fontSize': '18px !important',
+    'fontSize': '14px !important',
     'marginTop': 0,
   },
   'attributeKey': {
     'color': CONSTANTS.GRAY3,
-    'fontSize': '18px !important',
+    'fontSize': '14px !important',
     'marginBottom': 5,
     'textTransform': 'uppercase',
   },
@@ -169,26 +169,26 @@ export default (theme: Theme): any => ({
     'borderWidth': '0px', 
     'width': '100%',
     'marginTop': '20px',
-    'marginBottom': '20px',
+    'marginBottom': '15px',
   },
   'rightAlign': {
     'textAlign': 'right'
   },
   'occupiedHouseText': {
     'color': CONSTANTS.OCCUPIED_GREEN,
-    'fontSize': '18px !important',
+    'fontSize': '14px !important',
     'fontWeight': 'bold',
     'margin': 0
   },
   'notesTitle': {
     'color': CONSTANTS.GRAY2,
-    'fontSize': '22px !important',
+    'fontSize': '18px !important',
     'fontWeight': 'bold',
     'margin': 0
   },
   'notesSubtitle': {
     'color': CONSTANTS.GRAY3,
-    'fontSize': '18px !important',
+    'fontSize': '14px !important',
     'marginBottom': 5,
     'textTransform': 'uppercase',
     'textDecorationLine': 'underline',
@@ -200,15 +200,15 @@ export default (theme: Theme): any => ({
   },
   'footerText': {
     'color': CONSTANTS.GRAY3,
-    'fontSize': '12px !important',
+    'fontSize': '8px !important',
     'textTransform': 'uppercase',
     'letterSpacing': '1px',
   },
   'footerLogo': {
     'width': 'auto',
-    'max-width': '40px',
+    'max-width': '30px',
     'height': 'auto',
-    'max-height': '40px',
+    'max-height': '30px',
   }
 });
 
@@ -228,7 +228,7 @@ export const PageContainer = styled.div`
   padding-left: 65px;
   padding-right: 65px;
   background-color: ${CONSTANTS.PRIMARY_WHITE};
-  margin: 20px;
+  margin: 45px 20px 20px 0px;
   border-radius: 25px;
   .no-image {
     height: 100px;
@@ -259,7 +259,7 @@ export const DataContainer = styled.div`
   display: flex;
   flex-direction: column;
   padding: 0px 0px 0px 0px;
-  margin: 45px 0px 70px 0px;
+  margin: 20px 0px 70px 0px;
   background-color: ${CONSTANTS.PRIMARY_WHITE};
   border: ${CONSTANTS.GRAY6} 4px solid;
   border-radius: 25px;
