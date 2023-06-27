@@ -409,7 +409,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                   <Grid
                     item
                     xs={12}
-                    sm={4}
+                    sm={3}
                     container
                     alignItems="center"
                     key={tier.name}
@@ -421,7 +421,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                         fontWeight: 500,
                       }}
                     >
-                      TIER {tier.name} PRICE
+                      TIER {tier.name}
                     </Grid>
                     <FormControl>
                       <BCInput
@@ -477,7 +477,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                     <Grid
                       item
                       xs={12}
-                      sm={4}
+                      sm={3}
                       container
                       alignItems="center"
                       key={jobCost.name}

@@ -2,7 +2,7 @@ import BCTableContainer from 'app/components/bc-table-container/bc-table-contain
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import styles from './setup.styles';
-import { withStyles } from '@material-ui/core';
+import { FormControlLabel, Grid, Switch, withStyles } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllDiscountItemsAPI } from 'api/discount.api';
 import { getAllSalesTaxAPI } from 'api/tax.api';
@@ -25,9 +25,33 @@ function AdminSetupPage({ classes }: Props) {
     ({ invoiceItemsTiers }: any) => invoiceItemsTiers
   );
   const [updating, setUpdating] = useState(false);
+  const [tableData, setTableData] = useState([]);
+  const [statusFilter, setStatusFilter] = useState(true);
+
+  useEffect(() => {
+    let filteredTiers = tiers.filter((res: any) => res.tier.isActive === true);
+    setTableData(filteredTiers);
+  }, [tiers]);
+
+  useEffect(() => {
+    let filteredTiers = tiers.filter((res: any) => res.tier.isActive === statusFilter);
+    setTableData(filteredTiers);
+  }, [statusFilter]);
+
   function Toolbar() {
     return (
-      <>
+      <Grid
+        container
+        direction="row"
+        justify='space-between'
+      >
+        <FormControlLabel
+          control={
+            <Switch checked={statusFilter} onChange={() => setStatusFilter(!statusFilter)} name="active" color="primary" />
+          }
+          label={statusFilter ? "Active" : "Inactive"}
+        />
+
         <CSButton
           color={'primary'}
           disableElevation
@@ -40,7 +64,7 @@ function AdminSetupPage({ classes }: Props) {
         >
           {'Add'}
         </CSButton>
-      </>
+      </Grid>
     );
   }
   const addTier = async () => {
@@ -136,7 +160,7 @@ function AdminSetupPage({ classes }: Props) {
           columns={columns}
           isLoading={tiersLoading}
           isPageSaveEnabled
-          tableData={tiers}
+          tableData={tableData}
           toolbar={Toolbar()}
         />
       </PageContainer>

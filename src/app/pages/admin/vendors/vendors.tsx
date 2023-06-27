@@ -230,9 +230,13 @@ function AdminVendorsPage({ classes }: any) {
       className: 'font-bold',
       sortable: true,
       Cell({ row }: any) {
-        return (
-          <span>{(row.original?.vendor || row.original?.contractorEmail).substring(0, 20)}</span>
-        );
+        if (row.original?.accountType == 4) {
+          //Vendor Type is Contractor
+          return ""
+        } else {
+          //Vendor Type is Company
+          return <span>{(row.original?.vendor || row.original?.contractorEmail).substring(0, 20)}</span>;
+        }
       },
     },
     {
