@@ -1,4 +1,4 @@
-import request, { requestApiV2 } from 'utils/http.service';
+import request, { requestApiV2, pdfRequest } from 'utils/http.service';
 import { formatDateYMD } from 'helpers/format';
 import moment from 'moment';
 import axios from 'axios';
@@ -546,6 +546,19 @@ export const getJobsStream: any = (actionId: string) => {
     request(`/getJobsStream`, 'OPTIONS', { actionId }, false)
       .then((res: any) => {
         return resolve(res.data);
+      })
+      .catch(err => {
+        return reject(err);
+      });
+  });
+};
+
+export const callGetJobReportPDF = (id: string) => {
+  return new Promise((resolve, reject) => {
+
+    pdfRequest(`/getJobReportPDF/${id}`, 'get', {}, false)
+      .then((res: any) => {
+        return resolve(res);
       })
       .catch(err => {
         return reject(err);

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styles from './contacts.style';
-import { Fab, withStyles } from '@material-ui/core';
+import { Fab, FormControl, Grid, MenuItem, Select, withStyles } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
 import BCTableContainer from '../../../../components/bc-table-container/bc-table-container';
-import { modalTypes } from '../../../../../constants';
+import { NON_OCCUPIED_GREY, OCCUPIED_GREEN, modalTypes } from '../../../../../constants';
 import { getContacts, addContact, updateContact, removeContact } from 'api/contacts.api';
 import { useLocation, useHistory } from 'react-router-dom';
 import {CSButton, CSButtonSmall} from "../../../../../helpers/custom";
@@ -12,10 +12,20 @@ import {CSButton, CSButtonSmall} from "../../../../../helpers/custom";
 function CustomerContactsPage({ classes, id, type, customerId }: any) {
   const dispatch = useDispatch();
   const { isLoading, refresh, contacts } = useSelector((state: any) => state.contacts);
+  const [filterBySMSStatus, setFilterBySMSStatus] = useState('all');
 
   const location = useLocation<any>();
   const history = useHistory();
-
+  const filteredContacts = (() => {
+    switch(filterBySMSStatus) {
+      case 'all':
+        return contacts;
+      case 'optedIn':
+        return contacts.filter((item : any) => item.smsStatus === true);
+      case 'optedOut':
+        return contacts.filter((item : any) => item.smsStatus !== true);
+    }
+  })();
 
   const locationState = location.state;
 
@@ -26,9 +36,6 @@ function CustomerContactsPage({ classes, id, type, customerId }: any) {
     pageSize: 10,
     sortBy: [],
   });
-
-
-
 
   const initialValues = {
     name: "",
@@ -61,6 +68,29 @@ function CustomerContactsPage({ classes, id, type, customerId }: any) {
       'sortable': true,
       'width': 200
     },
+   
+    {
+      'Cell'({ row }: any) {
+        return <div className={classes.smsStatusCell}>
+          <span style={{
+            marginTop: 10,
+            height: "10px",
+            width: "10px",
+            backgroundColor: row.values.smsStatus ? OCCUPIED_GREEN : NON_OCCUPIED_GREY,
+            borderRadius: "50%",
+            display: "flex", 
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}></span>
+          <span className={classes.smsStatusText}>{ row.values.smsStatus ? 'Opted in' : 'Opted out' }</span>
+        </div>
+      },
+      'Header': 'SMS Messaging Status',
+      'id': 'smsStatus',
+      'accessor': 'smsStatus',
+      'sortable': true,
+      'width': 200
+    },
     {
       'Cell'({ row }: any) {
         return <div className={'flex items-center'}>
@@ -87,6 +117,25 @@ function CustomerContactsPage({ classes, id, type, customerId }: any) {
       'width': 40
     },
   ]
+
+  function Toolbar() {
+    return <div style={{display: 'flex', alignItems: 'center'}}>
+      <strong style={{fontSize: 16}}>{'Show:'}&nbsp;</strong>
+      <FormControl variant="standard" style={{minWidth: 80}}>
+        <Select
+          labelId="location-status-label"
+          id="location-status-select"
+          value={filterBySMSStatus}
+          label="Age"
+          onChange={(event: any) => setFilterBySMSStatus(event.target.value)}
+        >
+          <MenuItem value={'all'}>All</MenuItem>
+          <MenuItem value={'optedIn'}>Opted in SMS</MenuItem>
+          <MenuItem value={'optedOut'}>Opted out SMS</MenuItem>
+        </Select>
+      </FormControl>
+    </div>
+  }
 
   const handleAddContact = async (values: any) => {
     try {
@@ -222,7 +271,6 @@ function CustomerContactsPage({ classes, id, type, customerId }: any) {
     dispatch(getContacts(data));
   }, [refresh])
 
-
   return (
     <>
       <div className={classes.addButtonArea}>
@@ -242,8 +290,10 @@ function CustomerContactsPage({ classes, id, type, customerId }: any) {
         isLoading={isLoading}
         search
         searchPlaceholder={"Search contacts"}
-        tableData={contacts.sort((a: any, b: any) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))}
+        tableData={filteredContacts.sort((a: any, b: any) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))}
         initialMsg="There are no contacts"
+        toolbarPositionLeft={true}
+        toolbar={Toolbar()}
       />
     </>
   )
