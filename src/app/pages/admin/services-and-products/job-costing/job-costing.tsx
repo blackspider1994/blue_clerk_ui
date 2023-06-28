@@ -86,7 +86,7 @@ function AdminSetupPage({ classes }: Props) {
   const handleClick = async (tier: any) => {
     const { _id, isActive, name } = tier;
     const result = await updateJobCosting({
-      itemTierId: _id,
+      costingTierId: _id,
       isActive: isActive ? '0' : '1',
       name,
     }).catch((err) => dispatch(SnackBarError(err.message)));

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, createStyles, withStyles, Grid, Paper, Badge} from "@material-ui/core";
 import styles from "../customer.styles";
@@ -68,9 +68,9 @@ function ViewInvoice({ classes, theme }: any) {
   const { user } = useSelector(({ auth }: any) => auth);
   const { 'data': invoiceDetail, 'loading': loadingInvoiceDetail, 'error': invoiceDetailError } = useSelector(({ invoiceDetail }:any) => invoiceDetail);
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+  const [showJobCosting, setShowJobCosting] = useState(false);
 
   useEffect(() => {
-
     if (invoice) {
       dispatch(loadInvoiceDetail.fetch(invoice));
     }
@@ -79,6 +79,13 @@ function ViewInvoice({ classes, theme }: any) {
       dispatch(getCompanyProfileAction(user.company as string));
     }
   }, []);
+
+  useEffect(() => {
+    if (invoiceDetail && invoiceDetail.job) {
+      const vendorWithCommisionTier = invoiceDetail.job?.tasks?.filter((res: any) => res.contractor.commissionTier);
+      setShowJobCosting(vendorWithCommisionTier.length > 0);
+    }
+  }, [invoiceDetail]);
 
   if (loadingInvoiceDetail) {
     return <BCCircularLoader heightValue={'200px'} />;
@@ -293,15 +300,17 @@ function ViewInvoice({ classes, theme }: any) {
             >
               <ArrowBackIcon/>
             </IconButton>
-            <div>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={openEditJobCostingModal}
-                classes={{ root: invoiceStyles.costingButton, label: invoiceStyles.buttonLabel }}
-              >Job Costing
-              </Button>
-            </div>
+            {showJobCosting && 
+              <div>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={openEditJobCostingModal}
+                  classes={{ root: invoiceStyles.costingButton, label: invoiceStyles.buttonLabel }}
+                >Job Costing
+                </Button>
+              </div>
+            }
             {invoiceDetail?.isDraft ? (
               <CSChip
                 label={'Draft'}

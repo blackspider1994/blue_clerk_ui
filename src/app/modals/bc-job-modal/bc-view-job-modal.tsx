@@ -92,6 +92,7 @@ function BCViewJobModal({
 
   const customerContact = job.customerContactId?.name ||
     contacts.find((contact :any) => contact._id === job.customerContactId)?.name;
+  const vendorWithCommisionTier = job.tasks.filter((res: any) => res.contractor.commissionTier);
 
   useEffect(() => {
     const data: any = {
@@ -283,16 +284,18 @@ function BCViewJobModal({
   return (
     <DataContainer className={'new-modal-design'}>
       <Grid container className={'modalPreview'} justify={'space-around'}>
-        <Grid item xs={12}>
-          <Button
-            color='primary'
-            variant="outlined"
-            className='whiteButtonBg'
-            onClick={openEditJobCostingModal}
-          >
-            Job Costing
-          </Button>
-        </Grid>
+        {vendorWithCommisionTier.length > 0 &&
+          <Grid item xs={12}>
+            <Button
+              color='primary'
+              variant="outlined"
+              className='whiteButtonBg'
+              onClick={openEditJobCostingModal}
+            >
+              Job Costing
+            </Button>
+          </Grid>
+        }
         <Grid item style={{width: '40%'}}>
           {canEdit &&
             <>
