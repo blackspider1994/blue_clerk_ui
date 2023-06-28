@@ -85,7 +85,7 @@ function BCEditJobCostingModal({
   const [jobCommisionHistory, setJobCommisionHistory] = useState([]);
 
   useEffect(() => {
-    const newTabsData: any = job.tasks.filter((res: any) => res.contractor.commissionTier).map((res: any, index: number) => {
+    const newTabsData: any = job.tasks.filter((res: any) => res.contractor?.commissionTier).map((res: any, index: number) => {
       return {
         label: "Task " + (index + 1),
         task: res,

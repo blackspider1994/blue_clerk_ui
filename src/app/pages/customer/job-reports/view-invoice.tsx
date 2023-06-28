@@ -82,7 +82,7 @@ function ViewInvoice({ classes, theme }: any) {
 
   useEffect(() => {
     if (invoiceDetail && invoiceDetail.job) {
-      const vendorWithCommisionTier = invoiceDetail.job?.tasks?.filter((res: any) => res.contractor.commissionTier);
+      const vendorWithCommisionTier = invoiceDetail.job?.tasks?.filter((res: any) => res.contractor?.commissionTier);
       setShowJobCosting(vendorWithCommisionTier.length > 0);
     }
   }, [invoiceDetail]);

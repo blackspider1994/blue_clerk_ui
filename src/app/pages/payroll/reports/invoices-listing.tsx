@@ -95,18 +95,20 @@ function PayrollInvoices({classes}: Props) {
       let technicianIds: string[] = [];
 
       let job = item.invoice?.job || item.job;
-      job.tasks.forEach((task: any) => {
-        if(task.contractor){
-          !technicianIds.includes(task.contractor._id) && technicianCount++;
-          technicianIds.push(task.contractor._id)
-        } else {
-          !technicianIds.includes(task.technician._id) && technicianCount++;
-          technicianIds.push(task.technician._id)
-        }
-      })
-      totalInvoicesAmount += item.invoice?.total / (technicianCount || 1);
-      totalCommissions += item.commissionAmount;
-      setTotals({invoices: totalInvoicesAmount, commissions: totalCommissions});
+      if (job) {
+        job.tasks.forEach((task: any) => {
+          if (task.contractor) {
+            !technicianIds.includes(task.contractor._id) && technicianCount++;
+            technicianIds.push(task.contractor._id)
+          } else {
+            !technicianIds.includes(task.technician._id) && technicianCount++;
+            technicianIds.push(task.technician._id)
+          }
+        })
+        totalInvoicesAmount += item.invoice?.total / (technicianCount || 1);
+        totalCommissions += item.commissionAmount;
+        setTotals({ invoices: totalInvoicesAmount, commissions: totalCommissions });
+      }
       return {
         ...item,
         invoice: {

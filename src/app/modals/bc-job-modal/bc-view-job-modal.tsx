@@ -92,7 +92,7 @@ function BCViewJobModal({
 
   const customerContact = job.customerContactId?.name ||
     contacts.find((contact :any) => contact._id === job.customerContactId)?.name;
-  const vendorWithCommisionTier = job.tasks.filter((res: any) => res.contractor.commissionTier);
+  const vendorWithCommisionTier = job.tasks.filter((res: any) => res.contractor?.commissionTier);
 
   useEffect(() => {
     const data: any = {
