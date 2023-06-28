@@ -1,22 +1,25 @@
-import { getItemTierList, getItems, updateItem } from 'api/items.api';
-import { loadInvoiceItems, loadTierListItems, updateInvoiceItem } from 'actions/invoicing/items/items.action';
+import { getItemTierList, getItems, getJobCostingList, updateItem } from 'api/items.api';
+import { loadInvoiceItems, loadJobCostingList, loadTierListItems, updateInvoiceItem } from 'actions/invoicing/items/items.action';
 import { all, call, cancelled, put, takeLatest } from 'redux-saga/effects';
 
 
 export function *handleGetItems() {
   try {
-    const [itemsResult, tierListResult]:any = yield all([
+    const [itemsResult, tierListResult, jobCostingListResult]:any = yield all([
       call(getItems),
-      call(getItemTierList)
+      call(getItemTierList),
+      call(getJobCostingList),
     ]);
     yield all([
       put(loadInvoiceItems.success(itemsResult.items)),
-      put(loadTierListItems.success(tierListResult.itemTierList))
+      put(loadTierListItems.success(tierListResult.itemTierList)),
+      put(loadJobCostingList.success(jobCostingListResult.costingList)),
     ]);
   } catch (error) {
     yield all([
       put(loadInvoiceItems.fault(error.toString())),
-      put(loadTierListItems.fault(error.toString()))
+      put(loadTierListItems.fault(error.toString())),
+      put(loadJobCostingList.fault(error.toString())),
     ]);
   } finally {
     if (yield cancelled()) {
@@ -35,6 +38,19 @@ export function *handleGetTiers() {
   } finally {
     if (yield cancelled()) {
       yield put(loadTierListItems.cancelled());
+    }
+  }
+}
+export function* handleGetJobCosting() {
+  try {
+    const result = yield call(getJobCostingList);
+    console.log('CHECKING', result.costingList);
+    yield put(loadJobCostingList.success(result.costingList));
+  } catch (error) {
+    yield put(loadJobCostingList.fault(error.toString()));
+  } finally {
+    if (yield cancelled()) {
+      yield put(loadJobCostingList.cancelled());
     }
   }
 }
@@ -57,7 +73,8 @@ export default function *watchInvoiceItemsLoad() {
   yield all([
     takeLatest(updateInvoiceItem.fetch, handleUpdateItem),
     takeLatest(loadInvoiceItems.fetch, handleGetItems),
-    takeLatest(loadTierListItems.fetch, handleGetTiers)
+    takeLatest(loadTierListItems.fetch, handleGetTiers),
+    takeLatest(loadJobCostingList.fetch, handleGetJobCosting),
   ]);
 }
 
