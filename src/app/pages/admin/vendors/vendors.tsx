@@ -58,7 +58,7 @@ const status = [
   },
 ];
 const ITEMS = [
-  { id: 0, title: 'Edit Commission' },
+  { id: 0, title: 'Edit Pay' },
   { id: 1, title: 'View Edit History' },
   { id: 2, title: 'Payment History' },
 ];

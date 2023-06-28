@@ -84,7 +84,7 @@ function PayrollInvoices({classes}: Props) {
       let cond = true;
       if (selectionRange) {
         cond = cond &&
-          moment(item.invoice.dueDate).isBetween(selectionRange?.startDate, selectionRange?.endDate, 'day', '[]');
+          moment(item.invoice?.dueDate).isBetween(selectionRange?.startDate, selectionRange?.endDate, 'day', '[]');
       }
       if (selectedIDs.length > 0) {
         cond = cond && selectedIDs.indexOf(item.payedPerson._id) >= 0;
@@ -93,7 +93,9 @@ function PayrollInvoices({classes}: Props) {
     }).map((item: any) => {
       let technicianCount = 0;
       let technicianIds: string[] = [];
-      item.invoice.job.tasks.forEach((task:any) => {
+
+      let job = item.invoice?.job || item.job;
+      job.tasks.forEach((task: any) => {
         if(task.contractor){
           !technicianIds.includes(task.contractor._id) && technicianCount++;
           technicianIds.push(task.contractor._id)
@@ -102,7 +104,7 @@ function PayrollInvoices({classes}: Props) {
           technicianIds.push(task.technician._id)
         }
       })
-      totalInvoicesAmount += item.invoice.total / (technicianCount || 1);
+      totalInvoicesAmount += item.invoice?.total / (technicianCount || 1);
       totalCommissions += item.commissionAmount;
       setTotals({invoices: totalInvoicesAmount, commissions: totalCommissions});
       return {
@@ -118,24 +120,24 @@ function PayrollInvoices({classes}: Props) {
   }, [selectionRange, invoices, selectedIDs]);
 
   const columns: any = [
-    {
-      'Header': 'Invoice',
-      'accessor': (originalRow: any) => originalRow.invoice.invoiceId,
-      'className': 'font-bold',
-      'sortable': true,
-    },
+    // {
+    //   'Header': 'Invoice',
+    //   'accessor': (originalRow: any) => originalRow.invoice.invoiceId,
+    //   'className': 'font-bold',
+    //   'sortable': true,
+    // },
     {
       'Header': 'Vendor',
       'accessor': (originalRow: any) => originalRow.payedPerson.vendor,
       'className': 'font-bold',
       'sortable': true,
     },
-    {
-      'Header': 'Invoice Amount',
-      'accessor': (originalRow: any) => formatCurrency(originalRow.invoice.total),
-      'className': 'font-bold',
-      'sortable': true,
-    },
+    // {
+    //   'Header': 'Invoice Amount',
+    //   'accessor': (originalRow: any) => formatCurrency(originalRow.invoice.total),
+    //   'className': 'font-bold',
+    //   'sortable': true,
+    // },
     {
       'Header': '# of Technicians',
       'accessor': 'invoice.technicianCount',
@@ -154,25 +156,25 @@ function PayrollInvoices({classes}: Props) {
       'className': 'font-bold',
       'sortable': true,
     },
-    { Cell({ row }: any) {
-        return (
-          <Chip
-            label={row.original.invoice.status.split('_').join(' ').toLowerCase()}
-            className={
-              classNames({
-                [classes.statusChip]: true,
-                [classes.unPaidChip]: row.original.invoice.status === 'UNPAID',
-                [classes.partiallyPaidChip]: row.original.invoice.status === 'PARTIALLY_PAID',
-              })
-            }
-          />
-        )
-      },
-      'Header': 'Status',
-      'className': 'font-bold',
-      'sortable': false,
-      'width': 100
-    },
+    // { Cell({ row }: any) {
+    //     return (
+    //       <Chip
+    //         label={row.original.invoice.status.split('_').join(' ').toLowerCase()}
+    //         className={
+    //           classNames({
+    //             [classes.statusChip]: true,
+    //             [classes.unPaidChip]: row.original.invoice.status === 'UNPAID',
+    //             [classes.partiallyPaidChip]: row.original.invoice.status === 'PARTIALLY_PAID',
+    //           })
+    //         }
+    //       />
+    //     )
+    //   },
+    //   'Header': 'Status',
+    //   'className': 'font-bold',
+    //   'sortable': false,
+    //   'width': 100
+    // },
     {
       'Header': 'Notes',
       'accessor': (originalRow: any) =>

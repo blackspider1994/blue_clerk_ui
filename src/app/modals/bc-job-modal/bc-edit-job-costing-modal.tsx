@@ -362,7 +362,7 @@ function BCEditJobCostingModal({
                         <hr />
                         <Grid item xs={12} className='addition'>
                           <Grid container justify='flex-end'>
-                            <Typography variant={'body1'}>Technician Amount: ${replaceAmountToDecimal(String((technicianAmount)))}</Typography>
+                            <Typography variant={'body1'}>Total after additions and/or deductions: ${replaceAmountToDecimal(String((technicianAmount)))}</Typography>
                           </Grid>
                         </Grid>
                       </Grid>

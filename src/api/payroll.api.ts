@@ -113,25 +113,18 @@ export const getPayrollBalanceAPI = async (
     if (status === 1) {
       const data = [
         ...vendors.map((contractor: any) => {
-          const {
-            commissionTotal,
-            invoiceIds,
-            advancePaymentTotal,
-            creditAvailable,
-            creditUsedTotal,
-            workType,
-            companyLocation,
-          } = contractor;
-          return {
+          const { commissionTotal, invoiceIds, jobIds, advancePaymentTotal, creditAvailable, creditUsedTotal, workType, companyLocation } = contractor;
+          return ({
             ...normalizeData(contractor.contractor, 'vendor'),
             commissionTotal: Math.round(commissionTotal * 100) / 100,
             invoiceIds,
+            jobIds,
             advancePaymentTotal,
             creditAvailable,
             creditUsedTotal,
             workType,
             companyLocation,
-          };
+          })
         }),
         // ...employees.map((technician: any) => {
         //   const {commissionTotal, invoiceIds} = technician;
@@ -341,12 +334,13 @@ export const getPayrollReportAPI = async (
     if (status === 1) {
       const data = [
         ...vendors.map((vendor: any) => {
-          const { commissionAmount, contractor, invoice } = vendor;
-          return {
+          const { commissionAmount, contractor, invoice, job } = vendor;
+          return ({
             payedPerson: normalizeData(contractor, 'vendor'),
             commissionAmount,
             invoice,
-          };
+            job,
+          })
         }),
         // ...employees.map((technician: any) => {
         //   const {commissionAmount, invoice, employee} = technician;
