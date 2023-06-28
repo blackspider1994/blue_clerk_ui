@@ -121,4 +121,56 @@ export const addItem = async (item:any) => {
   }
 };
 
-
+export const getJobCostingList = async () => {
+  try {
+    const response: any = await request('/getJobCostingList', 'GET', false);
+    return response.data;
+  } catch (err) {
+    if (err.response.status >= 400 || err.data.status === 0) {
+      throw new Error(
+        err.data.errors ||
+          err.data.message ||
+          `${err.data['err.user.incorrect']}\nYou have ${err.data.retry} attempts left`
+      );
+    } else {
+      throw new Error(`Something went wrong`);
+    }
+  }
+};
+export const addJobCostingApi = async () => {
+  try {
+    const response: any = await request('/addJobCosting', 'POST', false);
+    return response.data;
+  } catch (err) {
+    if (err.response.status >= 400 || err.data.status === 0) {
+      throw new Error(
+        err.data.errors ||
+          err.data.message ||
+          `${err.data['err.user.incorrect']}\nYou have ${err.data.retry} attempts left`
+      );
+    } else {
+      throw new Error(`Something went wrong`);
+    }
+  }
+};
+export const updateJobCosting = async (data: any) => {
+  try {
+    const response: any = await request(
+      '/updateJobCosting',
+      'PUT',
+      data,
+      false
+    );
+    return response.data;
+  } catch (err) {
+    if (err.response.status >= 400 || err.data.status === 0) {
+      throw new Error(
+        err.data.errors ||
+          err.data.message ||
+          `${err.data['err.user.incorrect']}\nYou have ${err.data.retry} attempts left`
+      );
+    } else {
+      throw new Error(`Something went wrong`);
+    }
+  }
+};

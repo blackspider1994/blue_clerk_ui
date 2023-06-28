@@ -1,7 +1,7 @@
 
 import { InvoiceItemsState, Item } from './items.types';
 import { Reducer } from 'redux';
-import { loadInvoiceItems, loadTierListItems, updateInvoiceItem } from 'actions/invoicing/items/items.action';
+import { loadInvoiceItems, loadJobCostingList, loadTierListItems, updateInvoiceItem } from 'actions/invoicing/items/items.action';
 
 export type { InvoiceItemsState };
 
@@ -14,7 +14,8 @@ const initialState: InvoiceItemsState = {
     'isActive': false,
     '_id': '',
     'name': '',
-    'tiers': []
+    'tiers': [],
+    costingList: [],
   },
   'items': [],
   'loading': false,
@@ -26,6 +27,13 @@ const tierListInitialState: any = {
   'error': '',
   'loading': true,
   'tiers': []
+};
+
+
+const jobCostingListInitialState: any = {
+  error: '',
+  loading: true,
+  costingList: [],
 };
 
 export const InvoiceItemsReducer: Reducer = (state = initialState, action) => {
@@ -62,6 +70,9 @@ export const InvoiceItemsReducer: Reducer = (state = initialState, action) => {
     case updateInvoiceItem.success.toString():
       if (action.payload.tiers) {
         delete action.payload.tiers;
+      }
+      if (action.payload.costingList) {
+        delete action.payload.costingList;
       }
       return {
         ...state,
@@ -118,6 +129,33 @@ export const InvoiceItemsTierList: Reducer = (state = tierListInitialState, acti
         'loading': false
       };
 
+    default:
+      return state;
+  }
+};
+
+export const InvoiceJobCostingList: Reducer = (
+  state = jobCostingListInitialState,
+  action
+) => {
+  switch (action.type) {
+    case loadJobCostingList.success.toString():
+      return {
+        ...state,
+        loading: false,
+        costingList: action.payload,
+      };
+    case loadJobCostingList.fetch.toString():
+      return {
+        ...state,
+        loading: true,
+      };
+    case loadJobCostingList.fault.toString():
+      return {
+        ...state,
+        error: action.payload,
+        loading: false,
+      };
     default:
       return state;
   }

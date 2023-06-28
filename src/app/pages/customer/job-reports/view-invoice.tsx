@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, createStyles, withStyles, Grid, Paper, Badge} from "@material-ui/core";
 import styles from "../customer.styles";
@@ -49,6 +49,12 @@ const invoicePageStyles = makeStyles((theme: Theme) =>
       fontWeight: 700,
       fontSize: 14,
       marginLeft: 20,
+    },
+    costingButton: {
+      marginLeft: 10
+    },
+    buttonLabel: {
+      textWrap: 'nowrap'
     }
   }),
 );
@@ -62,9 +68,9 @@ function ViewInvoice({ classes, theme }: any) {
   const { user } = useSelector(({ auth }: any) => auth);
   const { 'data': invoiceDetail, 'loading': loadingInvoiceDetail, 'error': invoiceDetailError } = useSelector(({ invoiceDetail }:any) => invoiceDetail);
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
+  const [showJobCosting, setShowJobCosting] = useState(false);
 
   useEffect(() => {
-
     if (invoice) {
       dispatch(loadInvoiceDetail.fetch(invoice));
     }
@@ -73,6 +79,13 @@ function ViewInvoice({ classes, theme }: any) {
       dispatch(getCompanyProfileAction(user.company as string));
     }
   }, []);
+
+  useEffect(() => {
+    if (invoiceDetail && invoiceDetail.job) {
+      const vendorWithCommisionTier = invoiceDetail.job?.tasks?.filter((res: any) => res.contractor?.commissionTier);
+      setShowJobCosting(vendorWithCommisionTier.length > 0);
+    }
+  }, [invoiceDetail]);
 
   if (loadingInvoiceDetail) {
     return <BCCircularLoader heightValue={'200px'} />;
@@ -219,6 +232,22 @@ function ViewInvoice({ classes, theme }: any) {
       }
     }).catch(e => dispatch(error(e.message)))
   }
+  const openEditJobCostingModal = () => {
+    dispatch(
+      setModalDataAction({
+        data: {
+          job: { ...invoiceDetail.job, charge: invoiceDetail.total, isInvoice: true },
+          removeFooter: false,
+          maxHeight: '100%',
+          modalTitle: 'Job Costing'
+        },
+        type: modalTypes.EDIT_JOB_COSTING_MODAL,
+      })
+    );
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
+  };
 
 
 
@@ -262,7 +291,7 @@ function ViewInvoice({ classes, theme }: any) {
     <MainContainer>
       <PageContainer>
         <PageHeader>
-          <div style={{display: 'flex'}}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <IconButton
               color="default"
               size="small"
@@ -271,6 +300,17 @@ function ViewInvoice({ classes, theme }: any) {
             >
               <ArrowBackIcon/>
             </IconButton>
+            {showJobCosting && 
+              <div>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={openEditJobCostingModal}
+                  classes={{ root: invoiceStyles.costingButton, label: invoiceStyles.buttonLabel }}
+                >Job Costing
+                </Button>
+              </div>
+            }
             {invoiceDetail?.isDraft ? (
               <CSChip
                 label={'Draft'}

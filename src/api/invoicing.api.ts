@@ -543,3 +543,15 @@ export const callCreateEstimatesAPI = (data: any) => {
   });
 };
 
+export const updateJobCommission = (id: string, data: any) => {
+  return new Promise((resolve, reject) => {
+    request(`/updateJobCommission/` + id, 'put', data)
+      .then((res: any) => {
+        return resolve(res.data);
+      })
+      .catch(err => {
+        return reject(err);
+      });
+  });
+};
+

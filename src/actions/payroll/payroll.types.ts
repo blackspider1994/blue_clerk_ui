@@ -31,6 +31,8 @@ export interface Contractor {
   };
   balance: number;
   commission: number;
+  commissionType: string;
+  commissionTier: string;
   commissionTotal: number;
   invoiceIds: string[];
 }
