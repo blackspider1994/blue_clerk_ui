@@ -71,19 +71,19 @@ function CustomerContactsPage({ classes, id, type, customerId }: any) {
    
     {
       'Cell'({ row }: any) {
-        return <div className={classes.smsStatusCell}>
+        return row.values?.phone ? (<div className={classes.smsStatusCell}>
           <span style={{
             marginTop: 10,
             height: "10px",
             width: "10px",
-            backgroundColor: row.values.smsStatus ? OCCUPIED_GREEN : NON_OCCUPIED_GREY,
+            backgroundColor: row.values?.smsStatus ? OCCUPIED_GREEN : NON_OCCUPIED_GREY,
             borderRadius: "50%",
             display: "flex", 
             justifyContent: 'center',
             alignItems: 'center',
           }}></span>
           <span className={classes.smsStatusText}>{ row.values.smsStatus ? 'Opted in' : 'Opted out' }</span>
-        </div>
+        </div>) : <div></div>
       },
       'Header': 'SMS Messaging Status',
       'id': 'smsStatus',
