@@ -42,7 +42,6 @@ export function* handleGetTiers() {
 export function* handleGetJobCosting() {
   try {
     const result = yield call(getJobCostingList);
-    console.log('CHECKING', result.costingList);
     yield put(loadJobCostingList.success(result.costingList));
   } catch (error) {
     yield put(loadJobCostingList.fault(error.toString()));

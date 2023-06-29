@@ -19,6 +19,7 @@ import {
 } from 'actions/snackbar/snackbar.action';
 import {
   loadInvoiceItems,
+  loadJobCostingList,
   loadTierListItems,
 } from 'actions/invoicing/items/items.action';
 interface Props {
@@ -26,9 +27,10 @@ interface Props {
 }
 function AdminSetupPage({ classes }: Props) {
   const dispatch = useDispatch();
-  const { loading, error: tiersError, costingList } = useSelector(
+  const { loading: costingTierLoading, error: tiersError, costingList } = useSelector(
     ({ InvoiceJobCosting }: any) => InvoiceJobCosting
   );
+  const [loading, setLoading] = useState(costingTierLoading);
   const [updating, setUpdating] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [statusFilter, setStatusFilter] = useState(true);
@@ -37,6 +39,10 @@ function AdminSetupPage({ classes }: Props) {
     let filteredTiers = costingList.filter((res: any) => res.tier.isActive === true);
     setTableData(filteredTiers);
   }, [costingList]);
+
+  useEffect(() => {
+    setLoading(costingTierLoading);
+  }, [costingTierLoading]);
 
   useEffect(() => {
     let filteredTiers = costingList.filter((res: any) => res.tier.isActive === statusFilter);
@@ -60,6 +66,7 @@ function AdminSetupPage({ classes }: Props) {
           color={'primary'}
           disableElevation
           onClick={addTier}
+          disabled={updating}
           size={'small'}
           style={{
             color: 'white',
@@ -73,6 +80,7 @@ function AdminSetupPage({ classes }: Props) {
   }
   const addTier = async () => {
     setUpdating(true);
+    setLoading(true);
     const response = await addJobCostingApi().catch((err) => {
       dispatch(SnackBarError(err.message));
       setUpdating(false);
@@ -80,10 +88,12 @@ function AdminSetupPage({ classes }: Props) {
     if (response) {
       dispatch(success(response.message));
       setUpdating(false);
+      dispatch(loadJobCostingList.fetch());
       dispatch(loadInvoiceItems.fetch());
     }
   };
   const handleClick = async (tier: any) => {
+    setLoading(true);
     const { _id, isActive, name } = tier;
     const result = await updateJobCosting({
       costingTierId: _id,
@@ -96,7 +106,7 @@ function AdminSetupPage({ classes }: Props) {
           isActive ? `Tier ${name} deactivated` : `Tier ${name} activated`
         )
       );
-      dispatch(loadTierListItems.fetch());
+      dispatch(loadJobCostingList.fetch());
       dispatch(loadInvoiceItems.fetch());
     }
   };

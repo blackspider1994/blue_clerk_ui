@@ -70,7 +70,7 @@ function BcPaymentHistoryModal({
                 <TableRow>
                   <TableCell>Edit Date</TableCell>
                   <TableCell>Effective Date</TableCell>
-                  <TableCell>Commission</TableCell>
+                    <TableCell>Commissions</TableCell>
                   <TableCell>Edited By</TableCell>
                 </TableRow>
               </TableHead>
