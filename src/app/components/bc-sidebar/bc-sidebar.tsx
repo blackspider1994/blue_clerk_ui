@@ -158,10 +158,10 @@ function BCSidebar({ children, setContentGrid, isMobile }: BCSidebarProps) {
       'label': 'Vendors',
       'link': '/main/admin/vendors'
     },
-    {
-      'label': 'Payroll',
-      'link': '/main/admin/payroll'
-    },
+    // {
+    //   'label': 'Payroll',
+    //   'link': '/main/admin/payroll'
+    // },
     {
       'label': 'Integrations',
       'link': '/main/admin/integrations'

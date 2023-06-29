@@ -65,5 +65,9 @@ export default (theme: Theme): any => ({
       paddingTop: 0,
       paddingBottom: 0,
     }
+  },
+  jobCostingContent: {
+    paddingTop: "20px",
+    overflow: "hidden"
   }
 });

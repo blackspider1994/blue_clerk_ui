@@ -66,11 +66,12 @@ export const getPayrollBalanceAPI = async (startDate: string|null, endDate: stri
     if (status === 1) {
       const data = [
         ...vendors.map((contractor: any) => {
-          const { commissionTotal, invoiceIds, advancePaymentTotal, creditAvailable, creditUsedTotal, workType, companyLocation } = contractor;
+          const { commissionTotal, invoiceIds, jobIds, advancePaymentTotal, creditAvailable, creditUsedTotal, workType, companyLocation } = contractor;
           return ({
             ...normalizeData(contractor.contractor, 'vendor'),
             commissionTotal: Math.round(commissionTotal * 100) / 100,
             invoiceIds,
+            jobIds,
             advancePaymentTotal,
             creditAvailable,
             creditUsedTotal,
@@ -218,11 +219,12 @@ export const getPayrollReportAPI = async (type?: string, id?: string, division?:
     if (status === 1) {
       const data = [
         ...vendors.map((vendor: any) => {
-          const {commissionAmount, contractor, invoice} = vendor;
+          const { commissionAmount, contractor, invoice, job } = vendor;
           return ({
             payedPerson: normalizeData(contractor, 'vendor'),
             commissionAmount,
             invoice,
+            job,
           })
         }),
       // ...employees.map((technician: any) => {
@@ -249,7 +251,7 @@ export const normalizeData = (item: any, type: string) => {
   switch (type) {
     case 'vendor':
     case 'contractor':
-      return ({
+      return {
         vendor: item?.info?.displayName ?? item?.info?.companyName,
         email: item.info.companyEmail,
         phone: item.contact?.phone || '',
@@ -257,13 +259,17 @@ export const normalizeData = (item: any, type: string) => {
         contact: {
           displayName: item.admin?.profile?.displayName,
           _id: item.admin?._id,
-          email:  item.admin?.auth?.email,
-          phone:  item.admin?.contact?.phone,
+          email: item.admin?.auth?.email,
+          phone: item.admin?.contact?.phone,
         },
         commission: item.commission,
+        commissionType: item.commissionType,
+        commissionTier: item.commissionTier,
+        accountType: item.admin?.accountType,
         balance: item.balance,
         _id: item._id,
-        type: 'vendor'});
+        type: 'vendor',
+      };
     case 'employee':
     case 'technician':
       return ({

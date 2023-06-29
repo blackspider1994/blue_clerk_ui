@@ -63,7 +63,8 @@ import { mapState, mapReducer as map } from './map.reducer';
 
 import { InvoiceItemsState
   , InvoiceItemsReducer as invoiceItems
-  , InvoiceItemsTierList as invoiceItemsTiers } from './items.reducer';
+  , InvoiceItemsTierList as invoiceItemsTiers
+  , InvoiceJobCostingList as InvoiceJobCosting} from './items.reducer';
 import { EmailState, EmailReducer as email } from './email.reducer';
 import {removeQBAuthStateLocalStorage} from "../utils/local-storage.service";
 import {PayrollState} from "../actions/payroll/payroll.types";
@@ -124,6 +125,7 @@ const appReducer = combineReducers({
   invoiceDetail,
   invoiceItems,
   invoiceItemsTiers,
+  InvoiceJobCosting,
   invoiceList,
   invoicesForBulkPayments,
   invoiceTodos,
