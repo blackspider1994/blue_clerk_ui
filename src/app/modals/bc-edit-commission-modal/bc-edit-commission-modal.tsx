@@ -63,6 +63,7 @@ function BcEditCommissionModal({
   const { costingList } = useSelector(
     ({ InvoiceJobCosting }: any) => InvoiceJobCosting
   );
+  const [disablePast, setDisablePast] = useState(false);
 
   const closeModal = (forceClose?: boolean) => {
     if ((error || warning) && !forceClose) {
@@ -200,7 +201,7 @@ function BcEditCommissionModal({
                   alignItems={'center'}
                   xs={3}
                 >
-                  <Typography variant={'button'}>COMMISSION TYPE</Typography>
+                      <Typography variant={'button'}>COMMISSIONS TYPE</Typography>
                 </Grid>
                 <Grid
                   item
@@ -210,7 +211,15 @@ function BcEditCommissionModal({
                   <Select
                     input={<StyledInput />}
                     name={'isFixed'}
-                    onChange={(e: any) => setCommissionType(e.target.value)}
+                    onChange={(e: any) => {
+                      if (vendorCommission.commissionType != e.target.value) {
+                        setDisablePast(true);
+                      } else { 
+                        setDisablePast(false);
+                      }
+                      
+                      setCommissionType(e.target.value)
+                    }}
                     value={commissionType}
                   >
                     <MenuItem value={'fixed'}>{'Fixed'}</MenuItem>
@@ -230,7 +239,7 @@ function BcEditCommissionModal({
                     alignItems={'center'}
                     xs={3}
                   >
-                    <Typography variant={'button'}>COMMISSION</Typography>
+                        <Typography variant={'button'}>COMMISSIONS</Typography>
                   </Grid>
                   <Grid
                     item
@@ -323,6 +332,7 @@ function BcEditCommissionModal({
                       variant={'inline'}
                       inputVariant={'outlined'}
                       value={effectiveDate}
+                          disablePast={disablePast}
                       fullWidth
                       InputProps={{
                         className: classes.datePicker,
@@ -393,7 +403,7 @@ function BcEditCommissionModal({
       </DialogContent>
       {!error && !warning && (
         <div style={{ fontSize: 12, textAlign: 'center', color: '#828282' }}>
-          * Changes to Commission will only be applied from Effective Date and
+          * Changes to Commissions will only be applied from Effective Date and
           onwards.
         </div>
       )}

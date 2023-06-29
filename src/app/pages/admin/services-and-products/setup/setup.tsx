@@ -24,6 +24,7 @@ function AdminSetupPage({ classes }: Props) {
   const { loading: tiersLoading, error: tiersError, tiers } = useSelector(
     ({ invoiceItemsTiers }: any) => invoiceItemsTiers
   );
+  const [loading, setLoading] = useState(tiersLoading);
   const [updating, setUpdating] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [statusFilter, setStatusFilter] = useState(true);
@@ -32,6 +33,10 @@ function AdminSetupPage({ classes }: Props) {
     let filteredTiers = tiers.filter((res: any) => res.tier.isActive === true);
     setTableData(filteredTiers);
   }, [tiers]);
+
+  useEffect(() => {
+    setLoading(tiersLoading);
+  }, [tiersLoading]);
 
   useEffect(() => {
     let filteredTiers = tiers.filter((res: any) => res.tier.isActive === statusFilter);
@@ -55,6 +60,7 @@ function AdminSetupPage({ classes }: Props) {
         <CSButton
           color={'primary'}
           disableElevation
+          disabled={updating}
           onClick={addTier}
           size={'small'}
           style={{
@@ -69,6 +75,7 @@ function AdminSetupPage({ classes }: Props) {
   }
   const addTier = async () => {
     setUpdating(true);
+    setLoading(true);
     const response = await addTierApi().catch((err) => {
       dispatch(SnackBarError(err.message));
       setUpdating(false);
@@ -76,10 +83,12 @@ function AdminSetupPage({ classes }: Props) {
     if (response) {
       dispatch(success(response.message));
       setUpdating(false);
+      dispatch(loadTierListItems.fetch());
       dispatch(loadInvoiceItems.fetch());
     }
   };
   const handleClick = async (tier: any) => {
+    setLoading(true);
     const { _id, isActive, name } = tier;
     const result = await updateTier({
       itemTierId: _id,
@@ -158,7 +167,7 @@ function AdminSetupPage({ classes }: Props) {
       <PageContainer>
         <BCTableContainer
           columns={columns}
-          isLoading={tiersLoading}
+          isLoading={loading}
           isPageSaveEnabled
           tableData={tableData}
           toolbar={Toolbar()}

@@ -148,7 +148,7 @@ function AdminVendorsPage({ classes }: any) {
     dispatch(
       setModalDataAction({
         data: {
-          modalTitle: 'Edit Commission',
+          modalTitle: 'Edit Pay',
           vendorCommission: vendor,
         },
         type: modalTypes.EDIT_COMMISSION_MODAL,
@@ -162,7 +162,7 @@ function AdminVendorsPage({ classes }: any) {
     dispatch(
       setModalDataAction({
         data: {
-          modalTitle: `${vendor.vendor} \n Commission History`,
+          modalTitle: `${vendor.vendor} \n Pay History`,
           vendorId: vendor._id,
         },
         type: modalTypes.VIEW_COMMISSION_HISTORY_MODAL,
