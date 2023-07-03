@@ -172,6 +172,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
     }
   }
 
+  const serviceTicketNotes = job.request?.requests?.filter((request: any) => request.note).map((request: any) => request.note).join('\n\n') || job.ticket?.note;
   return (
     <MainContainer>
       <PageContainer>
@@ -243,7 +244,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                     {/* Logo */}
                     <Grid
                       item
-                      xs={1}>
+                      xs={2}>
                       <div className={classes.imgArea}>
                         <img
                           className={classes.iconImage}
@@ -264,16 +265,16 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                       <p className={classes.grayBoldTextM_0}>
                         {(job.company.address.city || 'N/A') + ', ' + (job.company.address.state || 'N/A') + ', ' + (job.company.address.zipCode || 'N/A')}
                       </p>
-                      <p className={classes.grayBoldTextM_0}>
-                        {job.company.contact.phone || 'N/A'}
-                      </p>
-                      <p className={classes.grayBoldTextM_0}>
-                        {job.company.info.companyEmail || 'N/A'}
-                      </p>
+                      {job.company.contact?.phone && <p className={classes.grayBoldTextM_0}>
+                        {job.company.contact.phone}
+                      </p>}
+                      {job.company.info?.companyEmail && <p className={classes.grayBoldTextM_0}>
+                        {job.company.info.companyEmail}
+                      </p>}
                     </Grid>
                     <Grid
                       item
-                      xs={8}>
+                      xs={7}>
                       <div className={classes.rightAlign}>
                         <p className={classes.reportTag}>
                           {`Job Report - ${job.jobId}`}
@@ -320,11 +321,11 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                             </p>
                             <p className={classes.grayBoldTextM_0}>
                               {job.customer?.address?.street && <>
-                                {job.customer?.address?.street + ', '}
+                                {job.customer?.address?.street}
+                                <br />
                               </>}
                               {job.customer?.address?.city && <>
-                                {job.customer?.address?.city}
-                                <br />
+                                {job.customer?.address?.city + ', '}
                               </>}
                               {job.customer?.address?.state && <>
                                 {job.customer?.address?.state}
@@ -334,30 +335,26 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                             </p>
                           </div>
                         </Grid>
-                        <Grid
-                          item
-                          xs={3}>
+                        {job.customer?.contact?.phone && <Grid item xs={3}>
                           <div className={classes.addMargin}>
                             <p className={classes.attributeKey}>
                               {'Phone Number'}
                             </p>
                             <p className={classes.grayBoldTextM_0}>
-                              {job.customer?.contact?.phone || 'N/A'}
+                              {job.customer?.contact?.phone}
                             </p>
                           </div>
-                        </Grid>
-                        <Grid
-                          item
-                          xs={3}>
+                        </Grid>}
+                        {job.customer?.info?.email && <Grid item xs={3}>
                           <div className={classes.addMargin}>
                             <p className={classes.attributeKey}>
                               {'Email'}
                             </p>
                             <p className={classes.grayBoldTextM_0}>
-                              {job.customer?.info?.email || 'N/A'}
+                              {job.customer?.info?.email}
                             </p>
                           </div>
-                        </Grid>
+                        </Grid>}
                       </Grid>
                     </Grid>
                   </Grid>
@@ -387,7 +384,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                       </Grid>}
                       {job.jobSite && <Grid
                         item
-                        xs={3}>
+                        xs={2}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'Job Address'}
@@ -399,7 +396,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                       </Grid>}
                       <Grid
                         item
-                        xs={3}>
+                        xs={2}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'House status'}
@@ -411,7 +408,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                       </Grid>
                       <Grid
                         item
-                        xs={3}>
+                        xs={5}>
                         <Grid container>
                           {/* start & end time */}
                           <Grid
@@ -455,7 +452,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                       </Grid>}
                       {job.customerContactId?.phone && <Grid
                         item
-                        xs={3}>
+                        xs={2}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'Phone number'}
@@ -467,7 +464,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                       </Grid>}
                       {job.customerContactId?.email && <Grid
                         item
-                        xs={3}>
+                        xs={4}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'Email'}
@@ -477,18 +474,18 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                           </p>
                         </div>
                       </Grid>}
-                      <Grid
+                      {(job.customerPO || job.ticket.customerPO) && <Grid
                         item
-                        xs={3}>
+                        xs={2}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'Purchase Order'}
                           </p>
                           <p className={classes.grayBoldTextM_0}>
-                            {job.customerPO || job.ticket.customerPO || 'N/A'}
+                            {job.customerPO || job.ticket.customerPO}
                           </p>
                         </div>
-                      </Grid>
+                      </Grid>}
                       <Grid
                         item
                         xs={12}>
@@ -534,54 +531,46 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                           {'Home owner information'}
                         </p>
                       </Grid>
-                      <Grid
-                        item
-                        xs={3}>
+                      { job.homeOwner?.profile?.firstName && <Grid item xs={3}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'First Name'}
                           </p>
                           <p className={classes.grayBoldTextM_0}>
-                            {job.homeOwner?.profile?.firstName || 'N/A'}
+                            {job.homeOwner?.profile?.firstName}
                           </p>
                         </div>
-                      </Grid>
-                      <Grid
-                        item
-                        xs={3}>
+                      </Grid>}
+                      { job.homeOwner?.profile?.lastName && <Grid item xs={3}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'Last Name'}
                           </p>
                           <p className={classes.grayBoldTextM_0}>
-                            {job.homeOwner?.profile?.lastName || 'N/A'}
+                            {job.homeOwner?.profile?.lastName}
                           </p>
                         </div>
-                      </Grid>
-                      <Grid
-                        item
-                        xs={3}>
+                      </Grid>}
+                      {job.homeOwner?.contact?.phoneNumber && <Grid item xs={2}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'Phone number'}
                           </p>
                           <p className={classes.grayBoldTextM_0}>
-                            {job.homeOwner?.contact?.phoneNumber || 'N/A'}
+                            {job.homeOwner?.contact?.phoneNumber}
                           </p>
                         </div>
-                      </Grid>
-                      <Grid
-                        item
-                        xs={3}>
+                      </Grid>}
+                      {job.homeOwner?.info?.email && <Grid item xs={3}>
                         <div className={classes.addMargin}>
                           <p className={classes.attributeKey}>
                             {'Email'}
                           </p>
                           <p className={classes.grayBoldTextM_0}>
-                            {job.homeOwner?.info?.email || 'N/A'}
+                            {job.homeOwner?.info?.email}
                           </p>
                         </div>
-                      </Grid>
+                      </Grid>}
                       <hr className={classes.separator} />
                     </Grid>}
                     <Grid container>
@@ -595,19 +584,17 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                               {'Notes'}
                             </p>
                           </Grid>
-                          <Grid
-                            item
-                            xs={12}>
+                          {serviceTicketNotes &&<Grid item xs={12}>
                             <div className={classes.addMargin}>
                               <p className={classes.notesSubtitle}>
                                 {'Service Ticket Note'}
                               </p>
                               <p className={classNames(classes.noMargin, classes.grayNormalText)}>
-                                {job.request?.requests?.filter((request: any) => request.note).map((request: any) => request.note).join('\n\n') || job.ticket?.note || 'N/A'}
+                                {serviceTicketNotes}
                               </p>
                             </div>
-                          </Grid>
-                          <Grid
+                          </Grid>}
+                          {job.comment && <Grid
                             item
                             xs={12}>
                             <div className={classes.addMargin}>
@@ -615,11 +602,11 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                                 {'Job Notes'}
                               </p>
                               <p className={classNames(classes.noMargin, classes.grayNormalText)}>
-                                {job.comment || 'N/A'}
+                                {job.comment}
                               </p>
                             </div>
-                          </Grid>
-                          <Grid
+                          </Grid>}
+                          {technicianNotes.length > 0 &&<Grid
                             item
                             xs={12}>
                             <div className={classes.addMargin}>
@@ -627,13 +614,11 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                                 {'Technician\'s Comments'}
                               </p>
                               {
-                                technicianNotes.length
-                                  ? technicianNotes.map((note: string, index: number) =>
+                                  technicianNotes.map((note: string, index: number) =>
                                     <p key={index} className={classNames(classes.noMargin, classes.noMarginBottom, classes.grayNormalText)}>{note}</p>)
-                                  : <p className={classNames(classes.noMargin, classes.grayNormalText)}>{'N/A'}</p>
                               }
                             </div>
-                          </Grid>
+                          </Grid>}
                         </Grid>
                       </Grid>
                       {/* Technician photos */}

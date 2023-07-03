@@ -24,7 +24,7 @@ export default (theme: Theme): any => ({
   'subTitle': {
     'fontSize': '14px',
     'fontWeight': 'bold',
-    'lineHeight': '26px',
+    'lineHeight': '10px',
     'textDecorationLine': 'underline',
     'textUnderlineOffset': '5px',
     'letterSpacing': '1px',
@@ -168,8 +168,8 @@ export default (theme: Theme): any => ({
     'background': CONSTANTS.GRAY6, 
     'borderWidth': '0px', 
     'width': '100%',
-    'marginTop': '20px',
-    'marginBottom': '15px',
+    'marginTop': '10px',
+    'marginBottom': '10px',
   },
   'rightAlign': {
     'textAlign': 'right'

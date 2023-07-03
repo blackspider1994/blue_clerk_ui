@@ -44,7 +44,7 @@ function InvoicingListListing({ classes, theme }: any) {
   const customStyles = useCustomStyles();
 
   // const isLoading = useSelector((state: any) => state?.invoiceList?.loading);
-  const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword } = useSelector(
+  const { loading, total, currentPageIndex, currentPageSize, keyword } = useSelector(
     ({ invoiceList }: any) => ({
       loading: invoiceList.loading,
       prevCursor: invoiceList.prevCursor,
@@ -221,7 +221,7 @@ function InvoicingListListing({ classes, theme }: any) {
 
   useEffect(() => {
     if (fetchInvoices) {
-      dispatch(getAllInvoicesAPI(currentPageSize, undefined, keyword, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params));
+      dispatch(getAllInvoicesAPI(currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params));
       dispatch(setCurrentPageIndex(0));
     }
     setFetchInvoices(false);

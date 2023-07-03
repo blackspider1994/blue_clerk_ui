@@ -179,22 +179,5 @@ export const pdfRequest = (url: string, type: Method, data?: any, noHeaders?: bo
     }
   }
 
-  if (!noHeaders) {
-    request.headers = {
-      ...request.headers,
-      'Authorization': token
-    };
-  }
-
-  if (cancelTokenSource) {
-    request.cancelToken = cancelTokenSource.token;
-  }
-
-  //add current division params
-  if (queryParams) {
-    try {
-      request.params = { ...request.params, ...queryParams };
-    } catch (error) { }
-  }
   return makeRequest(request);
 };
