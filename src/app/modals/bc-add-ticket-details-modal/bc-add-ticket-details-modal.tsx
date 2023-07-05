@@ -44,6 +44,7 @@ function BcAddTicketDetailsModal({classes, props}: any): JSX.Element {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedComments, setSelectedComments] = useState<any[]>([]);
   const [selectedImages, setSelectedImages] = useState<any[]>([]);
+  const [showJobId, setShowJobId] = useState(true);
 
   const technicianImages =
     invoiceData.job?.technicianImages?.map((image: any) => ({
@@ -122,6 +123,7 @@ function BcAddTicketDetailsModal({classes, props}: any): JSX.Element {
     if (isEditing) {
       setSelectedComments(allComments.filter((comment: any) => invoiceData.technicianMessages.notes.filter((c: any) => c.id === comment.id)?.length > 0));
       setSelectedImages(allImages.filter((image: any) => invoiceData.technicianMessages.images.filter((i: any) => i === image.imageUrl)?.length > 0));
+      setShowJobId(invoiceData.showJobId || false);
     }
     const data: any = {
       type: 'Customer',
@@ -147,13 +149,15 @@ function BcAddTicketDetailsModal({classes, props}: any): JSX.Element {
   const updateInvoiceMessagesAction = ({
                                          invoiceId,
                                          notes,
-                                         images
+                                         images,
+                                         showJobId
                                        }: any, callback?: Function) => {
     return async (dispatch: any) => {
       const result: any = await updateInvoiceMessages({
         invoiceId,
         notes,
-        images
+        images,
+        showJobId
       });
       if (result.status === 1) {
         dispatch(success(result?.message || 'Invoice updated successfully'));
@@ -174,6 +178,7 @@ function BcAddTicketDetailsModal({classes, props}: any): JSX.Element {
       invoiceId: invoiceData._id,
       notes: selectedComments,
       images: selectedImages.map((image: any) => image.imageUrl),
+      showJobId: showJobId,
     };
     try {
       await dispatch(updateInvoiceMessagesAction(requestObj, ({
@@ -261,7 +266,26 @@ function BcAddTicketDetailsModal({classes, props}: any): JSX.Element {
   return <>
     <DataContainer className={'new-modal-design'}>
       {invoiceData?.job._id &&
-        <Typography variant={'caption'} className={'jobIdText'}>{invoiceData?.job.jobId}</Typography>
+        <Typography variant={'caption'} className={'jobIdText'}>{invoiceData?.job.jobId}
+          {
+            isEditing && invoiceData?.job._id && <>
+            <Checkbox
+              style={{marginLeft: 25}}
+              className={classes.customcheck}
+              // Modify the checked condition based on your requirement
+              checked={showJobId}
+              disabled={!isEditing}
+              onChange={() => {
+                setShowJobId(!showJobId)
+              }}
+              color={'primary'}
+            />
+            <Typography variant={'caption'} className={classes.marginTop12}>
+              Add to Invoice
+            </Typography>
+          </>
+          }
+        </Typography>
       }
       {/*<BCMiniSidebar data={invoiceData}/>*/}
       <Grid container className={'modalPreview'} justify={'space-around'}>
