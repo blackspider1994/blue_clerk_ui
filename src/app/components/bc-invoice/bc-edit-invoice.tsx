@@ -898,7 +898,7 @@ function BCEditInvoice({
                 <Card elevation={2}>
                   <CardHeader title={invoiceData?.company?.info?.companyName + ' INVOICE DETAILS'}/>
                   <CardContent>
-                    {invoiceData?.job?._id &&
+                    {invoiceData?.job?._id && invoiceData?.showJobId &&
                       <Typography variant={'caption'} className={'jobIdText'}>{invoiceData?.job?.jobId}</Typography>
                     }
                     <Grid container spacing={5}>

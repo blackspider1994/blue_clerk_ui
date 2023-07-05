@@ -454,11 +454,12 @@ export const updateInvoice = (data: any) => {
   });
 };
 
-export const updateInvoiceMessages = ({invoiceId, notes, images}: any) => {
+export const updateInvoiceMessages = ({invoiceId, notes, images, showJobId}: any) => {
   return new Promise((resolve, reject) => {
     request(`/updateInvoiceMessages`, 'post', {
       invoiceId,
-      technicianMessages: {notes, images}
+      technicianMessages: {notes, images},
+      showJobId
     })
       .then((res: any) => {
         return resolve(res.data);
