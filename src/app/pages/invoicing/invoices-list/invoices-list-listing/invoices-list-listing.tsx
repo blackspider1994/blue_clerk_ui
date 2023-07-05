@@ -470,7 +470,7 @@ function InvoicingListListing({ classes, theme }: any) {
         // fetchFunction={(num: number, isPrev: boolean, isNext: boolean, query: string) => {
         //   setLastPrevCursor(isPrev ? prevCursor : undefined)
         //   setLastNextCursor(isNext ? nextCursor : undefined)
-        //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined, currentDivision.params))
+        //   dispatch(getAllInvoicesAPI(num || currentPageSize, isPrev ? prevCursor : undefined, isNext ? nextCursor : undefined, query === '' ? '' : query || keyword, advanceFilterInvoiceData, undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
         // }}
         total={total}
         currentPageIndex={currentPageIndex}
@@ -482,7 +482,7 @@ function InvoicingListListing({ classes, theme }: any) {
         currentPageSize={currentPageSize}
         setCurrentPageSizeFunction={(num: number) => {
           dispatch(setCurrentPageSize(num));
-          dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+          dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, advanceFilterInvoiceData,  undefined, undefined, undefined,undefined,undefined,undefined, currentDivision.params))
         }}
         setKeywordFunction={(query: string) => {
           desbouncedSearchFunction(query);

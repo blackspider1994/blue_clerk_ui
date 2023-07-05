@@ -616,6 +616,9 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 //     '',
                 //     { invoiceDateRange: selectionRange },
                 //     customerValue?._id,
+                //     customerContactValue?.value,
+                //     checkMissingPo,
+                //     true,
                 //     isNaN(parseInt(showValue)) ? null : moment().add(parseInt(showValue), 'day').toDate(),
                 //     showValue === 'all',
                 //     currentDivision.params
@@ -626,12 +629,12 @@ function BcSendInvoicesModal({ classes, modalOptions, setModalOptions }: any): J
                 setCurrentPageIndexFunction={(num: number, apiCall: Boolean) => {
                   dispatch(setCurrentPageIndex(num));
                   if (apiCall)
-                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+                    dispatch(getAllInvoicesAPI(currentPageSize, num, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, showValue === 'all', currentDivision.params))
                 }}
                 currentPageSize={currentPageSize}
                 setCurrentPageSizeFunction={(num: number) => {
                   dispatch(setCurrentPageSize(num));
-                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+                  dispatch(getAllInvoicesAPI(num || currentPageSize, currentPageIndex, keyword, { invoiceDateRange: selectionRange }, customerValue?._id, customerContactValue?.value, checkMissingPo, true, undefined, showValue === 'all', currentDivision.params))
                 }}
                 setKeywordFunction={(query: string) => {
                   desbouncedSearchFunction(query);
