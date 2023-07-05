@@ -230,7 +230,16 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
     }
   }, [itemObj]);
 
+let isFixedDisabled=false;
+  useEffect(() => {
+    // Set default value for field B based on field A
+    if (formik.values.itemType === 'Product') {
+      formik.setFieldValue('isFixed', true);
+    }
 
+    // Disable field B based on field A
+    isFixedDisabled = formik.values.itemType === 'Product'
+  }, [formik.values.itemType]);
 
 
   return <DataContainer>
@@ -356,6 +365,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                 input={<StyledInput />}
                 name={'itemType'}
                 onChange={formik.handleChange}
+                disabled={isFixedDisabled}
                 value={formik.values.itemType}
               >
                 <MenuItem value={'Service'} >{'Service'}</MenuItem>
@@ -387,6 +397,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                   }
                   input={<StyledInput />}
                   name={'isFixed'}
+                  disabled={formik.values.itemType=='Product'}
                   onChange={formik.handleChange}
                   value={formik.values.isFixed}
                 >
