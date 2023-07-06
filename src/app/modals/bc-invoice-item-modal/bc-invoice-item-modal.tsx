@@ -85,8 +85,7 @@ interface ModalProps {
 }
 
 function BCInvoiceEditModal({ item, classes }: ModalProps) {
-  const { _id, name, isFixed, isJobType, description, tax, tiers, costing, itemType } = item;
-  console.log("item",item);
+  const { _id, name, isFixed, isJobType, description, tax, tiers, costing, itemType, productCost } = item;
   const { itemObj, error, loadingObj } = useSelector(({ invoiceItems }: RootState) => invoiceItems);
   const { 'data': taxes } = useSelector(({ tax }: any) => tax);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -124,6 +123,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
       'tax': tax
         ? 1
         : 0,
+      "productCost": productCost ,
       'itemType': `${itemType}`,
       'tiers': activeTiers.reduce((total, currentValue) => ({
         ...total,
@@ -172,12 +172,14 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         dispatch(errorSnackBar('Tier Prices cannot be empty'));
         return setIsSubmitting(false);
       }
+      
+      const isProduct=values.itemType=='Product';
       const itemObject = {
         itemId: values.itemId,
         name: values.name,
         description: values.description || '',
         isFixed: values.isFixed === 'true' ? true : false,
-        isJobType: values.isJobType,
+        isJobType: isProduct?false:values.isJobType,
         tax: values.tax,
         itemType:values.itemType,
         tiers: tierArr,
@@ -232,13 +234,12 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
 
 let isFixedDisabled=false;
   useEffect(() => {
-    // Set default value for field B based on field A
+    // Set default value for jobId and is Fixed based on item type
     if (formik.values.itemType === 'Product') {
       formik.setFieldValue('isFixed', true);
+      formik.setFieldValue('isJobType',false);
     }
 
-    // Disable field B based on field A
-    isFixedDisabled = formik.values.itemType === 'Product'
   }, [formik.values.itemType]);
 
 
@@ -327,6 +328,8 @@ let isFixedDisabled=false;
                 classes={{ label: classes.checkboxLabel }}
                 control={
                   <Checkbox
+                    disabled={formik.values.itemType == 'Product'}
+
                     color={'primary'}
                     checked={formik.values.isJobType}
                     onChange={formik.handleChange}
@@ -507,11 +510,11 @@ let isFixedDisabled=false;
               ))}
             </Grid>
           </Grid>
-          {formik.values.isFixed !== '%' && !!activeJobCosts?.length && (
+          {formik.values.itemType == 'Service' &&formik.values.isFixed !== '%' && !!activeJobCosts?.length && (
             <Grid container className="pricing">
               <Grid container justify="center">
                 <Typography variant={'h6'}>
-                  <strong>Job costing</strong>
+                   <strong>Job costing</strong>
                 </Typography>
               </Grid>
               <Grid container classes={{ root: classes.tiers }}>
@@ -575,6 +578,69 @@ let isFixedDisabled=false;
                     </FormControl>
                   </Grid>
                 ))}
+              </Grid>
+            </Grid>
+          )}
+          {formik.values.itemType == 'Product' && formik.values.isFixed !== '%' && !!activeJobCosts?.length && (
+            <Grid container className="pricing">
+              <Grid container justify="center">
+                <Typography variant={'h6'}>
+                  <strong>Product cost</strong>
+                </Typography>
+              </Grid>
+              <Grid container classes={{ root: classes.tiers }}>
+                {/* {activeJobCosts.map((jobCost) => ( */}
+                  <Grid
+                    item
+                    xs={12}
+                    sm={3}
+                    container
+                    alignItems="center"
+                    key={"productCost"}
+                  >
+                  
+                    <FormControl>
+                      <BCInput
+                        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          formik.setFieldValue(
+                            'productCost',
+                            replaceAmountToDecimal(e.target.value)
+                          );
+                        }}
+                        handleChange={(
+                          e: React.ChangeEvent<HTMLInputElement>
+                        ) => {
+                          const amount = e.target.value;
+                          if (!validateDecimalAmount(amount)) return;
+                          formik.setFieldValue(
+                            'productCost',
+                            amount
+                          );
+                        }}
+                        name={'productCost'}
+                      value={`${formik.values.productCost}`}
+                        margin={'none'}
+                        inputProps={{
+                          style: {
+                            padding: '12px 14px',
+                            width: 110,
+                          },
+                        }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              $
+                            </InputAdornment>
+                          ),
+                          style: {
+                            borderRadius: 8,
+                            marginTop: 10,
+                          },
+                        }}
+                      />
+                    </FormControl>
+                  </Grid>
+                {/* ))} */}
               </Grid>
             </Grid>
           )}

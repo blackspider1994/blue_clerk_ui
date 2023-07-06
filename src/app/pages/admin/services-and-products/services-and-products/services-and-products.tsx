@@ -222,6 +222,7 @@ function AdminServiceAndProductsPage({ classes }: Props) {
             description: '',
             isFixed: true,
             itemType: "Service",
+            productCost: '',
             isJobType: true,
             tax: 0,
             tiers: activeTiers.reduce(

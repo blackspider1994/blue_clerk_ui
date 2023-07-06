@@ -17,5 +17,6 @@ export interface Item {
     company: string;
     tiers: any;
     costing: any;
-    itemType:string
+    itemType:string;
+    productCost:number,
 }
