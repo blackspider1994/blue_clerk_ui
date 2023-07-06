@@ -231,6 +231,20 @@ function BCServiceTicketModal(
         images: FormikValues.images,
         tasks: FormikValues.jobTypes.map((jobType: any) => ({jobType: jobType.jobTypeId || jobType._id})),
         customer: customers.find((customer: any) => customer?._id === FormikValues.customerId),
+        homeOwnerId: "",
+        isHomeOccupied: false,
+        homeOwner: {
+          profile: {
+            firstName: '',
+            lastName: '',
+          },
+          contact: {
+            phone: '',
+          },
+          info: {
+            email: '',
+          }
+        }
       }
       history.push({
         state: {
@@ -464,7 +478,9 @@ function BCServiceTicketModal(
               if(!homOwnerResult) { return; }
             }
           }
-
+          else {
+            formatedRequest.homeOwnerId = '';
+          }
           callEditTicketAPI(formatedRequest)
             .then((response: any) => {
               if (response.status === 0) {
