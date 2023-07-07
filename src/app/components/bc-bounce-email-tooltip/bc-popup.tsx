@@ -42,7 +42,7 @@ const Popup: React.FC<PopupProps> = ({ mouseEnter, mouseLeave }) => {
     color: '#ff0000',
   };
   const paraStyles: React.CSSProperties = {
-    textWrap: 'wrap',
+    // textWrap: 'wrap',
     color: '#9d9d9d',
     fontSize: '14px',
     lineHeight: '21px',
