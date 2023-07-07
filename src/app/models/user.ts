@@ -1,3 +1,5 @@
+import { RolesAndPermissions } from 'actions/employee/employee.types';
+
 export interface UserModel {
   _id: string;
   auth: Auth;
@@ -12,8 +14,10 @@ export interface UserModel {
 }
 
 export interface Auth {
+  _id?: string;
   email: string;
   password: string;
+  rolesAndPermissions?: RolesAndPermissions;
 }
 
 export interface AuthInfo {

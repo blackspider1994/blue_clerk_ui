@@ -5,6 +5,21 @@ export const types = {
   'SET_EMPLOYEES': 'setEmployee'
 };
 
+export enum Role {
+  OFFICE_ADMIN,
+  TECHNICIAN,
+  MANAGER,
+  COMPANY_ADMIN,
+  ADMIN_EMPLOYEE,
+  GLOBAL_ADMIN,
+  CUSTOMER,
+  CUSTOMER_CONTACT,
+  CONTRACTOR,
+  SUPPLIER_ADMIN,
+  ACCOUNT_MANAGER,
+  ACCOUNTS_PAYABLE
+}
+
 export interface updateEmployeeLocPermParam {
   employeeId: string;
   canAccessAllLocations: boolean;
@@ -39,7 +54,7 @@ export interface User {
     phone?: string
   },
   permissions?: {
-    role?: 0
+    role?: Role
   },
   info?: {
     companyName?: string,
@@ -47,7 +62,8 @@ export interface User {
     industry?: string
   },
   company?: string
-  allLocation?: boolean
+  allLocation?: boolean,
+  rolesAndPermissions?: RolesAndPermissions
 }
 
 export interface UserDetails {
@@ -59,7 +75,8 @@ export interface UserDetails {
     'preferences': string,
     'time': string,
     'timezone': string
-  }
+  },
+  'rolesAndPermissions': RolesAndPermissions
 }
 
 export interface UsersState {
@@ -79,4 +96,10 @@ export enum UsersActionType {
   ADDED = 'addedUser',
   GET_SINGLE_EMPLOYEE = 'getSingleEmployee',
   SET_SINGLE_EMPLOYEE = 'setSingleEmployee',
+}
+
+export type RolesAndPermissions = {
+  [key: string]: {
+    [key: string]: boolean
+  }
 }

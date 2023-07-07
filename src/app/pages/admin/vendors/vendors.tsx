@@ -34,6 +34,7 @@ import BCItemsFilter from '../../../components/bc-items-filter/bc-items-filter';
 import BCMenuButton from '../../../components/bc-menu-more';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import { getContractors } from 'actions/payroll/payroll.action';
+import { Can } from 'app/config/Can';
 
 interface StatusTypes {
   status: number;
@@ -434,16 +435,19 @@ function AdminVendorsPage({ classes }: any) {
             ]}
           />
           <div className={classes.addButtonArea}>
-            {curTab === 0 ? (
-              <CSButton
-                aria-label={'new-job'}
-                color={'primary'}
-                onClick={() => openVendorModal()}
-                variant={'contained'}
-              >
-                {'Invite Vendor'}
-              </CSButton>
-            ) : null}
+            {
+              curTab === 0
+                ? <Can I={'add'} a={'Vendor'}>
+                  <CSButton
+                    aria-label={'new-job'}
+                    color={'primary'}
+                    onClick={() => openVendorModal()}
+                    variant={'contained'}>
+                    {'Invite Vendor'}
+                  </CSButton>
+                </Can>
+                : null
+            }
           </div>
           <SwipeableViews index={curTab}>
             <div

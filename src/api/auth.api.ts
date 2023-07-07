@@ -1,5 +1,6 @@
 import request from 'utils/http.service';
 import { Auth, AuthInfo, ChangePassword } from 'app/models/user';
+import axios from 'axios';
 
 const login = async (param: Auth) => {
   let loginData: AuthInfo = {
@@ -11,8 +12,12 @@ const login = async (param: Auth) => {
   try {
     const response: any = await request('/login', 'POST', param, false);
     loginData = response.data;
-    // const responseCustomerAPI: any = await request('/login', 'POST', param, false, undefined, undefined, true);
-    // loginData = {...loginData, tokenCustomerAPI: responseCustomerAPI.data.token}
+
+
+    /*
+     * Const responseCustomerAPI: any = await request('/login', 'POST', param, false, undefined, undefined, true);
+     * loginData = {...loginData, tokenCustomerAPI: responseCustomerAPI.data.token}
+     */
     loginData.tokenCustomerAPI = response.data.token;
   } catch (err) {
     loginData = err.data;
@@ -25,6 +30,14 @@ const login = async (param: Auth) => {
     }
   }
 
+  try {
+    if (loginData?.user) {
+      const rolesAndPermissions: any = await axios.get(`${process.env.REACT_APP_LAMBDA_URL}/permissions/${loginData.user._id}`);
+      loginData.user.rolesAndPermissions = rolesAndPermissions?.data?.body?.permissions;
+    }
+  } catch (err) {
+    console.error('Something went wrong');
+  }
   return loginData;
 };
 
