@@ -42,7 +42,6 @@ const Popup: React.FC<PopupProps> = ({ mouseEnter, mouseLeave }) => {
     color: '#ff0000',
   };
   const paraStyles: React.CSSProperties = {
-    // textWrap: 'wrap',
     color: '#9d9d9d',
     fontSize: '14px',
     lineHeight: '21px',
@@ -84,7 +83,7 @@ const Popup: React.FC<PopupProps> = ({ mouseEnter, mouseLeave }) => {
       <div style={brStyles}></div>
       <div>
         <p style={paraStyles}>
-          There was an issue delivering this invoice. Please check the email.
+          There was an issue delivering<br />this invoice. Please check<br />the email.
         </p>
       </div>
       <div>

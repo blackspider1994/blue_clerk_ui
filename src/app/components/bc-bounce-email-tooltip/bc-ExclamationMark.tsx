@@ -14,7 +14,7 @@ const ExclamationMark: React.FC<ExclamationMarkProps> = ({
       width: '20px',
     },
     exclamation: {
-      fontSize: '18px',
+      fontSize: '28px',
       fontWeight: 'bold',
       color: 'red',
       width: '100%',
