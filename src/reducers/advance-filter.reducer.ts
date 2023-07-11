@@ -36,6 +36,7 @@ export const initialAdvanceFilterInvoiceState: AdvanceFilterInvoiceState = {
   jobAddressCity: '',
   selectedJobAddressState: '',
   jobAddressZip: '',
+  checkBouncedEmails: false
 };
 
 export const AdvanceFilterInvoiceReducer: Reducer<any> = (state = initialAdvanceFilterInvoiceState, action) => {

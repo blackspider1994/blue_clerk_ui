@@ -142,6 +142,7 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
       jobAddressCity: advanceFilterInvoiceData.jobAddressCity,
       selectedJobAddressState: advanceFilterInvoiceData.selectedJobAddressState,
       jobAddressZip: advanceFilterInvoiceData.jobAddressZip,
+      checkBouncedEmails: advanceFilterInvoiceData.checkBouncedEmails
     },
     onSubmit: (values) => {
       dispatch(applyAdvanceFilterInvoice(values));
@@ -348,7 +349,7 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
                   </div>
                 </Grid>
               </Grid>
-              <Grid item md={6} lg={3} container justify={'center'}>
+              <Grid item md={6} lg={3} direction='column' style={{justifyContent:'start'}} container justify={'center'}>
                 <Grid item style={{ maxWidth: 'calc(100% - 20px)' }}>
                   <Checkbox
                     color="primary"
@@ -366,6 +367,13 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
                       value={FormikValues.invoiceId}
                     />
                   </div>
+                </Grid>
+                <Grid item>
+                    <Checkbox color="primary"
+                      className={classes.checkbox}
+                      checked={FormikValues.checkBouncedEmails}
+                      onChange={(e) => FormikSetFieldValue('checkBouncedEmails', e.target.checked)} />
+                      BOUNCE EMAILS
                 </Grid>
               </Grid>
               <Grid item md={6} lg={3} container justify={'center'}>

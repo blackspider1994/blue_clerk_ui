@@ -113,6 +113,7 @@ export const getAllInvoicesAPI = (pageSize = 10, currentPageIndex = 0, keyword?:
       }
       if (advanceFilterInvoiceData) {
         optionObj.missingPO = advanceFilterInvoiceData.checkMissingPo;
+        optionObj.bouncedEmailFlag = advanceFilterInvoiceData.bouncedEmailFlag;
 
         if (advanceFilterInvoiceData.invoiceDateRange) {
           optionObj.startDate = moment(advanceFilterInvoiceData.invoiceDateRange.startDate).format('YYYY-MM-DD');
@@ -205,6 +206,22 @@ export const getAllInvoicesAPI = (pageSize = 10, currentPageIndex = 0, keyword?:
         .catch(err => {
           dispatch(setInvoicesLoading(false));
           dispatch(setInvoices([]));
+          if (err.message !== 'axios canceled') {
+            return reject(err);
+          }
+        });
+    });
+  };
+};
+
+export const markAsRead = (invoiceId?: string) => {
+  return (dispatch: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      requestApiV2(`/mark-as-read`, 'post', { invoiceId })
+        .then((res: any) => {
+          dispatch(getAllInvoicesAPI(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined))
+        })
+        .catch(err => {
           if (err.message !== 'axios canceled') {
             return reject(err);
           }
