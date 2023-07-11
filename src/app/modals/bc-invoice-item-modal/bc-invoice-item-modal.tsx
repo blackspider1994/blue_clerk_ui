@@ -178,10 +178,11 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         itemId: values.itemId,
         name: values.name,
         description: values.description || '',
-        isFixed: values.isFixed === 'true' ? true : false,
+        isFixed: isProduct?true:values.isFixed === 'true' ? true : false,
         isJobType: isProduct?false:values.isJobType,
         tax: values.tax,
         itemType:values.itemType,
+        productCost:values.productCost,
         tiers: tierArr,
         costing: costingArr,
       }
@@ -359,7 +360,7 @@ let isFixedDisabled=false;
                   minWidth: '37%'
                 }}
               >
-                ITEM TYPE
+                TYPE
               </div>
               <Select
                 error={
@@ -376,7 +377,7 @@ let isFixedDisabled=false;
               </Select>
             </Grid>
             <Grid container>
-              <Grid
+              {formik.values.itemType == 'Service'&&<Grid
                 item
                 xs={12}
                 style={{
@@ -400,7 +401,7 @@ let isFixedDisabled=false;
                   }
                   input={<StyledInput />}
                   name={'isFixed'}
-                  disabled={formik.values.itemType=='Product'}
+                  // disabled={formik.values.itemType=='Product'}
                   onChange={formik.handleChange}
                   value={formik.values.isFixed}
                 >
@@ -408,7 +409,66 @@ let isFixedDisabled=false;
                   <MenuItem value={'false'}>{'Hourly'}</MenuItem>
                   <MenuItem value={'%'}>{'Percentage(%)'}</MenuItem>
                 </Select>
-              </Grid>
+              </Grid>}
+              {formik.values.itemType == 'Product' && <Grid
+                item
+                xs={12}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <div
+                  style={{
+                    color: '#4F4F4F',
+                    fontWeight: 500,
+                    paddingRight: '7px',
+                    minWidth: '37%'
+                  }}
+                >
+                  PRODUCT COST
+                </div>
+                <FormControl>
+                  <BCInput
+                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      formik.setFieldValue(
+                        'productCost',
+                        replaceAmountToDecimal(e.target.value)
+                      );
+                    }}
+                    handleChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) => {
+                      const amount = e.target.value;
+                      if (!validateDecimalAmount(amount)) return;
+                      formik.setFieldValue(
+                        'productCost',
+                        amount
+                      );
+                    }}
+                    name={'productCost'}
+                    value={`${formik.values.productCost}`}
+                    margin={'none'}
+                    inputProps={{
+                      style: {
+                        padding: '12px 14px',
+                        width: 110,
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          $
+                        </InputAdornment>
+                      ),
+                      style: {
+                        borderRadius: 8,
+                        marginTop: 10,
+                      },
+                    }}
+                  />
+                </FormControl>
+              </Grid>}
               <Grid
                 item
                 xs={12}
@@ -581,69 +641,7 @@ let isFixedDisabled=false;
               </Grid>
             </Grid>
           )}
-          {formik.values.itemType == 'Product' && formik.values.isFixed !== '%' && !!activeJobCosts?.length && (
-            <Grid container className="pricing">
-              <Grid container justify="center">
-                <Typography variant={'h6'}>
-                  <strong>Product cost</strong>
-                </Typography>
-              </Grid>
-              <Grid container classes={{ root: classes.tiers }}>
-                {/* {activeJobCosts.map((jobCost) => ( */}
-                  <Grid
-                    item
-                    xs={12}
-                    sm={3}
-                    container
-                    alignItems="center"
-                    key={"productCost"}
-                  >
-                  
-                    <FormControl>
-                      <BCInput
-                        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          formik.setFieldValue(
-                            'productCost',
-                            replaceAmountToDecimal(e.target.value)
-                          );
-                        }}
-                        handleChange={(
-                          e: React.ChangeEvent<HTMLInputElement>
-                        ) => {
-                          const amount = e.target.value;
-                          if (!validateDecimalAmount(amount)) return;
-                          formik.setFieldValue(
-                            'productCost',
-                            amount
-                          );
-                        }}
-                        name={'productCost'}
-                      value={`${formik.values.productCost}`}
-                        margin={'none'}
-                        inputProps={{
-                          style: {
-                            padding: '12px 14px',
-                            width: 110,
-                          },
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              $
-                            </InputAdornment>
-                          ),
-                          style: {
-                            borderRadius: 8,
-                            marginTop: 10,
-                          },
-                        }}
-                      />
-                    </FormControl>
-                  </Grid>
-                {/* ))} */}
-              </Grid>
-            </Grid>
-          )}
+         
         </Grid>
       </DialogContent>
       <hr
