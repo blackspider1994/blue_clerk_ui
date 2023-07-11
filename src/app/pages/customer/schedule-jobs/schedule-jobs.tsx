@@ -16,6 +16,7 @@ import "../../../../scss/popup.scss";
 import { useLocation, useHistory } from 'react-router-dom';
 import { CSButton } from "../../../../helpers/custom";
 import { refreshServiceTickets } from 'actions/service-ticket/service-ticket.action';
+import { ability } from 'app/config/Can';
 
 function ScheduleJobsPage({ classes }: any) {
   const dispatch = useDispatch();
@@ -131,7 +132,7 @@ function ScheduleJobsPage({ classes }: any) {
               },
             ]}
           />
-          {curTab !== 2 && (
+          {curTab !== 2 && ability.can('manage', 'Tickets') && (
             <div className={classes.addButtonArea}>
               <CSButton
                 aria-label={'new-ticket'}

@@ -4,7 +4,7 @@ import { AuthInfo } from 'app/models/user';
 import { connect, useDispatch } from 'react-redux';
 import { setAuthAction } from 'actions/auth/auth.action';
 import React, { useEffect } from 'react';
-import { Redirect, Route, RouteComponentProps,  BrowserRouter as Router, Switch } from 'react-router-dom';
+import { Redirect, Route, RouteComponentProps, BrowserRouter as Router, Switch } from 'react-router-dom';
 import { setRouteDataAction, setRouteTitleAction } from 'actions/route/route.action';
 
 interface Props {
@@ -19,6 +19,7 @@ interface Props {
     link: string
   };
   setAuthAction: (authInfo: AuthInfo) => Action<any>;
+  hasAccess?: boolean;
 }
 
 function AuthRoute({
@@ -30,6 +31,7 @@ function AuthRoute({
   actionData,
   exact = false,
   setAuthAction,
+  hasAccess = true
 }: Props): JSX.Element | null {
   const storageAuth: AuthInfo = {
     'token': localStorage.getItem('token'),
@@ -37,7 +39,7 @@ function AuthRoute({
     'user': JSON.parse(localStorage.getItem('user') || '{}')
   };
   const dispatch = useDispatch();
-  const loginFromStorage = 
+  const loginFromStorage =
     (token === null || token === '') &&
     (tokenCustomerAPI === null || tokenCustomerAPI === '') &&
     storageAuth.token !== null &&
@@ -55,25 +57,27 @@ function AuthRoute({
 
   useEffect(() => {
     dispatch(setRouteTitleAction(title));
-  }, [title])
+  }, [title]);
 
   useEffect(() => {
     dispatch(setRouteDataAction(actionData));
-  }, [actionData])
+  }, [actionData]);
 
   if (loginFromStorage) {
     return null;
   }
 
   const isAuthed = token !== null && token !== '';
-  const message = 'Please log in to view this page';
+  const message = isAuthed && !hasAccess
+    ? 'You do not have access to this page'
+    : 'Please log in to view this page';
 
   return (
     <Route
       exact={exact}
       path={path}
       render={(props: RouteComponentProps) =>
-        isAuthed
+        isAuthed && hasAccess
           ? <Component {...props} />
           : <Redirect
             to={{
@@ -96,7 +100,7 @@ const mapStateToProps = (state: {
   };
 }) => ({
   'token': state.auth.token,
-  'tokenCustomerAPI': state.auth.tokenCustomerAPI,
+  'tokenCustomerAPI': state.auth.tokenCustomerAPI
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({

@@ -18,6 +18,7 @@ import InvoicingUnpaidListing
   from "./invoices-list-listing/invoices-unpaid-listing";
 import {RootState} from "../../../../reducers";
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import { Can, ability } from 'app/config/Can';
 
 function InvoiceList({ classes }: any) {
   const dispatch = useDispatch();
@@ -150,38 +151,52 @@ function InvoiceList({ classes }: any) {
     setTimeout(() => {
       dispatch(openModalAction());
     }, 200);
-  }
+  };
+
+  const invoicesTab = [
+    {
+      'label': 'Unpaid',
+      'value': 0
+    },
+    {
+      'label': 'Invoices',
+      'value': 1
+    },
+    {
+      'chip': true,
+      'chipValue': totalDraft,
+      'label': 'Drafts',
+      'value': 2
+    }
+  ];
+
+  const paymentsTabs = [
+    {
+      'label': 'Payments',
+      'value': 3
+    }
+  ];
+
+  const tabs = [
+    ...ability.can('manage', 'Invoicing')
+      ? invoicesTab
+      : [],
+    ...ability.can('manage', 'CustomerPayments')
+      ? paymentsTabs
+      : []
+  ];
 
   return (
     <div className={classes.pageMainContainer}>
       <div className={classes.pageContainer}>
         <div className={classes.pageContent}>
           <SyncButton />
-        <BCTabs
+          <BCTabs
             curTab={curTab}
             indicatorColor={'primary'}
             onChangeTab={handleTabChange}
-            // chip={true}
-            tabsData={[
-              {
-                'label': 'Unpaid',
-                'value': 0
-              },
-              {
-                'label': 'Invoices',
-                'value':1
-              },
-              {
-                'label': 'Drafts',
-                'value': 2,
-                'chip': true,
-                'chipValue': totalDraft
-              },
-              {
-                'label': 'Payments',
-                'value': 3,
-              },
-            ]}
+            // Chip={true}
+            tabsData={tabs}
           />
           <div className={classes.addButtonArea}>
             {/* <CSButton

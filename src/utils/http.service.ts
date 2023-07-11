@@ -142,15 +142,16 @@ export const downloadFile = (uri: string, type: Method, data?: any): Promise<Axi
     'url': `${api}${uri}`,
     responseType: 'blob',
   };
-    if (type !== 'get') {
-      if (type === 'OPTIONS') {
-        request.params = data;
-      } else {
-        request.data = data;
-      }
+
+  if (type !== 'get') {
+    if (type === 'OPTIONS') {
+      request.params = data;
+    } else {
+      request.data = data;
     }
+  }
   return makeRequest(request);
-  };
+};
 
 export const pdfRequest = (url: string, type: Method, data?: any, noHeaders?: boolean, enctype = '', cancelTokenSource?: CancelTokenSource, isCustomerAPI = false, queryParams?: any): Promise<AxiosResponse<any>> => {
   let token = '';
@@ -178,22 +179,5 @@ export const pdfRequest = (url: string, type: Method, data?: any, noHeaders?: bo
     }
   }
 
-  if (!noHeaders) {
-    request.headers = {
-      ...request.headers,
-      'Authorization': token
-    };
-  }
-
-  if (cancelTokenSource) {
-    request.cancelToken = cancelTokenSource.token;
-  }
-
-  //add current division params
-  if (queryParams) {
-    try {
-      request.params = { ...request.params, ...queryParams };
-    } catch (error) { }
-  }
   return makeRequest(request);
 };

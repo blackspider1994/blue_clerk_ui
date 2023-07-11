@@ -20,15 +20,24 @@ import {
   Typography,
 } from '@material-ui/core';
 
-import { validateDecimalAmount, replaceAmountToDecimal } from 'utils/validation'
-import { closeModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
+import {
+  validateDecimalAmount,
+  replaceAmountToDecimal,
+} from 'utils/validation';
+import {
+  closeModalAction,
+  setModalDataAction,
+} from 'actions/bc-modal/bc-modal.action';
 import BCInput from 'app/components/bc-input/bc-input';
 import { Item } from 'actions/invoicing/items/items.types';
 import { updateInvoiceItem, loadInvoiceItems } from 'actions/invoicing/items/items.action';
 import { RootState } from 'reducers';
-import { error as errorSnackBar, success } from 'actions/snackbar/snackbar.action';
-import * as CONSTANTS from "../../../constants";
-import styles from './bc-invoice-item-modal.styles'
+import {
+  error as errorSnackBar,
+  success,
+} from 'actions/snackbar/snackbar.action';
+import * as CONSTANTS from '../../../constants';
+import styles from './bc-invoice-item-modal.styles';
 import { updateItems, addItem } from 'api/items.api';
 
 const EditItemValidation = yup.object().shape({
@@ -66,17 +75,14 @@ export const StyledInput = withStyles((theme: Theme) =>
       fontSize: 16,
       padding: '10px 26px 10px 12px',
       transition: theme.transitions.create(['border-color', 'box-shadow']),
-      fontFamily: [
-        'Roboto',
-        'sans-serif',
-      ].join(','),
+      fontFamily: ['Roboto', 'sans-serif'].join(','),
       '&:focus': {
         borderRadius: 4,
         borderColor: '#80bdff',
         boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
       },
     },
-  }),
+  })
 )(InputBase);
 
 interface ModalProps {
@@ -93,10 +99,12 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
   const isAdd = _id ? false : true;
 
   const closeModal = () => {
-    dispatch(setModalDataAction({
-      'data': {},
-      'type': '',
-    }));
+    dispatch(
+      setModalDataAction({
+        data: {},
+        type: '',
+      })
+    );
     dispatch(closeModalAction());
   };
 
@@ -137,18 +145,24 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         {}
       ),
     },
-    'onSubmit': async values => {
-      setIsSubmitting(true)
+    onSubmit: async (values) => {
+      setIsSubmitting(true);
       if (Number(values.tax) === 1) {
         values.tax = taxes[0].tax;
       } else {
         values.tax = 0;
       }
       // dispatch(updateInvoiceItem.fetch(values));
-      const tiers: { ['string']: { _id: string; charge: string; } } = values.tiers;
-      const tierArr = Object.values(tiers).map(tier => ({
+      const tiers: {
+        ['string']: { _id: string; charge: string };
+      } = values.tiers;
+      const tierArr = Object.values(tiers).map((tier) => ({
         tierId: tier._id,
-        charge: !(typeof tier.charge === 'undefined' || tier.charge === null || tier.charge === '')
+        charge: !(
+          typeof tier.charge === 'undefined' ||
+          tier.charge === null ||
+          tier.charge === ''
+        )
           ? parseFloat(tier.charge).toFixed(2)
           : null
       }))
@@ -166,7 +180,9 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
           : null,
       }));
 
-      const invalidCharge = tierArr.filter(tier => typeof tier.charge === 'undefined' || tier.charge === null);
+      const invalidCharge = tierArr.filter(
+        (tier) => typeof tier.charge === 'undefined' || tier.charge === null
+      );
 
       if (invalidCharge.length) {
         dispatch(errorSnackBar('Tier Prices cannot be empty'));
@@ -188,13 +204,15 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
       }
       let response;
       if (isAdd) {
-        response = await addItem(itemObject).catch((err: { message: any; }) => {
+        response = await addItem(itemObject).catch((err: { message: any }) => {
           dispatch(errorSnackBar(err.message));
         });
       } else {
-        response = await updateItems([itemObject]).catch((err: { message: any; }) => {
-          dispatch(errorSnackBar(err.message));
-        });
+        response = await updateItems([itemObject]).catch(
+          (err: { message: any }) => {
+            dispatch(errorSnackBar(err.message));
+          }
+        );
       }
       if (response) {
         dispatch(loadInvoiceItems.fetch());
@@ -203,9 +221,9 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
       }
       setIsSubmitting(false);
     },
-    'validateOnBlur': false,
-    'validateOnChange': true,
-    'validationSchema': EditItemValidation
+    validateOnBlur: false,
+    validateOnChange: true,
+    validationSchema: EditItemValidation,
   });
 
   useEffect(() => {
@@ -214,16 +232,17 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
       return;
     }
 
-
     if (itemObj && itemObj._id === _id && !loadingObj) {
       dispatch(success('Item successfully updated'));
       setTimeout(() => {
         dispatch(closeModalAction());
         setTimeout(() => {
-          dispatch(setModalDataAction({
-            'data': {},
-            'type': ''
-          }));
+          dispatch(
+            setModalDataAction({
+              data: {},
+              type: '',
+            })
+          );
         }, 200);
       }, 100);
 
@@ -699,7 +718,7 @@ const DataContainer = styled.div`
     /* margin-bottom: 6px; */
   }
   .MuiFormControl-marginNormal {
-    margin-top: .5rem !important;
+    margin-top: 0.5rem !important;
     margin-bottom: 1rem !important;
     /* height: 20px !important; */
   }
@@ -723,15 +742,16 @@ const DataContainer = styled.div`
   }
   .required > label:after {
     margin-left: 3px;
-    content: "*";
+    content: '*';
     color: red;
   }
   .save-customer-button {
     color: ${CONSTANTS.PRIMARY_WHITE};
   }
+  .MuiTypography-h6 {
+    color: ${CONSTANTS.PRIMARY_BLUE};
+  }
 `;
 
-export default withStyles(
-  styles,
-  { 'withTheme': true }
-)(BCInvoiceEditModal);
+export default withStyles(styles, { withTheme: true })(BCInvoiceEditModal);
+

@@ -30,6 +30,7 @@ import { resetAdvanceFilterInvoice } from 'actions/advance-filter/advance-filter
 import { initialAdvanceFilterInvoiceState } from 'reducers/advance-filter.reducer';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 import debounce from 'lodash.debounce';
+import PopupMark from '../../../../components/bc-bounce-email-tooltip/bc-popup-mark';
 
 const getFilteredList = (state: any) => {
   const sortedInvoices = TableFilterService.filterByDateDesc(state?.invoiceList.data);
@@ -162,9 +163,21 @@ function InvoicingListListing({ classes, theme }: any) {
     },
     {
       'Header': 'Invoice Date',
-      'accessor': (originalRow: any) => formatDateMMMDDYYYY(originalRow.issuedDate || originalRow.createdAt),
+      'accessor': (originalRow: any) =>
+        formatDateMMMDDYYYY(originalRow.issuedDate || originalRow.createdAt),
       'className': 'font-bold',
-      'sortable': true
+      'sortable': true,
+      'Cell': ({ row }: any) => (
+        <div>
+          {
+          formatDateMMMDDYYYY(
+            row.original.issuedDate || row.original.createdAt
+          )
+          } { 
+            row.original.bouncedEmailFlag ? <PopupMark data={row.original.emailHistory} invoiceId={row.original._id} /> : ''
+          }
+        </div>
+      ),
     },
     {
       Cell({ row }: any) {
@@ -305,7 +318,7 @@ function InvoicingListListing({ classes, theme }: any) {
 
   /**
    * Receive the event when the modal filter is sumited by the user
-   * @param data 
+   * @param data
    */
   const handleFilterSubmit = async (data: any) => {
     dataModalFilter.data.loading = true;
@@ -320,7 +333,6 @@ function InvoicingListListing({ classes, theme }: any) {
     } else {
       dispatch(closeModalAction());
     }
-
   }
 
   // Data used by modal filter

@@ -84,6 +84,8 @@ function ViewInvoice({ classes, theme }: any) {
     if (invoiceDetail && invoiceDetail.job) {
       const vendorWithCommisionTier = invoiceDetail.job?.tasks?.filter((res: any) => res.contractor?.commissionTier);
       setShowJobCosting(vendorWithCommisionTier.length > 0);
+    }else{
+      setShowJobCosting(false);
     }
   }, [invoiceDetail]);
 
