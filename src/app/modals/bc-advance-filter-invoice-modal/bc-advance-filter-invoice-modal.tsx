@@ -173,6 +173,7 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
     checkAmountRange,
     checkSubdivision,
     checkJobAddress,
+    checkBouncedEmails
   } = FormikValues;
 
   const getContactsData = async (data: any) => {
@@ -218,6 +219,9 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
     if (checkMissingPo) {
       FormikSetFieldValue('checkPoNumber', false);
       FormikSetFieldValue('poNumber', '');
+    }
+    if (checkBouncedEmails) {
+      FormikSetFieldValue('checkBouncedEmails', true);
     }
     if (!checkPaymentStatus) {
       FormikSetFieldValue('selectedPaymentStatus', '');
@@ -265,6 +269,7 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
     checkAmountRange,
     checkSubdivision,
     checkJobAddress,
+    checkBouncedEmails
   ]);
 
   return <DataContainer>
@@ -373,7 +378,7 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
                       className={classes.checkbox}
                       checked={FormikValues.checkBouncedEmails}
                       onChange={(e) => FormikSetFieldValue('checkBouncedEmails', e.target.checked)} />
-                      BOUNCE EMAILS
+                      BOUNCED EMAILS
                 </Grid>
               </Grid>
               <Grid item md={6} lg={3} container justify={'center'}>
@@ -402,7 +407,7 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
                     <Grid item xs={8}>
                       <Checkbox
                         color="primary"
-                        disabled={FormikValues.checkMissingPo}
+                        disabled={FormikValues.checkPoNumber}
                         className={classes.checkbox}
                         checked={FormikValues.checkPoNumber}
                         onChange={(e) => FormikSetFieldValue('checkPoNumber', e.target.checked)}

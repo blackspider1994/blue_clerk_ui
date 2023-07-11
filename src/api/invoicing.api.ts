@@ -113,7 +113,7 @@ export const getAllInvoicesAPI = (pageSize = 10, currentPageIndex = 0, keyword?:
       }
       if (advanceFilterInvoiceData) {
         optionObj.missingPO = advanceFilterInvoiceData.checkMissingPo;
-        optionObj.bouncedEmailFlag = advanceFilterInvoiceData.bouncedEmailFlag;
+        optionObj.bouncedEmailFlag = advanceFilterInvoiceData.checkBouncedEmails;
 
         if (advanceFilterInvoiceData.invoiceDateRange) {
           optionObj.startDate = moment(advanceFilterInvoiceData.invoiceDateRange.startDate).format('YYYY-MM-DD');
