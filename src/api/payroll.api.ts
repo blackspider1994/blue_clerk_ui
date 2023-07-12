@@ -94,11 +94,10 @@ export const getPayrollBalanceAPI = async (
 ) => {
   try {
     const offset = new Date().getTimezoneOffset() / 60;
-    const url = `/getPayrollBalance${
-      startDate
+    const url = `/getPayrollBalance${startDate
         ? `?startDate=${startDate}&endDate=${endDate}&offset=${offset}`
         : ''
-    }`;
+      }`;
     const response: any = await request(
       url,
       'GET',
@@ -150,9 +149,8 @@ export const getPaymentsByContractorAPI = async (
   division?: DivisionParams
 ) => {
   try {
-    const url = `/getPaymentsByContractor${
-      type ? `?id=${id}&type=${type}` : ''
-    }`;
+    const url = `/getPaymentsByContractor${type ? `?id=${id}&type=${type}` : ''
+      }`;
     const response: any = await request(
       url,
       'GET',

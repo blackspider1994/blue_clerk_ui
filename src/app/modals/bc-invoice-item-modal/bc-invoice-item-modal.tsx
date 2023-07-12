@@ -17,7 +17,7 @@ import {
   InputAdornment,
   FormControlLabel,
   Checkbox,
-   Typography,
+  Typography,
 } from '@material-ui/core';
 
 import {
@@ -41,11 +41,23 @@ import styles from './bc-invoice-item-modal.styles';
 import { updateItems, addItem } from 'api/items.api';
 
 const EditItemValidation = yup.object().shape({
-  name: yup.string().required(),
-  description: yup.string(),
-  isFixed: yup.boolean().required(),
-  isJobType: yup.boolean().required(),
-  tax: yup.string().required(),
+  'name': yup
+    .string()
+    .required(),
+  'description': yup
+    .string(),
+  'isFixed': yup
+    .boolean()
+    .required(),
+  'isJobType': yup
+    .boolean()
+    .required(),
+  'tax': yup
+    .string()
+    .required(),
+  'itemType': yup
+    .string().required()
+
 });
 
 export const StyledInput = withStyles((theme: Theme) =>
@@ -79,7 +91,7 @@ interface ModalProps {
 }
 
 function BCInvoiceEditModal({ item, classes }: ModalProps) {
-  const { _id, name, isFixed, isJobType, description, tax, tiers, costing } = item;
+  const { _id, name, isFixed, isJobType, description, tax, tiers, costing, itemType, productCost } = item;
   const { itemObj, error, loadingObj } = useSelector(({ invoiceItems }: RootState) => invoiceItems);
   const { 'data': taxes } = useSelector(({ tax }: any) => tax);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,13 +109,13 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
   };
 
   const activeTiers = Object.keys(tiers)
-    .map(tier_id => ({ ...tiers[tier_id].tier, charge: tiers[tier_id].charge !== null && typeof tiers[tier_id].charge !== 'undefined'  ? `${tiers[tier_id].charge}` : '' }))
+    .map(tier_id => ({ ...tiers[tier_id].tier, charge: tiers[tier_id].charge !== null && typeof tiers[tier_id].charge !== 'undefined' ? `${tiers[tier_id].charge}` : '' }))
     .filter(tier => tier.isActive)
   const activeJobCosts = Object.keys(costing).map((tier_id) => ({
     ...costing[tier_id].tier,
     charge:
       costing[tier_id].charge !== null &&
-      typeof costing[tier_id].charge !== 'undefined'
+        typeof costing[tier_id].charge !== 'undefined'
         ? `${costing[tier_id].charge}`
         : '',
   }))
@@ -119,6 +131,8 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
       'tax': tax
         ? 1
         : 0,
+      "productCost": productCost ,
+      'itemType': `${itemType}`,
       'tiers': activeTiers.reduce((total, currentValue) => ({
         ...total,
         [currentValue._id]: currentValue,
@@ -174,13 +188,17 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         dispatch(errorSnackBar('Tier Prices cannot be empty'));
         return setIsSubmitting(false);
       }
+      
+      const isProduct=values.itemType=='Product';
       const itemObject = {
         itemId: values.itemId,
         name: values.name,
         description: values.description || '',
-        isFixed: values.isFixed === 'true' ? true : false,
-        isJobType: values.isJobType,
+        isFixed: isProduct?true:values.isFixed === 'true' ? true : false,
+        isJobType: isProduct?false:values.isJobType,
         tax: values.tax,
+        itemType:values.itemType,
+        productCost:values.productCost,
         tiers: tierArr,
         costing: costingArr,
       }
@@ -234,185 +252,359 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
     }
   }, [itemObj]);
 
+let isFixedDisabled=false;
+  useEffect(() => {
+    // Set default value for jobId and is Fixed based on item type
+    if (formik.values.itemType === 'Product') {
+      formik.setFieldValue('isFixed', true);
+      formik.setFieldValue('isJobType',false);
+    }
 
+  }, [formik.values.itemType]);
 
 
   return <DataContainer>
-      <hr
-        style={{ height: '1px', background: '#D0D3DC', borderWidth: '0px' }}
-      />
-      <form onSubmit={formik.handleSubmit}>
-        <DialogContent classes={{ root: classes.dialogContent }}>
-          <Grid container alignItems={'center'}>
-            <Grid item xs={12} sm={7} classes={{ root: classes.grid }}>
+    <hr
+      style={{ height: '1px', background: '#D0D3DC', borderWidth: '0px' }}
+    />
+    <form onSubmit={formik.handleSubmit}>
+      <DialogContent classes={{ root: classes.dialogContent }}>
+        <Grid container alignItems={'center'}>
+          <Grid item xs={12} sm={7} classes={{ root: classes.grid }}>
+            <Grid
+              item
+              xs={12}
+              classes={{ root: classes.label }}
+            >
               <Grid
-                item
-                xs={12}
-                classes={{ root: classes.label }}
+                classes={{ root: classes.labelText }}
               >
-                <Grid
-                  classes={{ root: classes.labelText }}
-                >
-                  ITEM NAME
-                </Grid>
-                <BCInput
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                  handleChange={formik.handleChange}
-                  helperText={formik.touched.name && formik.errors.name}
-                  name={'name'}
-                  value={formik.values.name}
-                  margin={'none'}
-                  inputProps={{
-                    style: {
-                      padding: '12px 14px',
-                    },
-                  }}
-                  InputProps={{
-                    style: {
-                      borderRadius: 8,
-                      marginTop: 10,
-                    },
-                  }}
-                />
+                ITEM NAME
               </Grid>
-              <Grid
-                item
-                xs={12}
-                style={{ display: 'flex' }}
-              >
-                <Grid
-                  classes={{ root: classes.labelText }}
-                >
-                  DESCRIPTION
-                </Grid>
-                <BCInput
-                  error={
-                    formik.touched.description &&
-                    Boolean(formik.errors.description)
-                  }
-                  handleChange={formik.handleChange}
-                  helperText={
-                    formik.touched.description && formik.errors.description
-                  }
-                  name={'description'}
-                  value={formik.values.description}
-                  multiline
-                  margin={'none'}
-                  inputProps={{
-                    style: {
-                      padding: '12px 14px',
-                    },
-                  }}
-                  InputProps={{
-                    style: {
-                      borderRadius: 8,
-                      marginTop: 10,
-                    },
-                  }}
-                />
-              </Grid>
+              <BCInput
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                handleChange={formik.handleChange}
+                helperText={formik.touched.name && formik.errors.name}
+                name={'name'}
+                value={formik.values.name}
+                margin={'none'}
+                inputProps={{
+                  style: {
+                    padding: '12px 14px',
+                  },
+                }}
+                InputProps={{
+                  style: {
+                    borderRadius: 8,
+                    marginTop: 10,
+                  },
+                }}
+              />
             </Grid>
-            <Grid item xs={12} sm={5} classes={{ root: classes.grid }}>
-              <Grid container>
-                <Grid
-                  item
-                  xs={12}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  <div
-                    style={{
-                      color: '#4F4F4F',
-                      fontWeight: 500,
-                      paddingRight: '7px',
-                      minWidth: '37%'
-                    }}
-                  >
-                    CHARGE TYPE
-                  </div>
-                  <Select
-                    error={
-                      formik.touched.isFixed && Boolean(formik.errors.isFixed)
-                    }
-                    input={<StyledInput />}
-                    name={'isFixed'}
-                    onChange={formik.handleChange}
-                    value={formik.values.isFixed}
-                  >
-                    <MenuItem value={'true'}>{'Fixed'}</MenuItem>
-                    <MenuItem value={'false'}>{'Hourly'}</MenuItem>
-                    <MenuItem value={'%'}>{'Percentage(%)'}</MenuItem>
-                  </Select>
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  <div
-                    style={{
-                      color: '#4F4F4F',
-                      fontWeight: 500,
-                      paddingRight: '7px',
-                      minWidth: '37%',
-                    }}
-                  >
-                    TAX
-                  </div>
-                  <FormControl>
-                    <Select
-                      error={formik.touched.tax && Boolean(formik.errors.tax)}
-                      input={<StyledInput />}
-                      name={'tax'}
-                      onChange={formik.handleChange}
-                      value={formik.values.tax}
-                    >
-                      <MenuItem value={1}>{'Yes'}</MenuItem>
-                      <MenuItem value={0}>{'No'}</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  style={{ padding: '0 7px' }}
-                >
-                  <FormControlLabel
-                    classes={{ label: classes.checkboxLabel }}
-                    control={
-                      <Checkbox
-                        color={'primary'}
-                        checked={formik.values.isJobType}
-                        onChange={formik.handleChange}
-                        name="isJobType"
-                        classes={{ root: classes.checkboxInput }}
-                      />
-                    }
-                    label={`This Item is also a Job Type`}
-                  />
-                </Grid>
+            <Grid
+              item
+              xs={12}
+              style={{ display: 'flex' }}
+            >
+              <Grid
+                classes={{ root: classes.labelText }}
+              >
+                DESCRIPTION
               </Grid>
+              <BCInput
+                error={
+                  formik.touched.description &&
+                  Boolean(formik.errors.description)
+                }
+                handleChange={formik.handleChange}
+                helperText={
+                  formik.touched.description && formik.errors.description
+                }
+                name={'description'}
+                value={formik.values.description}
+                multiline
+                margin={'none'}
+                inputProps={{
+                  style: {
+                    padding: '12px 14px',
+                  },
+                }}
+                InputProps={{
+                  style: {
+                    borderRadius: 8,
+                    marginTop: 10,
+                  },
+                }}
+              />
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              style={{ display: 'flex' }}
+            >
+              <Grid item xs={12} sm={3}>
+</Grid>
+              <FormControlLabel
+                classes={{ label: classes.checkboxLabel }}
+                control={
+                  <Checkbox
+                    disabled={formik.values.itemType == 'Product'}
+
+                    color={'primary'}
+                    checked={formik.values.isJobType}
+                    onChange={formik.handleChange}
+                    name="isJobType"
+                    classes={{ root: classes.checkboxInput }}
+                  />
+                }
+                label={`This Item is also a Job Type`}
+              />
+            </Grid>
+           
+          </Grid>
+          <Grid item xs={12} sm={5} classes={{ root: classes.grid }}>
+            <Grid
+              item
+              xs={12}
+              style={{
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <div
+                style={{
+                  color: '#4F4F4F',
+                  fontWeight: 500,
+                  paddingRight: '7px',
+                  minWidth: '37%'
+                }}
+              >
+                TYPE
+              </div>
+              <Select
+                error={
+                  formik.touched.itemType && Boolean(formik.errors.itemType)
+                }
+                input={<StyledInput />}
+                name={'itemType'}
+                onChange={formik.handleChange}
+                disabled={isFixedDisabled}
+                value={formik.values.itemType}
+              >
+                <MenuItem value={'Service'} >{'Service'}</MenuItem>
+                <MenuItem value={'Product'}>{'Product'}</MenuItem>
+              </Select>
             </Grid>
             <Grid container>
+              {formik.values.itemType == 'Service'&&<Grid
+                item
+                xs={12}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <div
+                  style={{
+                    color: '#4F4F4F',
+                    fontWeight: 500,
+                    paddingRight: '7px',
+                    minWidth: '37%'
+                  }}
+                >
+                  CHARGE TYPE
+                </div>
+                <Select
+                  error={
+                    formik.touched.isFixed && Boolean(formik.errors.isFixed)
+                  }
+                  input={<StyledInput />}
+                  name={'isFixed'}
+                  // disabled={formik.values.itemType=='Product'}
+                  onChange={formik.handleChange}
+                  value={formik.values.isFixed}
+                >
+                  <MenuItem value={'true'}>{'Fixed'}</MenuItem>
+                  <MenuItem value={'false'}>{'Hourly'}</MenuItem>
+                  <MenuItem value={'%'}>{'Percentage(%)'}</MenuItem>
+                </Select>
+              </Grid>}
+              {formik.values.itemType == 'Product' && <Grid
+                item
+                xs={12}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <div
+                  style={{
+                    color: '#4F4F4F',
+                    fontWeight: 500,
+                    paddingRight: '7px',
+                    minWidth: '37%'
+                  }}
+                >
+                  PRODUCT COST
+                </div>
+                <FormControl>
+                  <BCInput
+                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      formik.setFieldValue(
+                        'productCost',
+                        replaceAmountToDecimal(e.target.value)
+                      );
+                    }}
+                    handleChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) => {
+                      const amount = e.target.value;
+                      if (!validateDecimalAmount(amount)) return;
+                      formik.setFieldValue(
+                        'productCost',
+                        amount
+                      );
+                    }}
+                    name={'productCost'}
+                    value={`${formik.values.productCost}`}
+                    margin={'none'}
+                    inputProps={{
+                      style: {
+                        padding: '12px 14px',
+                        width: 110,
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          $
+                        </InputAdornment>
+                      ),
+                      style: {
+                        borderRadius: 8,
+                        marginTop: 10,
+                      },
+                    }}
+                  />
+                </FormControl>
+              </Grid>}
+              <Grid
+                item
+                xs={12}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <div
+                  style={{
+                    color: '#4F4F4F',
+                    fontWeight: 500,
+                    paddingRight: '7px',
+                    minWidth: '37%',
+                  }}
+                >
+                  TAX
+                </div>
+                <FormControl>
+                  <Select
+                    error={formik.touched.tax && Boolean(formik.errors.tax)}
+                    input={<StyledInput />}
+                    name={'tax'}
+                    onChange={formik.handleChange}
+                    value={formik.values.tax}
+                  >
+                    <MenuItem value={1}>{'Yes'}</MenuItem>
+                    <MenuItem value={0}>{'No'}</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+             
+            </Grid>
+          </Grid>
+          <Grid container className="pricing">
+            <Grid container justify="center">
+              <Typography variant={'h6'}>
+                <strong>Tier Prices</strong>
+              </Typography>
+            </Grid>
+            <Grid container classes={{ root: classes.tiers }}>
+              {activeTiers.map((tier) => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={3}
+                  container
+                  alignItems="center"
+                  key={tier.name}
+                >
+                  <Grid
+                    style={{
+                      padding: '0 7px 0 0',
+                      color: '#4F4F4F',
+                      fontWeight: 500,
+                    }}
+                  >
+                    TIER {tier.name}
+                  </Grid>
+                  <FormControl>
+                    <BCInput
+                      onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        formik.setFieldValue(
+                          `tiers.${tier._id}.charge`,
+                          replaceAmountToDecimal(e.target.value)
+                        );
+                      }}
+                      handleChange={(
+                        e: React.ChangeEvent<HTMLInputElement>
+                      ) => {
+                        const amount = e.target.value;
+                        if (!validateDecimalAmount(amount)) return;
+                        formik.setFieldValue(
+                          `tiers.${tier._id}.charge`,
+                          amount
+                        );
+                      }}
+                      name={`tiers.${tier._id}.charge`}
+                      value={`${formik.values.tiers[tier._id].charge}`}
+                      margin={'none'}
+                      inputProps={{
+                        style: {
+                          padding: '12px 14px',
+                          width: 110,
+                        },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">$</InputAdornment>
+                        ),
+                        style: {
+                          borderRadius: 8,
+                          marginTop: 10,
+                        },
+                      }}
+                    />
+                  </FormControl>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+          {formik.values.itemType == 'Service' &&formik.values.isFixed !== '%' && !!activeJobCosts?.length && (
+            <Grid container className="pricing">
               <Grid container justify="center">
                 <Typography variant={'h6'}>
-                  <strong>Tier Prices</strong>
+                   <strong>Job costing</strong>
                 </Typography>
               </Grid>
               <Grid container classes={{ root: classes.tiers }}>
-                {activeTiers.map((tier) => (
+                {activeJobCosts.map((jobCost) => (
                   <Grid
                     item
                     xs={12}
                     sm={3}
                     container
                     alignItems="center"
-                    key={tier.name}
+                    key={jobCost.name}
                   >
                     <Grid
                       style={{
@@ -421,13 +613,13 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                         fontWeight: 500,
                       }}
                     >
-                      TIER {tier.name}
+                      TIER {jobCost.name}
                     </Grid>
                     <FormControl>
                       <BCInput
                         onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                           formik.setFieldValue(
-                            `tiers.${tier._id}.charge`,
+                            `costing.${jobCost._id}.charge`,
                             replaceAmountToDecimal(e.target.value)
                           );
                         }}
@@ -437,12 +629,12 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                           const amount = e.target.value;
                           if (!validateDecimalAmount(amount)) return;
                           formik.setFieldValue(
-                            `tiers.${tier._id}.charge`,
+                            `costing.${jobCost._id}.charge`,
                             amount
                           );
                         }}
-                        name={`tiers.${tier._id}.charge`}
-                        value={`${formik.values.tiers[tier._id].charge}`}
+                        name={`costing.${jobCost._id}.charge`}
+                        value={`${formik.values.costing[jobCost._id].charge}`}
                         margin={'none'}
                         inputProps={{
                           style: {
@@ -452,7 +644,9 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                         }}
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
+                            <InputAdornment position="start">
+                              $
+                            </InputAdornment>
                           ),
                           style: {
                             borderRadius: 8,
@@ -465,119 +659,50 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
                 ))}
               </Grid>
             </Grid>
-            {formik.values.isFixed !== '%' && !!activeJobCosts?.length && (
-              <Grid container>
-                <Grid container justify="center">
-                  <Typography variant={'h6'}>
-                    <strong>Job costing</strong>
-                  </Typography>
-                </Grid>
-                <Grid container classes={{ root: classes.tiers }}>
-                  {activeJobCosts.map((jobCost) => (
-                    <Grid
-                      item
-                      xs={12}
-                      sm={3}
-                      container
-                      alignItems="center"
-                      key={jobCost.name}
-                    >
-                      <Grid
-                        style={{
-                          padding: '0 7px 0 0',
-                          color: '#4F4F4F',
-                          fontWeight: 500,
-                        }}
-                      >
-                        TIER {jobCost.name}
-                      </Grid>
-                      <FormControl>
-                        <BCInput
-                          onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            formik.setFieldValue(
-                              `costing.${jobCost._id}.charge`,
-                              replaceAmountToDecimal(e.target.value)
-                            );
-                          }}
-                          handleChange={(
-                            e: React.ChangeEvent<HTMLInputElement>
-                          ) => {
-                            const amount = e.target.value;
-                            if (!validateDecimalAmount(amount)) return;
-                            formik.setFieldValue(
-                              `costing.${jobCost._id}.charge`,
-                              amount
-                            );
-                          }}
-                          name={`costing.${jobCost._id}.charge`}
-                          value={`${formik.values.costing[jobCost._id].charge}`}
-                          margin={'none'}
-                          inputProps={{
-                            style: {
-                              padding: '12px 14px',
-                              width: 110,
-                            },
-                          }}
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                $
-                              </InputAdornment>
-                            ),
-                            style: {
-                              borderRadius: 8,
-                              marginTop: 10,
-                            },
-                          }}
-                        />
-                      </FormControl>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Grid>
-            )}
+          )}
+         
+        </Grid>
+      </DialogContent>
+      <hr
+        style={{ height: '1px', background: '#D0D3DC', borderWidth: '0px' }}
+      />
+      <DialogActions
+        classes={{
+          root: classes.dialogActions,
+        }}
+      >
+        <Grid container justify={'space-between'}>
+          <Grid item />
+          <Grid item>
+            <Button
+              disabled={isSubmitting}
+              aria-label={'record-payment'}
+              onClick={closeModal}
+              classes={{
+                root: classes.closeButton,
+              }}
+              variant={'outlined'}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={isSubmitting}
+              aria-label={'create-job'}
+              classes={{
+                root: classes.submitButton,
+                disabled: classes.submitButtonDisabled,
+              }}
+              color="primary"
+              type={'submit'}
+              variant={'contained'}
+            >
+              Save
+            </Button>
           </Grid>
-        </DialogContent>
-        <hr
-          style={{ height: '1px', background: '#D0D3DC', borderWidth: '0px' }}
-        />
-        <DialogActions
-          classes={{
-            root: classes.dialogActions,
-          }}
-        >
-          <Grid container justify={'space-between'}>
-            <Grid item />
-            <Grid item>
-              <Button
-                disabled={isSubmitting}
-                aria-label={'record-payment'}
-                onClick={closeModal}
-                classes={{
-                  root: classes.closeButton,
-                }}
-                variant={'outlined'}
-              >
-                Cancel
-              </Button>
-              <Button
-                disabled={isSubmitting}
-                aria-label={'create-job'}
-                classes={{
-                  root: classes.submitButton,
-                  disabled: classes.submitButtonDisabled,
-                }}
-                color="primary"
-                type={'submit'}
-                variant={'contained'}
-              >
-                Save
-              </Button>
-            </Grid>
-          </Grid>
-        </DialogActions>
-      </form>
-    </DataContainer>
+        </Grid>
+      </DialogActions>
+    </form>
+  </DataContainer>
 
 }
 

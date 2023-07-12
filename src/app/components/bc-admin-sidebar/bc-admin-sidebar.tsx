@@ -296,7 +296,7 @@ function BCAdminSidebar({
     },
     {
       'label': 'Brands',
-      'icon': <BrandingWatermarkIcon />,
+      'icon': <BrandingWatermarkIcon/>,
       'link': '/main/admin/brands'
     },
     {
@@ -313,12 +313,12 @@ function BCAdminSidebar({
     },
     {
       'label': 'Equipment Type',
-      'icon': <BuildIcon />,
+      'icon': <BuildIcon/>,
       'link': '/main/admin/equipment-type'
     },
     {
       'label': 'Groups',
-      'icon': <GroupIcon />,
+      'icon': <GroupIcon/>,
       'link': '/main/admin/groups'
     },
     {
@@ -352,7 +352,12 @@ function BCAdminSidebar({
       'label': 'Vendors',
       'icon': <StorefrontIcon />,
       'link': '/main/admin/vendors',
-      'flag': currentDivision.isDivisionFeatureActivated && vendors.unsignedVendorsFlag
+      'flag': currentDivision.isDivisionFeatureActivated && vendors.unsignedVendorsFlag 
+    },
+    {
+      'label': 'Payroll',
+      'icon': <PaymentIcon/>,
+      'link': '/main/admin/payroll'
     },
     // {
     //   'label': 'Payroll',
