@@ -18,7 +18,17 @@ const THEME = createMuiTheme({
     'primary': {
       'main': CONSTANTS.PRIMARY_BLUE
     }
+  },
+  'overrides': {
+    'MuiAccordion': {
+      'root': {
+        "&$expanded": {
+          'margin': 0
+        }
+      }
+    }
   }
+  
 });
 
 setUpTracer();

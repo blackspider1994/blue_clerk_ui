@@ -92,7 +92,7 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
     <Grid container direction={'column'} className={classes.container}>
       <div className={classes.headerContainer}>
         <Typography align={'left'} variant={'h4'} color={'primary'}>
-          <strong>{'Roles / Permissions'}</strong>
+          <strong>{'Permissions'}</strong>
         </Typography>
         {!isEditing &&
           <CSButton
@@ -102,7 +102,7 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
               setIsEditing(true);
             }}
             variant={'contained'}>
-            {'Edit Role/Permissions\r'}
+            {'Edit Permissions'}
           </CSButton>
         }
       </div>
@@ -116,11 +116,12 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
             if (permissions) {
               permissionKeys = Object.keys(permissions);
             }
-            if (isEditing) {
+ 
               return (
                 <Accordion expanded={Boolean(expanded[roleKey])} className={classes.card} style={{ 'borderTopLeftRadius': '10px',
                   'borderTopRightRadius': '10px' }}>
                   <AccordionSummary
+                    className={classes.accordionSummary}
                     expandIcon={
                       <ArrowDropDown
                         style={{ 'cursor': 'pointer' }}
@@ -129,7 +130,8 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
                         }}
                       />
                     }>
-                    <FormControlLabel
+                    {isEditing 
+                      ? <FormControlLabel
                       classes={{ 'label': classes.checkboxLabel }}
                       control={
                         <Checkbox
@@ -142,38 +144,33 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
                         />
                       }
                       label={roleText}
-                    />
+                      />
+                      : <Typography>{roleText}</Typography>
+                    }
                   </AccordionSummary>
                   <AccordionDetails className={classes.permissions}>
                     {permissionKeys.filter(key => permissionDescriptions[key]).map(key => {
                       const permissionValue = permissions[key];
                       const permissionText = permissionDescriptions[key];
-                      return (
-                        <FormControlLabel
-                          classes={{ 'label': classes.checkboxLabel }}
-                          control={
-                            <Checkbox
-                              color={'primary'}
-                              checked={permissionValue}
-                              onChange={() => handleUpdatePermissions(roleKey, key)}
-                              name={permissionText}
-                            />
-                          }
-                          label={permissionText}
-                        />
-                      );
+                        return (
+                          <FormControlLabel
+                            classes={{ 'label': classes.checkboxLabel }}
+                            control={
+                              <Checkbox
+                                color={'primary'}
+                                checked={permissionValue}
+                                onChange={() => handleUpdatePermissions(roleKey, key)}
+                                name={permissionText}
+                                disabled={!isEditing}
+                              />
+                            }
+                            label={permissionText}
+                          />
+                        );
                     })}
                   </AccordionDetails>
                 </Accordion>
               );
-            }
-            return (
-              <div className={classes.card} style={{ 'borderTopLeftRadius': '10px',
-                'borderTopRightRadius': '10px',
-                'padding': '1rem' }}>
-                <Typography>{roleText}</Typography>
-              </div>
-            );
           })}
         {isEditing &&
           <div className={classes.actionsContainer}>

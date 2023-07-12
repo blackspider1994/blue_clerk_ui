@@ -54,15 +54,6 @@ function AdminEmployeesPage({ classes, children }: Props) {
       'className': 'font-bold',
       'sortable': true
     },
-    {
-      'Cell'({ row }: any) {
-        return `${EmployeeRoles[row.original?.permissions?.role] || ''}`;
-      },
-      'Header': 'Role',
-      'accessor': 'permissions.role',
-      'className': 'font-bold',
-      'sortable': true
-    },
   ];
 
   useEffect(() => {

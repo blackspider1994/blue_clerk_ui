@@ -181,7 +181,7 @@ function EmployeeProfilePage({ classes }: any) {
                       'value': 1
                     },
                     {
-                      'label': 'ROLES/PERMISSIONS',
+                      'label': 'PERMISSIONS',
                       'value': 2
                     }
                   ]}
