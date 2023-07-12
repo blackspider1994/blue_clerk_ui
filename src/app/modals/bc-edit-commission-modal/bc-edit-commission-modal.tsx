@@ -532,7 +532,5 @@ const DataContainer = styled.div`
   }
 `;
 
-export default withStyles(
-  styles,
-  {'withTheme': true}
-)(BcEditCommissionModal);
+export default withStyles(styles, { withTheme: true })(BcEditCommissionModal);
+

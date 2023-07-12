@@ -120,22 +120,7 @@ function BCServiceTicketModal(
 
   const filter = createFilterOptions();
 
-  const handleCustomerChange = async (
-    event: any,
-    fieldName: any,
-    setFieldValue: any,
-    newValue: any
-  ) => {
-    const customerId = newValue ? newValue._id : '';
-    await setFieldValue(fieldName, '');
-    await setFieldValue('jobLocationId', '');
-    await setFieldValue('jobSiteId', '');
-    await setFieldValue('customerContactId', '');
-    await setJobLocationValue([]);
-    await setContactValue([]);
-    await setJobSiteValue([]);
-
-    // Clean homeowner fields on customer update
+  const resetHomeOwnerFields = async () => {
     await setFieldValue('customerFirstName', '');
     await setFieldValue('customerLastName', '');
     await setFormDataEmail({
@@ -146,9 +131,29 @@ function BCServiceTicketModal(
       ...formDataPhone,
       value: ''
     });
-    await setHomeOwnerId(''); 
+    await setHomeOwnerId('');
     await setHomeOccupied(false);
     await setFieldValue('isHomeOccupied', false);
+  }
+
+  const handleCustomerChange = async (
+    event: any,
+    fieldName: any,
+    setFieldValue: any,
+    newValue: any
+  ) => {
+    const customerId = newValue ? newValue._id : '';
+    // await setFieldValue(fieldName, '');
+    await setFieldValue(fieldName, customerId);
+    await setFieldValue('jobLocationId', '');
+    await setFieldValue('jobSiteId', '');
+    await setFieldValue('customerContactId', '');
+    await setJobLocationValue([]);
+    await setContactValue([]);
+    await setJobSiteValue([]);
+
+    // Clean homeowner fields on customer update
+    await resetHomeOwnerFields();
 
     if (customerId !== '') {
       const data: any = {
@@ -160,7 +165,7 @@ function BCServiceTicketModal(
       await dispatch(getJobLocationsAction({customerId, isActive: true}));
     }
 
-    await setFieldValue(fieldName, customerId);
+    // await setFieldValue(fieldName, customerId);
   };
 
   const handleContactChange = (
@@ -195,14 +200,19 @@ function BCServiceTicketModal(
       await dispatch(clearJobSiteStore());
     }
     await setFieldValue(fieldName, locationId);
+
+    // Clean homeowner fields on location update
+    await resetHomeOwnerFields();
   };
 
-  const handleJobSiteChange = (
+  const handleJobSiteChange = async (
     event: any,
     fieldName: any,
     setFieldValue: any,
     newValue: any
   ) => {
+    // Clean homeowner fields on site update
+    await resetHomeOwnerFields();
     dispatch(getHomeOwnerAction(newValue?._id || FormikValues.jobSiteId, FormikValues.jobLocationId));
     if (newValue?._id) {
       setFieldValue(fieldName, newValue._id);
@@ -221,6 +231,20 @@ function BCServiceTicketModal(
         images: FormikValues.images,
         tasks: FormikValues.jobTypes.map((jobType: any) => ({jobType: jobType.jobTypeId || jobType._id})),
         customer: customers.find((customer: any) => customer?._id === FormikValues.customerId),
+        homeOwnerId: "",
+        isHomeOccupied: false,
+        homeOwner: {
+          profile: {
+            firstName: '',
+            lastName: '',
+          },
+          contact: {
+            phone: '',
+          },
+          info: {
+            email: '',
+          }
+        }
       }
       history.push({
         state: {
@@ -232,7 +256,7 @@ function BCServiceTicketModal(
           data: {
             ticket: tempTicket,
             jobSiteInfo: {
-              name: newValue.inputValue || newValue,
+              name: newValue?.inputValue || newValue,
               locationId: FormikValues.jobLocationId,
             },
             modalTitle: `Add Job Address`,
@@ -416,12 +440,20 @@ function BCServiceTicketModal(
           // Create home owner if it has been updated or added
           if (formatedRequest.isHomeOccupied) {
             if(!checkValidHomeOwner()) return;
-            if(!ticket.isHomeOccupied || 
-              formatedRequest.customerFirstName !== ticket.homeOwner.profile.firstName ||
-              formatedRequest.customerLastName !== ticket.homeOwner.profile.lastName ||
+            if (homeOwners.length > 0 &&
+              formatedRequest.customerFirstName === homeOwners?.[0]?.profile?.firstName &&
+              formatedRequest.customerLastName === homeOwners?.[0]?.profile?.lastName &&
+              formDataEmail.value === homeOwners?.[0]?.info?.email &&
+              formDataPhone.value === homeOwners?.[0]?.contact?.phone
+            ) {
+              formatedRequest.homeOwnerId = homeOwners?.[0]._id;
+            }
+            else if(!ticket.isHomeOccupied || 
+              formatedRequest.customerFirstName !== ticket.homeOwner?.profile?.firstName ||
+              formatedRequest.customerLastName !== ticket.homeOwner?.profile?.lastName ||
               formDataEmail.value !== ticket.homeOwner.info?.email ||
               formDataPhone.value !== ticket.homeOwner.contact?.phone
-            ){
+            ) {
               let homeOwnerData : any = {
                 firstName: formatedRequest.customerFirstName ?? '',
                 lastName: formatedRequest.customerLastName ?? '',
@@ -446,7 +478,9 @@ function BCServiceTicketModal(
               if(!homOwnerResult) { return; }
             }
           }
-
+          else {
+            formatedRequest.homeOwnerId = '';
+          }
           callEditTicketAPI(formatedRequest)
             .then((response: any) => {
               if (response.status === 0) {
@@ -499,10 +533,10 @@ function BCServiceTicketModal(
         if (formatedRequest.isHomeOccupied) {
           if(!checkValidHomeOwner()) return;
           if(homeOwnerId !== '' && 
-            formatedRequest.customerFirstName === homeOwners[0].profile.firstName &&
-            formatedRequest.customerLastName === homeOwners[0].profile.lastName &&
-            formDataEmail.value === homeOwners[0].info.email &&
-            formDataPhone.value === homeOwners[0].contact.phone
+            formatedRequest.customerFirstName === homeOwners?.[0]?.profile?.firstName &&
+            formatedRequest.customerLastName === homeOwners?.[0]?.profile?.lastName &&
+            formDataEmail.value === homeOwners?.[0]?.info?.email &&
+            formDataPhone.value === homeOwners?.[0]?.contact?.phone
           ) {
             formatedRequest.homeOwnerId = homeOwnerId;
           }
@@ -592,10 +626,10 @@ function BCServiceTicketModal(
   const homeOwners = useSelector((state: any) => state.homeOwner.data);
 
   useEffect(() => {
-    const filteredHomeOwners = homeOwners.filter((item: any) => {
-      return (item?.address === FormikValues.jobSiteId);
-    });
-    if (filteredHomeOwners && filteredHomeOwners.length > 0 && FormikValues.jobSiteId !== '') {
+    const filteredHomeOwners = homeOwners.filter((item: any) => 
+      item?.address === FormikValues.jobSiteId || item?.address === jobSiteValue?._id
+    );
+    if (filteredHomeOwners && filteredHomeOwners.length > 0 && (FormikValues.jobSiteId !== '' || jobSiteValue?._id)) {
       setFieldValue('customerFirstName', filteredHomeOwners[0].profile.firstName);
       setFieldValue('customerLastName', filteredHomeOwners[0].profile.lastName);
       setFormDataEmail({
@@ -706,13 +740,15 @@ function BCServiceTicketModal(
         jobLocationValue?._id &&
         ticket?.customer?._id === FormikValues.customerId
       ) {
-        setJobSiteValue(
-          jobSites.filter(
-            (jobSite: any) =>
-              jobSite._id === ticket.jobSite ||
-              jobSite._id === ticket?.jobSite?._id
-          )[0]
-        );
+        const newJobSite = jobSites.filter(
+          (jobSite: any) =>
+            jobSite._id === ticket.jobSite ||
+            jobSite._id === ticket?.jobSite?._id
+        )[0];
+        setJobSiteValue(newJobSite);
+        if(newJobSite?._id) {
+          dispatch(getHomeOwnerAction(newJobSite?._id, jobLocationValue?._id));
+        }
       }
     }
   }, [jobSites, jobLocationValue]);
