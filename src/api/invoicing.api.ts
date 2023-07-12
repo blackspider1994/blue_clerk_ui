@@ -6,6 +6,7 @@ import {
   setDraftInvoicesLoading,
   setDraftInvoicesTotal,
   setInvoices,
+  setInvoiceEmailDeliveryStatus,
   setInvoicesLoading,
   setInvoicesTotal,
   setNextDraftInvoicesCursor,
@@ -220,6 +221,22 @@ export const markAsRead = (invoiceId?: string) => {
       requestApiV2(`/mark-as-read`, 'post', { invoiceId })
         .then((res: any) => {
           dispatch(getAllInvoicesAPI(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined))
+        })
+        .catch(err => {
+          if (err.message !== 'axios canceled') {
+            return reject(err);
+          }
+        });
+    });
+  };
+};
+
+export const invoicingEmailDeliveryStatus = (invoiceId?: string) => {
+  return (dispatch: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      requestApiV2(`/getInvoiceEmailDeliveryStatus`, 'get')
+        .then((res: any) => {
+          dispatch(setInvoiceEmailDeliveryStatus(res.data.invoiceEmailDeliveryStatus));
         })
         .catch(err => {
           if (err.message !== 'axios canceled') {

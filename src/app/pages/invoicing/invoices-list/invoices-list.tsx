@@ -13,6 +13,7 @@ import { info, warning } from 'actions/snackbar/snackbar.action';
 import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
 import { modalTypes } from '../../../../constants'
 import { getCustomers } from 'actions/customer/customer.action'
+import { invoicingEmailDeliveryStatus } from 'api/invoicing.api';
 import {Sync as SyncIcon} from '@material-ui/icons';
 import InvoicingUnpaidListing
   from "./invoices-list-listing/invoices-unpaid-listing";
@@ -46,6 +47,7 @@ function InvoiceList({ classes }: any) {
 
   useEffect(() => {
     dispatch(getCustomers());
+    dispatch(invoicingEmailDeliveryStatus());
   }, []);
 
   useEffect(() => {

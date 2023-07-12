@@ -118,6 +118,13 @@ export const setInvoices = (invoices: any) => {
     'type': InvoicingListActionType.SET_INVOICES
   };
 };
+
+export const setInvoiceEmailDeliveryStatus = (status: boolean) => {
+  return {
+    'payload': status,
+    'type': InvoicingListActionType.SET_INVOICES_EMAIL_DELIVERY_STATUS
+  };
+};
 export const setUnsyncedInvoices = (invoices: any) => {
   return {
     'payload': invoices,

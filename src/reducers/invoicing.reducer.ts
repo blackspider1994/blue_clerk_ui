@@ -104,6 +104,11 @@ export const InvoicingListReducer: Reducer<any> = (state = initialState, action)
         ...state,
         data: action.payload,
       };
+    case InvoicingListActionType.SET_INVOICES_EMAIL_DELIVERY_STATUS:
+      return {
+        ...state,
+        data: action.payload,
+      };
     case InvoicingListActionType.SET_UNSYNCED_INVOICES_COUNT:
       return {
         ...state,
