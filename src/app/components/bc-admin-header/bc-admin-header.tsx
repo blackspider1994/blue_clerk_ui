@@ -250,6 +250,18 @@ function BCAdminHeader({
           }, 200);
         }
     }
+
+    if (!divisionList.length && !divisions.loading) {
+      dispatch(setModalDataAction({
+        'data': {
+          'user': user,
+        },
+        'type': modalTypes.NOT_ASSIGNED_TO_ANY_LOCATION_MODAL
+      }));
+      setTimeout(() => {
+        dispatch(openModalAction());
+      }, 200);
+    }
   }, [divisionList]);
 
   useEffect(() => {
@@ -314,6 +326,7 @@ function BCAdminHeader({
     //   'link': '/main/tags/purchasedtag'
     // },
     {
+      'key': 'payroll',
       'label': 'Payroll',
       'link':  currentDivision.isDivisionFeatureActivated && currentDivision.urlParams ? `/main/payroll/${currentDivision.urlParams}` : `/main/payroll`
     },

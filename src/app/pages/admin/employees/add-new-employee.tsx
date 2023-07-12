@@ -334,12 +334,10 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
                             >
                               <AccordionSummary
                                 className={classes.accordionSummary}
+                                onClick={() => handleExpand(roleKey)}
                                 expandIcon={
                                   <ArrowDropDown
                                     style={{ cursor: 'pointer' }}
-                                    onClick={() => {
-                                      handleExpand(roleKey);
-                                    }}
                                   />
                                 }
                               >

@@ -295,6 +295,7 @@ function BCAdminSidebar({
       'link': '/main/admin/billing'
     },
     {
+      'key': 'brands',
       'label': 'Brands',
       'icon': <BrandingWatermarkIcon/>,
       'link': '/main/admin/brands'
@@ -312,21 +313,25 @@ function BCAdminSidebar({
       'link': '/main/admin/employees'
     },
     {
+      'key': 'equipment_type',
       'label': 'Equipment Type',
       'icon': <BuildIcon/>,
       'link': '/main/admin/equipment-type'
     },
     {
+      'key': 'groups',
       'label': 'Groups',
       'icon': <GroupIcon/>,
       'link': '/main/admin/groups'
     },
     {
+      'key': 'services_products',
       'label': 'Services & Products',
       'icon': <WorkIcon />,
       'link': '/main/admin/services-and-products'
     },
     {
+      'key': 'invoicing',
       'label': 'Invoicing',
       'icon': <LibraryBooksIcon />,
       'link': '/main/admin/invoicing'
@@ -339,16 +344,19 @@ function BCAdminSidebar({
      * },
      */
     {
+      'key': 'report_number',
       'label': 'Report Number',
       'icon': <ReportIcon />,
       'link': '/main/admin/report-number'
     },
     {
+      'key': 'roles',
       'label': 'Roles/Permissions',
       'icon': <AssignmentIndIcon />,
       'link': '/main/admin/roles-permissions'
     },
     {
+      'key': 'vendors',
       'label': 'Vendors',
       'icon': <StorefrontIcon />,
       'link': '/main/admin/vendors',
@@ -365,11 +373,13 @@ function BCAdminSidebar({
     //   'link': '/main/admin/payroll'
     // },
     {
+      'key': 'integrations',
       'label': 'Integrations',
       'icon': <SettingsApplicationsIcon />,
       'link': '/main/admin/integrations'
     },
     {
+      'key': 'data',
       'label': 'Data',
       'icon': <DescriptionIcon />,
       'link': '/main/admin/data'

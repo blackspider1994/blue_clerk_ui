@@ -246,6 +246,16 @@ function Main(): any {
     dispatch(info(''));
   }
 
+  let AdminPage: any = BillingPage;
+
+  if (ability.can('edit', 'BillingInformation')) {
+    AdminPage = BillingPage;
+  } else if (ability.can('manage', 'Company')) {
+    AdminPage = CompanyProfilePage;
+  } else if (ability.can('manage', 'Employee')) {
+    AdminPage = AdminEmployeesPage;
+  }
+
   return (
     <Router>
       <Switch>
@@ -615,7 +625,7 @@ function Main(): any {
                 />
 
                 <AuthRoute
-                  Component={BillingPage}
+                  Component={AdminPage}
                   exact
                   path={'/main/admin'}
                   title={'Admin'}
