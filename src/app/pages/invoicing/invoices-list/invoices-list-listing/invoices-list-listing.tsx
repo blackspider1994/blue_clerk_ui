@@ -33,7 +33,7 @@ import debounce from 'lodash.debounce';
 import PopupMark from '../../../../components/bc-bounce-email-tooltip/bc-popup-mark';
 
 const getFilteredList = (state: any) => {
-  const sortedInvoices = TableFilterService.filterByDateDesc(state?.invoiceList.data);
+  const sortedInvoices = TableFilterService.filterByDateDesc(state?.invoiceList?.data);
   return sortedInvoices && sortedInvoices.filter((invoice: any) => !invoice.isDraft);
 };
 
@@ -63,7 +63,7 @@ function InvoicingListListing({ classes, theme }: any) {
   const [lastNextCursor, setLastNextCursor] = useState<string | undefined>(location?.state?.option?.lastNextCursor)
   const [lastPrevCursor, setLastPrevCursor] = useState<string | undefined>(location?.state?.option?.lastPrevCursor)
 
-  let advanceFilterInvoiceData: any = useSelector(({ advanceFilterInvoiceState }: any) => advanceFilterInvoiceState);
+  const advanceFilterInvoiceData: any = useSelector(({ advanceFilterInvoiceState }: any) => advanceFilterInvoiceState);
 
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
