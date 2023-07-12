@@ -94,11 +94,10 @@ export const getPayrollBalanceAPI = async (
 ) => {
   try {
     const offset = new Date().getTimezoneOffset() / 60;
-    const url = `/getPayrollBalance${
-      startDate
+    const url = `/getPayrollBalance${startDate
         ? `?startDate=${startDate}&endDate=${endDate}&offset=${offset}`
         : ''
-    }`;
+      }`;
     const response: any = await request(
       url,
       'GET',
@@ -113,7 +112,7 @@ export const getPayrollBalanceAPI = async (
     if (status === 1) {
       const data = [
         ...vendors.map((contractor: any) => {
-          const { commissionTotal, invoiceIds, advancePaymentTotal, creditAvailable, creditUsedTotal, workType, companyLocation } = contractor;
+          const { commissionTotal, invoiceIds, jobIds, advancePaymentTotal, creditAvailable, creditUsedTotal, workType, companyLocation } = contractor;
           return ({
             ...normalizeData(contractor.contractor, 'vendor'),
             commissionTotal: Math.round(commissionTotal * 100) / 100,
@@ -150,9 +149,8 @@ export const getPaymentsByContractorAPI = async (
   division?: DivisionParams
 ) => {
   try {
-    const url = `/getPaymentsByContractor${
-      type ? `?id=${id}&type=${type}` : ''
-    }`;
+    const url = `/getPaymentsByContractor${type ? `?id=${id}&type=${type}` : ''
+      }`;
     const response: any = await request(
       url,
       'GET',
