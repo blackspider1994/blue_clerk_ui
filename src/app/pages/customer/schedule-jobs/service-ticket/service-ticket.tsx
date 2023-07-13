@@ -29,13 +29,17 @@ import { error, warning } from '../../../../../actions/snackbar/snackbar.action'
 import BCDateRangePicker, { Range }
   from '../../../../components/bc-date-range-picker/bc-date-range-picker';
 import { CSButton } from '../../../../../helpers/custom';
-import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
+import { IDivision, ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 import { ability } from 'app/config/Can';
+import { useHistory } from 'react-router-dom';
 
 function ServiceTicket({ classes, hidden }: any) {
   const dispatch = useDispatch();
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
-
+  const divisions = useSelector((state: any) => state.divisions);
+  const divisionList = divisions.data as IDivision[];
+  const history = useHistory();
+  
   const customers = useSelector(({ customers }: any) => customers.data);
   const [showAllTickets, toggleShowAllTickets] = useState(false);
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
@@ -97,6 +101,10 @@ function ServiceTicket({ classes, hidden }: any) {
       }
     } else {
       dispatch(warning('Please select a division before creating a ticket.'));
+    }
+
+    if (!divisionList.length && !divisions.loading) {
+      history.push('/main/no-locations-assigned')
     }
   };
 

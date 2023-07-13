@@ -1,5 +1,3 @@
-import { RolesAndPermissions } from 'actions/employee/employee.types';
-
 export type Roles = 'admin'| 'dispatch' | 'accounting' | 'superAdmin';
 
 export const permissionDescriptions: { [key :string]: string } = {
@@ -21,30 +19,3 @@ export const permissionDescriptions: { [key :string]: string } = {
   'superAdmin': 'Super Admin',
   'vendorPayments': 'Vendor Payments'
 };
-
-
-const initialRolesAndPermissions: RolesAndPermissions = {
-  'admin': {
-    'addVendors': false,
-    'manageItems': false,
-    'manageCompanySettings': false,
-    'manageEmployeeInfoAndPermissions': false
-  },
-  'dispatch': {
-    'serviceTickets': false,
-    'jobs': false
-  },
-  'accounting': {
-    'invoicing': false,
-    'customerPayments': false,
-    'vendorPayments': false,
-    'reporting': false
-  },
-  'superAdmin': {
-    'deleteCompanyAccount': false,
-    'editCompanyLogo': false,
-    'editBillingInformation': false
-  }
-};
-
-export default initialRolesAndPermissions;

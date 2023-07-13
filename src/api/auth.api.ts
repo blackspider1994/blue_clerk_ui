@@ -30,14 +30,6 @@ const login = async (param: Auth) => {
     }
   }
 
-  try {
-    if (loginData?.user) {
-      const rolesAndPermissions: any = await axios.get(`${process.env.REACT_APP_LAMBDA_URL}/permissions/${loginData.user._id}`);
-      loginData.user.rolesAndPermissions = rolesAndPermissions?.data?.body?.permissions;
-    }
-  } catch (err) {
-    console.error('Something went wrong');
-  }
   return loginData;
 };
 

@@ -1,6 +1,5 @@
 import { ArrowDropDown } from '@material-ui/icons';
 import { CSButton } from 'helpers/custom';
-import { RolesAndPermissions } from 'actions/employee/employee.types';
 import axios from 'axios';
 import styles from './bc-roles-permissions.style';
 import { useLocation } from 'react-router-dom';
@@ -18,29 +17,23 @@ import {
   withStyles
 } from '@material-ui/core';
 import React, { FC, useEffect, useState } from 'react';
-import initialRolesAndPermissions, { permissionDescriptions } from './rolesAndPermissions';
+import { permissionDescriptions } from './rolesAndPermissions';
+import { RolesAndPermissions } from 'actions/permissions/permissions.types';
+import { initialRolesAndPermissions } from 'reducers/permissions.reducer';
 
 
 interface BcRolesPermissionsProps extends WithStyles<typeof styles> {}
 
 const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
-  const { employeeDetails } = useSelector((state: any) => state.employees);
-  const location = useLocation<any>();
-  const obj: any = location.state;
-  const { employeeId } = obj;
-  let { rolesAndPermissions } : { rolesAndPermissions: RolesAndPermissions } = employeeDetails;
+  const { employeeDetails, employeePermissions } = useSelector((state: any) => state.employees);
 
-  if (!Object.keys(rolesAndPermissions).length) {
-    rolesAndPermissions = initialRolesAndPermissions;
-  }
-
-  const [roles, setRoles] = useState<RolesAndPermissions>(rolesAndPermissions);
+  const [roles, setRoles] = useState<RolesAndPermissions>(initialRolesAndPermissions);
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({ });
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    setRoles(rolesAndPermissions);
-  }, [rolesAndPermissions]);
+    setRoles(employeePermissions);
+  }, [employeePermissions]);
 
   const handleUpdateRoles = (key: string) => {
     const permissions = roles[key];
@@ -83,7 +76,7 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
   };
 
   const handleSavePermission = async () => {
-    await axios.post(`${process.env.REACT_APP_LAMBDA_URL}/permissions/${employeeId}`, { 'permission': roles });
+    await axios.post(`${process.env.REACT_APP_LAMBDA_URL}/permissions/${employeeDetails._id}`, { 'permission': roles });
 
     setIsEditing(false);
   };
@@ -109,7 +102,7 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
       <div className={classes.contentContainer}>
         {Object.keys(roles).filter(roleKey => permissionDescriptions[roleKey])
           .map(roleKey => {
-            const permissions = rolesAndPermissions[roleKey];
+            const permissions = roles[roleKey];
             const roleText = permissionDescriptions[roleKey];
             let permissionKeys: string[] = [];
 
@@ -122,13 +115,11 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
                   'borderTopRightRadius': '10px' }}>
                   <AccordionSummary
                     className={classes.accordionSummary}
+                    onClick={() => {
+                      handleExpand(roleKey);
+                    }}
                     expandIcon={
-                      <ArrowDropDown
-                        style={{ 'cursor': 'pointer' }}
-                        onClick={() => {
-                          handleExpand(roleKey);
-                        }}
-                      />
+                      <ArrowDropDown style={{ 'cursor': 'pointer' }} />
                     }>
                     {isEditing 
                       ? <FormControlLabel

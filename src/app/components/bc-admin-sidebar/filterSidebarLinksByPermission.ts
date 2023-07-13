@@ -36,6 +36,10 @@ const filterSidebarLinksByPermission = (user:User, links: any) => {
     linksToRemove.push('billing');
   }
 
+  if (!ability.can('manage', 'VendorPayments') && !isAdmin) {
+    linksToRemove.push('payroll');
+  }
+
   if (!isAdmin) {
     linksToRemove.push('brands');
     linksToRemove.push('equipment_type');

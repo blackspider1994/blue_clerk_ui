@@ -32,5 +32,5 @@ export default function (user: User, links: NAVDATA[]) {
     linksToRemove.push('admin')
   }
 
-  return links.filter((link: any) => !linksToRemove.includes(link.key));
+  return links.filter((link: NAVDATA) => !linksToRemove.includes(link.key || ''));
 }

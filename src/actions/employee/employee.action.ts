@@ -1,7 +1,10 @@
 
+import { RolesAndPermissions } from 'actions/permissions/permissions.types';
 import { createApiAction } from '../action.utils';
-import { RolesAndPermissions, UserProfile, UsersActionType, types, updateEmployeeLocPermParam } from './employee.types';
-import { addAdministrator, addManager, addOfficeAdmin, addTechnician, getEmployees as fetchEmployees, getEmployeeDetail, getEmployeePermissions, updateAdminRole, updateLocPermission } from 'api/employee.api';
+import { UserProfile, UsersActionType, types, updateEmployeeLocPermParam } from './employee.types';
+import { addAdministrator, addManager, addOfficeAdmin, addTechnician, getEmployees as fetchEmployees, getEmployeeDetail, updateAdminRole, updateLocPermission } from 'api/employee.api';
+import { getUserPermissions } from 'api/permissions.api';
+import { initialRolesAndPermissions } from 'reducers/permissions.reducer';
 
 export const loadAllEmployeesActions = createApiAction(types.EMPLOYEE_LOAD);
 export const newCustomerAction = createApiAction(types.EMPLOYEE_NEW);
@@ -73,21 +76,17 @@ export const loadingSingleEmployee = () => {
 export const getEmployeeDetailAction = (data: any) => {
   return async (dispatch: any) => {
     const employee: any = await getEmployeeDetail(data);
-    const response: RolesAndPermissions = await getEmployeePermissions(data);
 
-    const rolesAndPermissions: RolesAndPermissions = {};
-
-    if (response) {
-      Object.keys(response).forEach(key => {
-        if (['admin', 'accounting', 'dispatch', 'superAdmin'].includes(key)) {
-          rolesAndPermissions[key] = response[key];
-        }
-      });
-    }
-
-    employee.employee.rolesAndPermissions = rolesAndPermissions;
     dispatch({ 'type': UsersActionType.SET_SINGLE_EMPLOYEE,
       'payload': employee });
   };
 };
+
+export const getEmployeePermissionsAction = (data: any) => {
+  return async (dispatch: any) => {
+    const response: RolesAndPermissions = await getUserPermissions(data);
+
+    dispatch({ type: UsersActionType.SET_SINGLE_EMPLOYEE_PERMISSIONS, payload: response.permissions || initialRolesAndPermissions });
+  };
+}
 

@@ -42,6 +42,12 @@ export const EmployeesReducer: Reducer<any> = (state = initialEmployees, action)
         loading: false,
         employeeDetails: action.payload.employee
       }
+    case UsersActionType.SET_SINGLE_EMPLOYEE_PERMISSIONS:
+      return {
+        ...state,
+        loading: false,
+        employeePermissions: action.payload
+      }  
     default:
   }
   return state;

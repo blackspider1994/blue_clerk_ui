@@ -12,14 +12,18 @@ export default (): any => ({
     'height': '100%',
     'width': '100%',
     'background': 'white',
+    'display': 'flex',
+    'flex-direction': 'column',
+    'align-items': 'center'
   },
   'infoPane': {
     'padding': '20px',
-    'width': '100%',
+    'width': '90%',
   },
   'buttonPane': {
     'textAlign': 'end',
-    'padding': '20px'
+    'padding': '20px',
+    'width': '100%'
   },
   'required': {
     'color': 'gray'

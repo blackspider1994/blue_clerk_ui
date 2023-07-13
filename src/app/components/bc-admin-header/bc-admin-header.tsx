@@ -252,15 +252,10 @@ function BCAdminHeader({
     }
 
     if (!divisionList.length && !divisions.loading) {
-      dispatch(setModalDataAction({
-        'data': {
-          'user': user,
-        },
-        'type': modalTypes.NOT_ASSIGNED_TO_ANY_LOCATION_MODAL
-      }));
-      setTimeout(() => {
-        dispatch(openModalAction());
-      }, 200);
+      history.push({
+        pathname: `/main/no-locations-assigned`,
+        state: {}
+      })
     }
   }, [divisionList]);
 

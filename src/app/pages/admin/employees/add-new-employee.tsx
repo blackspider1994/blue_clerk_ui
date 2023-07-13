@@ -17,18 +17,14 @@ import {
 import { ArrowDropDown } from '@material-ui/icons';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import validator from 'validator';
-import {
-  RolesAndPermissions,
-  UserProfile,
-} from 'actions/employee/employee.types';
-import { useDispatch } from 'react-redux';
+import { UserProfile } from 'actions/employee/employee.types';
+import { useDispatch, useSelector } from 'react-redux';
 import { createOfficeAdmin } from 'actions/employee/employee.action';
 import { useLocation, useHistory } from 'react-router-dom';
 import { info, error, success } from 'actions/snackbar/snackbar.action';
-import initialRolesAndPermissions, {
-  permissionDescriptions,
-} from 'app/components/bc-roles-permissions/rolesAndPermissions';
+import { permissionDescriptions } from 'app/components/bc-roles-permissions/rolesAndPermissions';
 import axios from 'axios';
+import { RolesAndPermissions } from 'actions/permissions/permissions.types';
 
 export enum Roles {
   Technician = 'Technician',
@@ -44,9 +40,8 @@ interface Props {
 
 function AdminAddNewEmployeePage({ classes, children }: Props) {
   const dispatch = useDispatch();
-  const [roles, setRoles] = useState<RolesAndPermissions>(
-    initialRolesAndPermissions
-  );
+  const { rolesAndPermissions } = useSelector((state: any) => state.permissions)
+  const [roles, setRoles] = useState<RolesAndPermissions>(rolesAndPermissions);
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
   const location = useLocation<any>();
   const history = useHistory();
@@ -94,8 +89,7 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
     }
 
     if (response.status) {
-      // await renderGoBack(location.state);
-      history.push({pathname: `/main/admin/employees/${response.employee?._id}`});
+      await renderGoBack(location.state);
       dispatch(success('Employee created successfully.'));
     } else if (
       response.message ===
