@@ -30,6 +30,7 @@ export interface AdvanceFilterInvoiceState {
     jobAddressCity: string;
     selectedJobAddressState: string;
     jobAddressZip: string;
+    checkBouncedEmails: boolean
 }
 
 export enum AdvanceFilterInvoiceActionType {

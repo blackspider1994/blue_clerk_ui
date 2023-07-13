@@ -497,9 +497,12 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                               <p className={classes.attributeKey}>
                                 {'Technician(s) Name(s)'}
                               </p>
-                              {job.tasks.map((task: any, idx: number) => <span className={classes.grayBoldTextM_0} key={idx}>
-                                {task.technician?.profile?.displayName || 'N/A'}
-                              </span>
+                              {job.tasks.map((task: any, idx: number) => <>
+                                <span className={classes.grayBoldTextM_0} key={idx}>
+                                  {task.technician?.profile?.displayName || 'N/A'}
+                                </span>
+                                <br />
+                              </>
                               )}
                             </div>
                           </Grid>
@@ -510,13 +513,10 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                               <p className={classes.attributeKey}>
                                 {'Job Type(s)'}
                               </p>
-                              {getJobTypesFromJob(job).map((item: any, index: number) =>
-                                <span
-                                  className={classes.grayBoldTextM_0}
-                                  key={index.toString()}>
-                                  {item || 'N/A'}
+                              <span className={classes.grayBoldTextM_0}>
+                                  {getJobTypesFromJob(job).map((item: any) =>
+                                   { return item || 'N/A'; }).join(', ')}
                                 </span>
-                              )}
                             </div>
                           </Grid>
                         </Grid>
