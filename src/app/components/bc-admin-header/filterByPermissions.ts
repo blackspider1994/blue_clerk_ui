@@ -10,8 +10,8 @@ export default function (user: User, links: NAVDATA[]) {
   }
 
   const { permissions } = user;
-  const isAdmin = permissions?.role === 3;
-
+  const isAdmin = permissions?.role === 3 || permissions?.role === 4;
+  
   if (!ability.can('manage', 'Invoicing') && !ability.can('manage', 'CustomerPayments') && !isAdmin) {
     linksToRemove.push('invoicing');
   }
@@ -23,5 +23,14 @@ export default function (user: User, links: NAVDATA[]) {
     linksToRemove.push('reports');
   }
 
-  return links.filter((link: any) => !linksToRemove.includes(link.key));
+  if (
+    !ability.can('manage', 'Employee') &&
+    !ability.can('manage', 'Company') &&
+    !ability.can('edit', 'BillingInformation') && 
+    !isAdmin
+  ) {
+    linksToRemove.push('admin')
+  }
+
+  return links.filter((link: NAVDATA) => !linksToRemove.includes(link.key || ''));
 }

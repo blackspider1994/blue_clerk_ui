@@ -1,5 +1,6 @@
 import { User } from 'actions/employee/employee.types';
 import { AbilityBuilder, AbilityClass, PureAbility } from '@casl/ability';
+import { RolesAndPermissions } from 'actions/permissions/permissions.types';
 
 export type Actions =
   | 'add'
@@ -26,12 +27,12 @@ export type Subjects =
 export type AppAbility = PureAbility<[Actions, Subjects]>;
 export const appAbility = PureAbility as AbilityClass<AppAbility>;
 
-export default function defineRulesFor(user: User) {
+export default function defineRulesFor(user: User, rolesAndPermissions: RolesAndPermissions) {
   const { can, rules } = new AbilityBuilder(appAbility);
   if (!user) {
     return rules;
   }
-  const { rolesAndPermissions, permissions } = user;
+  const { permissions } = user;
   const isAdmin = permissions?.role === 3;
 
   // Admin

@@ -407,7 +407,7 @@ function BCAdvanceFilterInvoiceModal({ classes, handleFilterSubmit, loading = fa
                     <Grid item xs={8}>
                       <Checkbox
                         color="primary"
-                        disabled={FormikValues.checkPoNumber}
+                        disabled={FormikValues.checkMissingPo}
                         className={classes.checkbox}
                         checked={FormikValues.checkPoNumber}
                         onChange={(e) => FormikSetFieldValue('checkPoNumber', e.target.checked)}

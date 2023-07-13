@@ -15,7 +15,7 @@ import { uploadImage } from 'actions/image/image.action';
 import { updateCompanyProfileAction } from 'actions/user/user.action';
 import { updateEmployeeEmailPreferences } from 'api/email-preferences.api';
 import { useHistory, useLocation } from 'react-router-dom';
-import { getEmployeeDetailAction, getEmployees, loadingEmployees, loadingSingleEmployee, updateEmployeeRole } from 'actions/employee/employee.action';
+import { getEmployeeDetailAction, getEmployeePermissionsAction, getEmployees, loadingEmployees, loadingSingleEmployee, updateEmployeeRole } from 'actions/employee/employee.action';
 import { Fab, Grid, withStyles } from '@material-ui/core';
 import SwipeableViews from 'react-swipeable-views';
 import styles from './view-more.styles';
@@ -72,6 +72,7 @@ function EmployeeProfilePage({ classes }: any) {
 
       dispatch(loadingSingleEmployee());
       dispatch(getEmployeeDetailAction(employeeId));
+      dispatch(getEmployeePermissionsAction(employeeId));
     }
   }, []);
 
@@ -181,7 +182,7 @@ function EmployeeProfilePage({ classes }: any) {
                       'value': 1
                     },
                     {
-                      'label': 'ROLES/PERMISSIONS',
+                      'label': 'PERMISSIONS',
                       'value': 2
                     }
                   ]}

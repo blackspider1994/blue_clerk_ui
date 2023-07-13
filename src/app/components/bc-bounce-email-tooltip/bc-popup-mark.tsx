@@ -22,10 +22,11 @@ const PopupMark: React.FC<PopupMarkProps> = ({ data, invoiceId }) => {
   useEffect( () => {
     setEmails(data);
   })
-  
-  for (const email of emails) {
-    if (email.deliveryStatus === false) {
-      bounceEmails.push(email.sentTo)
+  if(emails){
+    for (const email of emails) {
+      if (email.deliveryStatus === false) {
+        bounceEmails.push(email.sentTo)
+      }
     }
   }
 
@@ -44,8 +45,12 @@ const PopupMark: React.FC<PopupMarkProps> = ({ data, invoiceId }) => {
     setPopupVisible(false);
   };
 
+  const handlePopMarkClick=(e:any)=>{
+    e.stopPropagation();
+  }
+
   return (
-    <div style={styles}>
+    <div style={styles} onClick={(e)=>handlePopMarkClick(e)} >
       <ExclamationMark
         mouseEnter={handleMouseHover}
         mouseLeave={handleMouseLeave}
@@ -58,3 +63,4 @@ const PopupMark: React.FC<PopupMarkProps> = ({ data, invoiceId }) => {
 };
 
 export default PopupMark;
+

@@ -9,7 +9,7 @@ const filterSidebarLinksByPermission = (user:User, links: any) => {
   }
 
   const { permissions } = user;
-  const isAdmin = permissions?.role === 3;
+  const isAdmin = permissions?.role === 3 || permissions?.role === 4;
 
   if (!ability.can('manage', 'Employee') && !isAdmin) {
     linksToRemove.push('employees');
@@ -32,8 +32,25 @@ const filterSidebarLinksByPermission = (user:User, links: any) => {
     linksToRemove.push('map');
   }
 
-  if (!ability.can('edit', 'BillingInformation') && !ability.can('manage', 'Jobs') && !isAdmin) {
+  if (!ability.can('edit', 'BillingInformation') && !isAdmin) {
     linksToRemove.push('billing');
+  }
+
+  if (!ability.can('manage', 'VendorPayments') && !isAdmin) {
+    linksToRemove.push('payroll');
+  }
+
+  if (!isAdmin) {
+    linksToRemove.push('brands');
+    linksToRemove.push('equipment_type');
+    linksToRemove.push('groups');
+    linksToRemove.push('services_products');
+    linksToRemove.push('invoicing');
+    linksToRemove.push('report_number');
+    linksToRemove.push('roles');
+    linksToRemove.push('vendors');
+    linksToRemove.push('integrations');
+    linksToRemove.push('data');
   }
 
   return links.filter((link: any) => !linksToRemove.includes(link.key));

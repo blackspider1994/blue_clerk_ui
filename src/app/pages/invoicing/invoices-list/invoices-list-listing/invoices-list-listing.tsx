@@ -2,7 +2,7 @@ import BCTableContainer from '../../../../components/bc-table-container/bc-table
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import styled from 'styled-components';
 import styles from './../invoices-list.styles';
-import { withStyles, Button, Tooltip, Badge, Dialog, DialogTitle, DialogContent, DialogActions } from "@material-ui/core";
+import { withStyles, Button, Checkbox, Tooltip, Badge, Dialog, DialogTitle, DialogContent, DialogActions } from "@material-ui/core";
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TableFilterService from 'utils/table-filter';
@@ -33,8 +33,8 @@ import debounce from 'lodash.debounce';
 import PopupMark from '../../../../components/bc-bounce-email-tooltip/bc-popup-mark';
 
 const getFilteredList = (state: any) => {
-  const sortedInvoices = TableFilterService.filterByDateDesc(state?.invoiceList.data);
-  return sortedInvoices.filter((invoice: any) => !invoice.isDraft);
+  const sortedInvoices = TableFilterService.filterByDateDesc(state?.invoiceList?.data);
+  return sortedInvoices && sortedInvoices.filter((invoice: any) => !invoice.isDraft);
 };
 
 function InvoicingListListing({ classes, theme }: any) {
@@ -58,6 +58,7 @@ function InvoicingListListing({ classes, theme }: any) {
   );
   // const [selectionRange, setSelectionRange] = useState<Range | null>(null);
 
+  let [checkBouncedEmailsFlag, setCheckBouncedEmailsFlag] = useState(false);
   const [fetchInvoices, setFetchInvoices] = useState(false);
   const [lastNextCursor, setLastNextCursor] = useState<string | undefined>(location?.state?.option?.lastNextCursor)
   const [lastPrevCursor, setLastPrevCursor] = useState<string | undefined>(location?.state?.option?.lastPrevCursor)
@@ -354,6 +355,15 @@ function InvoicingListListing({ classes, theme }: any) {
     }, 200);
   }
 
+  const handleBouncedEmail = () => {
+    checkBouncedEmailsFlag = !checkBouncedEmailsFlag
+    setCheckBouncedEmailsFlag(checkBouncedEmailsFlag);
+
+    advanceFilterInvoiceData.checkBouncedEmails = checkBouncedEmailsFlag ?? null
+    
+    dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
+  }
+
   const handleClear = () => {
     dispatch(resetAdvanceFilterInvoice());
     setTimeout(() => {
@@ -414,6 +424,20 @@ function InvoicingListListing({ classes, theme }: any) {
     )
   }
 
+  const BouncedCheckbox = (props: any) => {
+    const content = JSON.stringify(initialAdvanceFilterInvoiceState) !== JSON.stringify(advanceFilterInvoiceData)
+    return (
+      <div>
+        <Checkbox 
+          color="primary"
+          className={classes.checkbox}
+          checked={checkBouncedEmailsFlag}
+          onChange={props.onChange}
+        />
+        BOUNCED EMAILS
+      </div>
+    );
+  }
   // Dialog to be showed whent the filter modal doesn't return data
   const DialogNotData = ({ open, handleClose }: { open: boolean, handleClose: () => void }) => {
     return (
@@ -448,7 +472,12 @@ function InvoicingListListing({ classes, theme }: any) {
         title={'Filter by Invoice Date...'}
         classes={{button: classes.noLeftMargin}}
       /> */}
-      <ButtonFilter onClick={handleOpenFilter} onClear={handleClear}>Filter</ButtonFilter>
+      {
+        <ButtonFilter onClick={handleOpenFilter} onClear={handleClear}>Filter</ButtonFilter>
+      }
+      {
+        <BouncedCheckbox onChange={handleBouncedEmail}></BouncedCheckbox>
+      }
     </>
   }
 

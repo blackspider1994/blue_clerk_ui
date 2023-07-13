@@ -1,3 +1,5 @@
+import { RolesAndPermissions } from "actions/permissions/permissions.types";
+
 export const types = {
   'EMPLOYEE_LOAD': 'loadAllEmployeesActions',
   'EMPLOYEE_NEW': 'newEmployeeAction',
@@ -63,7 +65,6 @@ export interface User {
   },
   company?: string
   allLocation?: boolean,
-  rolesAndPermissions?: RolesAndPermissions
 }
 
 export interface UserDetails {
@@ -76,7 +77,6 @@ export interface UserDetails {
     'time': string,
     'timezone': string
   },
-  'rolesAndPermissions': RolesAndPermissions
 }
 
 export interface UsersState {
@@ -84,7 +84,8 @@ export interface UsersState {
   readonly data?: User[]
   readonly error?: string
   readonly added?: boolean
-  readonly employeeDetails?: UserDetails
+  readonly employeeDetails?: UserDetails,
+  readonly employeePermissions?: RolesAndPermissions | null
 }
 
 export const EmployeeRoles = ['Office Admin', 'Technician', 'Manager', 'Company Administrator', 'Admin', 'Customer'];
@@ -96,10 +97,5 @@ export enum UsersActionType {
   ADDED = 'addedUser',
   GET_SINGLE_EMPLOYEE = 'getSingleEmployee',
   SET_SINGLE_EMPLOYEE = 'setSingleEmployee',
-}
-
-export type RolesAndPermissions = {
-  [key: string]: {
-    [key: string]: boolean
-  }
+  SET_SINGLE_EMPLOYEE_PERMISSIONS = 'setSingleEmployeePermissions'
 }

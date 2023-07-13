@@ -250,6 +250,13 @@ function BCAdminHeader({
           }, 200);
         }
     }
+
+    if (!divisionList.length && !divisions.loading) {
+      history.push({
+        pathname: `/main/no-locations-assigned`,
+        state: {}
+      })
+    }
   }, [divisionList]);
 
   useEffect(() => {
@@ -314,6 +321,7 @@ function BCAdminHeader({
     //   'link': '/main/tags/purchasedtag'
     // },
     {
+      'key': 'payroll',
       'label': 'Payroll',
       'link':  currentDivision.isDivisionFeatureActivated && currentDivision.urlParams ? `/main/payroll/${currentDivision.urlParams}` : `/main/payroll`
     },

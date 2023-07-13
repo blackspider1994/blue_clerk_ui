@@ -23,6 +23,7 @@ import { markNotificationAsRead } from 'actions/notifications/notifications.acti
 import { info } from '../../../actions/snackbar/snackbar.action';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 import { Can, ability } from 'app/config/Can';
+import { getUserPermissionsAction } from 'actions/permissions/permissions.action';
 
 const UpdateInvoicePage = React.lazy(() => import('../invoicing/invoices-list/update-invoice/update-invoice'));
 const DashboardPage = React.lazy(() => import('../dashboard/dashboard'));
@@ -105,6 +106,7 @@ const RevenueReportsPage = React.lazy(() => import('../reports/customers/revenue
 const ARReportsPage = React.lazy(() => import('../reports/customers/ar-report'));
 const NewPayrollReportsPage = React.lazy(() => import('../reports/vendors/payroll-reports/payroll'));
 const DataPage = React.lazy(() => import('../admin/data/data'))
+const NoLocationAssignedProps = React.lazy(() => import('../no-location-assigned/no-location-assigned'));
 
 const activeJobRequest = process.env.REACT_APP_JOB_REQUEST_ACTIVE
 
@@ -113,6 +115,7 @@ function Main(): any {
   const notifications = useSelector((state: any) => state.notifications)
   const profileState = useSelector((state: any) => state.profile);
   const { user } = useSelector((state: any) => state.auth);
+  const { rolesAndPermissions } = useSelector((state: any) => state.permissions)
   const { numberOfJobRequest } = useSelector((state: any) => state.jobRequests);
   const { jobRequests } = useSelector((state: any) => state.jobRequests);
   const snackbarState = useSelector((state: any) => state.snackbar);
@@ -133,6 +136,10 @@ function Main(): any {
   const getCompanyProfile = (companyId:string) => {
     dispatch(getCompanyProfileAction(companyId));
   };
+
+  const getUserPermission = (id: string) => {
+    dispatch(getUserPermissionsAction(id));
+  }
 
   const logoutAndReset = () => {
     dispatch(logoutAction());
@@ -242,8 +249,24 @@ function Main(): any {
     }
   }
 
+  useEffect(() => {
+    if (user?._id) {
+      getUserPermission(user._id);
+    }
+  }, [user])
+
   const dispatchResetInfoSnackbar = () => {
     dispatch(info(''));
+  }
+
+  let AdminPage: any = BillingPage;
+
+  if (ability.can('edit', 'BillingInformation')) {
+    AdminPage = BillingPage;
+  } else if (ability.can('manage', 'Company')) {
+    AdminPage = CompanyProfilePage;
+  } else if (ability.can('manage', 'Employee')) {
+    AdminPage = AdminEmployeesPage;
   }
 
   return (
@@ -615,7 +638,7 @@ function Main(): any {
                 />
 
                 <AuthRoute
-                  Component={BillingPage}
+                  Component={AdminPage}
                   exact
                   path={'/main/admin'}
                   title={'Admin'}
@@ -832,10 +855,10 @@ function Main(): any {
                   title={'User'}
                 />
                 <AuthRoute
-                  Component={NotificationPage}
+                  Component={NoLocationAssignedProps}
                   exact
-                  path={'/main/notifications'}
-                  title={'Notifications'}
+                  path={'/main/no-locations-assigned'}
+                  title={'No Locations Assigned'}
                 />
               </Switch>
             </BCAdminLayout>
