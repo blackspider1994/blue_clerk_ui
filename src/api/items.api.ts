@@ -117,7 +117,7 @@ export const addItem = async (item: any) => {
     const response: any = await request(
       '/createJobType',
       'POST',
-      { title: item.name, description: item.description },
+      { title: item.name, description: item.description},
       false
     );
     if (response.data.status === 0) {
@@ -139,6 +139,43 @@ export const addItem = async (item: any) => {
         err?.data?.errors ||
           err?.data?.message ||
           `${err?.data['err.user.incorrect']}\nYou have ${err?.data?.retry} attempts left`
+      );
+    } else {
+      throw new Error(`Something went wrong`);
+    }
+  }
+};
+
+export const addItemProduct = async (item: any) => {
+  try {
+    const response: any = await request(
+      '/createItem',
+      'POST',
+      {
+        title: item.name, description: item.description,
+        ...item
+      },
+      false
+    );
+    if (response.data.status === 0) {
+      throw response;
+    }
+    const responseUpdate: any = await request(
+      '/updateItems',
+      'POST',
+      { items: JSON.stringify([{ ...item, itemId: response.data.item._id }]) },
+      false
+    );
+    if (responseUpdate.data.status === 0) {
+      throw responseUpdate;
+    }
+    return responseUpdate.data;
+  } catch (err) {
+    if (err?.response?.status >= 400 || err?.data?.status === 0) {
+      throw new Error(
+        err?.data?.errors ||
+        err?.data?.message ||
+        `${err?.data['err.user.incorrect']}\nYou have ${err?.data?.retry} attempts left`
       );
     } else {
       throw new Error(`Something went wrong`);
