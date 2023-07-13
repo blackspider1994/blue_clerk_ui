@@ -38,7 +38,7 @@ import {
 } from 'actions/snackbar/snackbar.action';
 import * as CONSTANTS from '../../../constants';
 import styles from './bc-invoice-item-modal.styles';
-import { updateItems, addItem } from 'api/items.api';
+import { updateItems, addItem, addItemProduct } from 'api/items.api';
 
 const EditItemValidation = yup.object().shape({
   'name': yup
@@ -203,6 +203,13 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         costing: costingArr,
       }
       let response;
+      if(isProduct){
+        
+        response = await addItemProduct(itemObject).catch((err: { message: any }) => {
+          dispatch(errorSnackBar(err.message));
+        });
+      }
+      else 
       if (isAdd) {
         response = await addItem(itemObject).catch((err: { message: any }) => {
           dispatch(errorSnackBar(err.message));
@@ -337,6 +344,7 @@ let isFixedDisabled=false;
                 }}
               />
             </Grid>
+            {formik.values.itemType == 'Service' &&
             <Grid
               item
               xs={12}
@@ -360,6 +368,7 @@ let isFixedDisabled=false;
                 label={`This Item is also a Job Type`}
               />
             </Grid>
+            }
            
           </Grid>
           <Grid item xs={12} sm={5} classes={{ root: classes.grid }}>
