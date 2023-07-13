@@ -152,7 +152,9 @@ export const addItemProduct = async (item: any) => {
       '/createItem',
       'POST',
       {
-        title: item.name, description: item.description,
+        title: item.name, description: item.description, itemType: item.itemType, productCost: item.productCost, salePrice: item.salePrice,
+        isFixed: item.isFixed,
+        sku:item.sku,
         ...item
       },
       false

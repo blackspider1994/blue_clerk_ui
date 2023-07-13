@@ -203,17 +203,20 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         costing: costingArr,
       }
       let response;
-      if(isProduct){
-        
-        response = await addItemProduct(itemObject).catch((err: { message: any }) => {
-          dispatch(errorSnackBar(err.message));
-        });
-      }
-      else 
+      
+       
       if (isAdd) {
-        response = await addItem(itemObject).catch((err: { message: any }) => {
-          dispatch(errorSnackBar(err.message));
-        });
+        
+        if (isProduct) {
+
+          response = await addItemProduct(itemObject).catch((err: { message: any }) => {
+            dispatch(errorSnackBar(err.message));
+          });
+        }else{
+          response = await addItem(itemObject).catch((err: { message: any }) => {
+            dispatch(errorSnackBar(err.message));
+          });
+        }
       } else {
         response = await updateItems([itemObject]).catch(
           (err: { message: any }) => {
