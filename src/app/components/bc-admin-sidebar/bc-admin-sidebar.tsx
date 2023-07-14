@@ -459,8 +459,9 @@ function BCAdminSidebar({
   const sidebarStyles = useSidebarStyles();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const permissions = useSelector((state: any) => state.permissions.rolesAndPermissions);
 
-  const filteredLinkData = filterSidebarLinksByPermission(auth.user, LINK_DATA);
+  const filteredLinkData = filterSidebarLinksByPermission(auth.user, permissions, LINK_DATA);
 
   const withSidebar = !['/main/dashboard', '/main/notifications'].includes(pathName);
   const subGroupBar = (item : any) => {

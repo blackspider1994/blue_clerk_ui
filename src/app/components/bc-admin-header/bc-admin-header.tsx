@@ -184,6 +184,7 @@ function BCAdminHeader({
   const divisionList = divisions.data as IDivision[];
   const vendors = useSelector((state: any) => state.vendors);
   const auth = useSelector((state: any) => state.auth);
+  const permissions = useSelector((state: any) => state.permissions.rolesAndPermissions);
 
   useEffect(() => {
     initialLoad()
@@ -348,7 +349,7 @@ function BCAdminHeader({
     }
   ];
 
-  const filteredNavData = filterByPermissions(auth.user, NAV_DATA);
+  const filteredNavData = filterByPermissions(auth.user, permissions, NAV_DATA);
 
   const handleLocationChange = (params: any) => {
     const selectedDivision = divisionList[params.target.value];

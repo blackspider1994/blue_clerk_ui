@@ -1,54 +1,56 @@
 import { User } from 'actions/employee/employee.types';
+import { RolesAndPermissions } from 'actions/permissions/permissions.types';
 import { ability } from 'app/config/Can';
 
-const filterSidebarLinksByPermission = (user:User, links: any) => {
+const filterSidebarLinksByPermission = (user:User, rolesAndPermissions: RolesAndPermissions, links: any, ) => {
   const linksToRemove: string[] = [];
 
-  if (!user) {
+  if (!user && !rolesAndPermissions) {
     return links;
   }
 
-  const { permissions } = user;
-  const isAdmin = permissions?.role === 3 || permissions?.role === 4;
+  const role = user?.permissions?.role;
 
-  if (!ability.can('manage', 'Employee') && !isAdmin) {
+  const isAdmin = role === 3 || role === 4;
+
+  if (!rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions && !isAdmin) {
     linksToRemove.push('employees');
   }
 
-  if (!ability.can('manage', 'Company') && !isAdmin) {
+  if (!rolesAndPermissions?.admin?.manageCompanySettings && !isAdmin) {
     linksToRemove.push('company');
   }
 
-  if (!ability.can('add', 'Vendor') && !isAdmin) {
+  if (!rolesAndPermissions?.admin?.addVendors && !isAdmin) {
     linksToRemove.push('vendors');
   }
 
-  if (!ability.can('manage', 'Items') && !isAdmin) {
+  if (!rolesAndPermissions?.admin?.manageItems && !isAdmin) {
     linksToRemove.push('services_products');
   }
 
-  if (!ability.can('manage', 'Invoicing') && !isAdmin) {
+  if (!rolesAndPermissions?.accounting?.invoicing && !isAdmin) {
     linksToRemove.push('invoicing');
   }
 
-  if (!ability.can('manage', 'Tickets') && !isAdmin) {
+  if (!rolesAndPermissions?.dispatch?.serviceTickets && !isAdmin) {
     linksToRemove.push('tickets');
   }
 
-  if (!ability.can('manage', 'Jobs') && !isAdmin) {
+  if (!rolesAndPermissions?.dispatch?.jobs && !isAdmin) {
     linksToRemove.push('jobs');
   }
 
-  if (!ability.can('manage', 'Tickets') && !ability.can('manage', 'Jobs') && !isAdmin) {
+  if (!rolesAndPermissions?.dispatch?.serviceTickets && !rolesAndPermissions?.dispatch?.jobs && !isAdmin) {
     linksToRemove.push('calendar');
     linksToRemove.push('map');
   }
 
-  if (!ability.can('edit', 'BillingInformation') && !isAdmin) {
+  if (!rolesAndPermissions?.superAdmin?.editBillingInformation && !isAdmin) {
     linksToRemove.push('billing');
   }
 
-  if (!ability.can('manage', 'VendorPayments') && !isAdmin) {
+  if (!rolesAndPermissions?.accounting?.vendorPayments && !isAdmin) {
     linksToRemove.push('payroll');
   }
 

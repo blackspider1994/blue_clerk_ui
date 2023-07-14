@@ -1,36 +1,44 @@
 import { User } from 'actions/employee/employee.types';
-import { ability } from 'app/config/Can';
+// import { ability } from 'app/config/Can';
 import { NAVDATA } from './bc-admin-header';
+import { RolesAndPermissions } from 'actions/permissions/permissions.types';
 
-export default function (user: User, links: NAVDATA[]) {
+export default function (user: User, rolesAndPermissions: RolesAndPermissions, links: NAVDATA[]) {
   const linksToRemove: string[] = [];
 
   if (!user) {
     return links;
   }
 
-  const { permissions } = user;
-  const isAdmin = permissions?.role === 3 || permissions?.role === 4;
-  
-  if (!ability.can('manage', 'Invoicing') && !ability.can('manage', 'CustomerPayments') && !isAdmin) {
+  const role = user.permissions?.role;
+  const isAdmin = role === 3 || role === 4;
+
+  if (!rolesAndPermissions?.accounting?.invoicing && !rolesAndPermissions?.accounting?.customerPayments && !isAdmin) {
     linksToRemove.push('invoicing');
   }
 
-  if (!ability.can('manage', 'VendorPayments') && !isAdmin) {
+  if (!rolesAndPermissions?.accounting?.vendorPayments && !isAdmin) {
     linksToRemove.push('payroll');
   }
-  if (!ability.can('manage', 'Reporting') && !isAdmin) {
+  if (!rolesAndPermissions?.accounting?.reporting && !isAdmin) {
     linksToRemove.push('reports');
   }
-
+  console.log(!rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions ,
+    !rolesAndPermissions?.admin?.manageCompanySettings ,
+    !rolesAndPermissions?.superAdmin?.editBillingInformation , 
+    !rolesAndPermissions?.admin?.addVendors , 
+    !rolesAndPermissions?.admin?.manageItems , 
+    !rolesAndPermissions?.admin?.manageCompanySettings , 
+    !rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions , 
+    !isAdmin)
   if (
-    !ability.can('manage', 'Employee') &&
-    !ability.can('manage', 'Company') &&
-    !ability.can('edit', 'BillingInformation') && 
-    !ability.can('add', 'Vendor') && 
-    !ability.can('manage', 'Items') && 
-    !ability.can('manage', 'Company') && 
-    !ability.can('manage', 'Employee') && 
+    !rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions &&
+    !rolesAndPermissions?.admin?.manageCompanySettings &&
+    !rolesAndPermissions?.superAdmin?.editBillingInformation && 
+    !rolesAndPermissions?.admin?.addVendors && 
+    !rolesAndPermissions?.admin?.manageItems && 
+    !rolesAndPermissions?.admin?.manageCompanySettings && 
+    !rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions && 
     !isAdmin
   ) {
     linksToRemove.push('admin')
