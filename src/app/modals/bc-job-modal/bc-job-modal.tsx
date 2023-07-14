@@ -70,6 +70,11 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 import { DivisionParams } from 'app/models/division';
+import BCEmailValidateInput from '../../components/bc-email-validate-input/bc-email-validate-input';
+import { FormDataModel } from '../../models/form-data';
+import BCPhoneNumberInput from '../../components/bc-phone-number-input/bc-phone-number-input';
+import { callCreateHomeOwner } from 'api/home-owner.api';
+import { getHomeOwnerAction, clearHomeOwnerStore } from 'actions/home-owner/home-owner.action';
 
 const initialTask = {
   employeeType: 1,
@@ -191,6 +196,7 @@ function BCJobModal({
   const openServiceTicketFilter = useSelector(
     (state: any) => state.serviceTicket.filterTicketState
   );
+  const homeOwners = useSelector((state: any) => state.homeOwner.data);
 
   const employeesForJob = useMemo(() => [...data], [data]);
 
@@ -199,7 +205,10 @@ function BCJobModal({
   const [jobSiteValue, setJobSiteValue] = useState<any>([]);
   const [contactValue, setContactValue] = useState<any>([]);
 
-  let { ticket = {} } = job;
+  const [isHomeOwnerAutocompleted, setIsHomeOwnerAutocompleted] = useState<any>(false);
+  const [homeOwnerAutocompleted, sethomeOwnerAutocompleted] = useState<any>({});
+
+  let {ticket = {}} = job;
 
   if (job.request) {
     ticket = job.request;
@@ -304,6 +313,10 @@ function BCJobModal({
     const jobSiteId = newValue ? newValue._id : '';
     setFieldValue(fieldName, jobSiteId);
     setJobSiteValue(newValue);
+    clearHomeOwnerFields();
+    if (jobSiteId != '') {
+      dispatch(getHomeOwnerAction(jobSiteId, FormikValues.jobLocationId));
+    }
   };
 
   /**
@@ -327,6 +340,7 @@ function BCJobModal({
       await dispatch(clearJobSiteStore());
     }
     await setFieldValue(fieldName, locationId);
+    await clearHomeOwnerFields();
   };
 
   /**
@@ -387,6 +401,29 @@ function BCJobModal({
     };
     dispatch(getContacts(data));
   }, []);
+
+  // Implements autocomplete for homeowner
+  useEffect(() => {
+    const filteredHomeOwners = homeOwners.filter((item: any) => {
+      return (item?.address === FormikValues.jobSiteId);
+    });
+    if (filteredHomeOwners && filteredHomeOwners.length > 0 && FormikValues.jobSiteId !== '' && FormikValues.homeOwnerId === '') {
+      setFieldValue('homeOwnerFirstName', filteredHomeOwners[0].profile.firstName);
+      setFieldValue('homeOwnerLastName', filteredHomeOwners[0].profile.lastName);
+      setFormDataEmail({
+        ...formDataEmail,
+        value: filteredHomeOwners[0].info?.email || ''
+      });
+      setFormDataPhone({
+        ...formDataPhone,
+        value: filteredHomeOwners[0].contact?.phone || ''
+      });
+      setFieldValue('homeOwnerId', filteredHomeOwners[0]._id);
+      setFieldValue('isHomeOccupied', true);
+      setIsHomeOwnerAutocompleted(true);
+      sethomeOwnerAutocompleted(filteredHomeOwners[0])
+    }
+  }, [homeOwners]);
 
   useEffect(() => {
     const tasks = getJobTasks(job, items);
@@ -516,6 +553,94 @@ function BCJobModal({
 
   const jobValue = JSON.parse(JSON.stringify(job));
 
+  const [formDataPhone, setFormDataPhone] = useState<FormDataModel>({
+    'errorMsg': '',
+    'validate': true,
+    'value': jobValue?.homeOwnerObj?.[0]?.contact?.phone || jobValue?.ticket?.homeOwner?.contact?.phone || '',
+  });
+  const [formDataEmail, setFormDataEmail] = useState<FormDataModel>({
+    'errorMsg': 'Occupied house must have email or phone number',
+    'validate': true,
+    'value': jobValue?.homeOwnerObj?.[0]?.info?.email || jobValue?.ticket?.homeOwner?.info?.email || '',
+  });
+
+  const isNewHomeOwner = () => {
+    if (isHomeOwnerAutocompleted === true) {
+      return (
+        FormikValues.homeOwnerFirstName !== homeOwnerAutocompleted?.profile?.firstName ||
+        (homeOwnerAutocompleted?.profile?.lastName ? 
+          FormikValues.homeOwnerLastName !== homeOwnerAutocompleted?.profile?.lastName :
+          FormikValues.homeOwnerLastName !== ''
+        ) ||
+        (homeOwnerAutocompleted?.info?.email ?
+          formDataEmail.value !== homeOwnerAutocompleted?.info?.email :
+          formDataEmail.value !== ''
+        ) ||
+        (homeOwnerAutocompleted?.contact?.phone ?
+          formDataPhone.value !== homeOwnerAutocompleted?.contact?.phone :
+          formDataPhone.value !== ''
+        )
+      )
+    }
+    if (job._id) { // Job update
+      // Home occupied status has changed from the ticket to the job
+      if (jobValue?.isHomeOccupied !== FormikValues.isHomeOccupied) return true;
+      // Home occupied status is the same but homeOwner data may have changed
+      if (jobValue?.isHomeOccupied) {
+        return (
+          FormikValues.homeOwnerFirstName !== jobValue?.homeOwnerObj?.[0]?.profile?.firstName ||
+          FormikValues.homeOwnerLastName !== jobValue?.homeOwnerObj?.[0]?.profile?.lastName ||
+          formDataEmail.value !== jobValue?.homeOwnerObj?.[0]?.info?.email ||
+          formDataPhone.value !== jobValue?.homeOwnerObj?.[0]?.contact?.phone
+        )
+      }
+      return false;
+    }
+    else { // New job
+      // Home occupied status has changed from the ticket to the job
+      if (jobValue?.ticket?.isHomeOccupied !== FormikValues.isHomeOccupied) return true;
+      // Home occupied status is the same but homeOwner data may have changed
+      if (jobValue?.ticket?.isHomeOccupied) {
+        return (
+          FormikValues.homeOwnerFirstName !== jobValue?.ticket?.homeOwner?.profile?.firstName ||
+          FormikValues.homeOwnerLastName !== jobValue?.ticket?.homeOwner?.profile?.lastName ||
+          formDataEmail.value !== jobValue?.ticket?.homeOwner.info?.email ||
+          formDataPhone.value !== jobValue?.ticket?.homeOwner.contact?.phone
+        )
+      }
+      return false;
+    }
+  }
+
+  const checkValidHomeOwner = () => {
+    if (!jobSiteValue || jobSiteValue.length === 0) {
+      dispatch(error("Address is required when house is occupied"));
+      return false;
+    }
+    if (!formDataPhone.value && !formDataEmail.value) {
+      dispatch(error("Occupied house must have email or phone number"));
+      return false;
+    }
+    return true;
+  }
+
+  const clearHomeOwnerFields = async () => {
+    // Clean homeowner fields on customer update
+    await setFieldValue('homeOwnerFirstName', '');
+    await setFieldValue('homeOwnerLastName', '');
+    await setFieldValue('isHomeOccupied', false);
+    await setFieldValue('homeOwnerId', '');
+    await setFormDataEmail({
+      ...formDataEmail,
+      value: ''
+    });
+    await setFormDataPhone({
+      ...formDataPhone,
+      value: ''
+    });
+    await setIsHomeOwnerAutocompleted(false);
+  }
+
   /**
    * Formik form configuration
    */
@@ -560,21 +685,17 @@ function BCJobModal({
       customerPO: jobValue.customerPO || ticket.customerPO,
       images: jobValue?.images?.length ? jobValue.images : ticket.images || [],
       scheduleTimeAMPM: timeRangeOptions[jobValue?.scheduleTimeAMPM || 0],
-      isHomeOccupied:
-        jobValue?.isHomeOccupied ||
-        ticket?.isHomeOccupied ||
-        jobValue.ticket?.isHomeOccupied,
-      homeOwnerId:
-        jobValue?.homeOwner ||
-        ticket?.homeOwner?._id ||
-        jobValue.ticket?.homeOwner?._id ||
-        '',
+      isHomeOccupied: job._id ? jobValue?.isHomeOccupied : ticket?.isHomeOccupied || jobValue.ticket?.isHomeOccupied,
+      homeOwnerId: jobValue?.homeOwner || ticket?.homeOwner?._id || jobValue.ticket?.homeOwner?._id || '',
+      homeOwnerFirstName: jobValue?.homeOwnerObj?.[0]?.profile?.firstName || jobValue?.ticket?.homeOwner?.profile?.firstName || '',
+      homeOwnerLastName: jobValue?.homeOwnerObj?.[0]?.profile?.lastName || jobValue?.ticket?.homeOwner?.profile?.lastName || '',
     },
     validateOnMount: false,
     validateOnChange: false,
     validateOnBlur: false,
-    onSubmit: (values: any, { setSubmitting }: any) => {
-      const tempData = { ...values };
+
+    onSubmit: async(values: any, {setSubmitting}: any) => {
+      const tempData = {...values};
       tempData.scheduleTimeAMPM = tempData.scheduleTimeAMPM?.index || 0;
       tempData.scheduleDate = moment(values.scheduleDate).format('YYYY-MM-DD');
       tempData.customerId = customer?._id;
@@ -617,7 +738,39 @@ function BCJobModal({
         delete tempData.ticketId;
       }
 
-      const requestObj = formatRequestObj(tempData);
+      // Handle home owner creation / update on job modal
+      if (isNewHomeOwner()) {
+        if(FormikValues.isHomeOccupied === false) {
+          tempData.homeOwnerId = null;
+        }
+        else {
+          if (!checkValidHomeOwner()) return;
+          // Create new homeowner
+          let homeOwnerData: any = {
+            firstName: tempData.homeOwnerFirstName ?? '',
+            lastName: tempData.homeOwnerLastName ?? '',
+            address: tempData.jobSiteId ?? '',
+            ...(
+              (tempData.jobLocationId && tempData.jobLocationId.length > 0) &&
+              { subdivision: tempData.jobLocationId }
+            ),
+            ...((formDataEmail.value && formDataEmail.value.length > 0) && { email: formDataEmail.value }),
+            ...((formDataPhone.value && formDataPhone.value.length > 0) && { phone: formDataPhone.value }),
+
+          };
+          const homOwnerResult = await callCreateHomeOwner(homeOwnerData)
+            .then((response: any) => {
+              if (response.status !== 1) {
+                dispatch(error("Could not create home owner"));
+                return false;
+              }
+              tempData.homeOwnerId = response.homeOwner._id;
+              return true;
+            });
+          if (!homOwnerResult) { return; }
+        }
+      }
+      const requestObj = formatRequestObj(tempData)
 
       const editJob = async (tempData: any) => {
         tempData.jobId = job._id;
@@ -740,6 +893,7 @@ function BCJobModal({
   } = form;
 
   const closeModal = () => {
+    dispatch(clearHomeOwnerStore());
     dispatch(closeModalAction());
     setTimeout(() => {
       dispatch(
@@ -1491,69 +1645,73 @@ function BCJobModal({
                     color={'primary'}
                     checked={FormikValues.isHomeOccupied}
                     name="isHomeOccupied"
-                    classes={{ root: classes.checkboxInput }}
-                    disabled={true}
+                    classes={{root: classes.checkboxInput}}
+                    onChange={(e) => {
+                      formikChange(e)
+                    }}
                   />
                 }
                 label={`HOUSE IS OCCUPIED`}
               />
-            </Grid>
-            {FormikValues.isHomeOccupied ? (
-              <Grid container>
-                <Grid justify={'space-between'} xs>
+            </Grid> 
+            { 
+              FormikValues.isHomeOccupied ? (
+              <Grid container xs={12} spacing={4}>
+                <Grid item xs>
                   <Typography variant={'caption'} className={'previewCaption'}>
                     First name
                   </Typography>
                   <BCInput
-                    disabled={true}
-                    name={'customerFirstName'}
-                    value={
-                      jobValue?.ticket?.homeOwner?.profile?.firstName ||
-                      jobValue?.homeOwnerObj?.[0]?.profile?.firstName ||
-                      'N/A'
-                    }
+                    disabled={false}
+                    name={'homeOwnerFirstName'}
+                    value={FormikValues.homeOwnerFirstName}
+                    handleChange={formikChange}
+                    required={true}
                   />
                 </Grid>
-                <Grid justify={'space-between'} xs>
+                <Grid item xs>
                   <Typography variant={'caption'} className={'previewCaption'}>
                     Last name
                   </Typography>
                   <BCInput
-                    disabled={true}
-                    name={'customerLastName'}
-                    value={
-                      jobValue?.ticket?.homeOwner?.profile?.lastName ||
-                      jobValue?.homeOwnerObj?.[0]?.profile?.lastName ||
-                      'N/A'
-                    }
+                    disabled={false}
+                    name={'homeOwnerLastName'}
+                    value={FormikValues.homeOwnerLastName}
+                    handleChange={formikChange}
                   />
                 </Grid>
-                <Grid justify={'space-between'} xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>
+                <Grid item xs>
+                  <Typography
+                    variant={'caption'}
+                    className={'previewCaption'}
+                  >
                     Email
                   </Typography>
-                  <BCInput
-                    disabled={true}
-                    name={'customerEmail'}
-                    value={
-                      jobValue?.ticket?.homeOwner?.info?.email ||
-                      jobValue?.homeOwnerObj?.[0]?.info?.email ||
-                      'N/A'
-                    }
+                  <BCEmailValidateInput
+                    id={'email'}
+                    inputData={formDataEmail}
+                    disabled={false}
+                    label={''}
+                    onChange={(newEmail: FormDataModel) => setFormDataEmail(newEmail)}
+                    size={'small'}
+                    variant={'outlined'}
+                    required={false}
+                    referenceEmail=" "
                   />
                 </Grid>
-                <Grid justify={'space-between'} xs>
-                  <Typography variant={'caption'} className={'previewCaption'}>
+                <Grid item xs>
+                  <Typography
+                    variant={'caption'}
+                    className={'previewCaption'}
+                  >
                     Phone
                   </Typography>
-                  <BCInput
-                    disabled={true}
-                    name={'customerPhone'}
-                    value={
-                      jobValue?.ticket?.homeOwner?.contact?.phone ||
-                      jobValue?.homeOwnerObj?.[0]?.contact?.phone ||
-                      'N/A'
-                    }
+                  <BCPhoneNumberInput
+                    changeData={(data: FormDataModel) => setFormDataPhone(data)}
+                    id={'phone_number'}
+                    inputData={formDataPhone}
+                    label={''}
+                    size={'small'}
                   />
                 </Grid>
               </Grid>
