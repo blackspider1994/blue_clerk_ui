@@ -57,6 +57,11 @@ const PermissionsReducer: Reducer<any> = (
         loading: false,
         rolesAndPermissions: initialRolesAndPermissions
       }
+    case UserPermissionsActionType.UPDATE_SUCCESS:
+      return {
+        ...state,
+        loading: false
+      }
     default:
   }
   return state;

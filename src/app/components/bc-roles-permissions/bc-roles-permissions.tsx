@@ -3,7 +3,7 @@ import { CSButton } from 'helpers/custom';
 import axios from 'axios';
 import styles from './bc-roles-permissions.style';
 import { useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Accordion,
   AccordionDetails,
@@ -20,13 +20,15 @@ import React, { FC, useEffect, useState } from 'react';
 import { permissionDescriptions } from './rolesAndPermissions';
 import { RolesAndPermissions } from 'actions/permissions/permissions.types';
 import { initialRolesAndPermissions } from 'reducers/permissions.reducer';
+import { updateUserPermissions } from 'api/permissions.api';
+import { updateUserPermissionsAction } from 'actions/permissions/permissions.action';
 
 
 interface BcRolesPermissionsProps extends WithStyles<typeof styles> {}
 
 const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
   const { employeeDetails, employeePermissions } = useSelector((state: any) => state.employees);
-
+  const dispatch = useDispatch();
   const [roles, setRoles] = useState<RolesAndPermissions>(initialRolesAndPermissions);
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({ });
   const [isEditing, setIsEditing] = useState(false);
@@ -76,7 +78,7 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
   };
 
   const handleSavePermission = async () => {
-    await axios.post(`${process.env.REACT_APP_LAMBDA_URL}/permissions/${employeeDetails._id}`, { 'permission': roles });
+    dispatch(updateUserPermissionsAction(employeeDetails._id, roles));
 
     setIsEditing(false);
   };
