@@ -58,7 +58,6 @@ function InvoicingListListing({ classes, theme }: any) {
   );
   // const [selectionRange, setSelectionRange] = useState<Range | null>(null);
 
-  let [checkBouncedEmailsFlag, setCheckBouncedEmailsFlag] = useState(false);
   const [fetchInvoices, setFetchInvoices] = useState(false);
   const [lastNextCursor, setLastNextCursor] = useState<string | undefined>(location?.state?.option?.lastNextCursor)
   const [lastPrevCursor, setLastPrevCursor] = useState<string | undefined>(location?.state?.option?.lastPrevCursor)
@@ -218,6 +217,10 @@ function InvoicingListListing({ classes, theme }: any) {
   ];
 
   useEffect(() => {
+    advanceFilterInvoiceData.checkBouncedEmails = false
+  }, [])
+
+  useEffect(() => {
     // dispatch(getInvoicingList());
     // dispatch(loadingInvoicingList());
     dispatch(getAllInvoicesAPI(undefined, undefined, undefined, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params));
@@ -356,10 +359,7 @@ function InvoicingListListing({ classes, theme }: any) {
   }
 
   const handleBouncedEmail = () => {
-    checkBouncedEmailsFlag = !checkBouncedEmailsFlag
-    setCheckBouncedEmailsFlag(checkBouncedEmailsFlag);
-
-    advanceFilterInvoiceData.checkBouncedEmails = checkBouncedEmailsFlag ?? null
+    advanceFilterInvoiceData.checkBouncedEmails = !advanceFilterInvoiceData.checkBouncedEmails
     
     dispatch(getAllInvoicesAPI(currentPageSize, 0, keyword, advanceFilterInvoiceData, undefined, undefined, undefined, undefined, undefined, undefined, currentDivision.params))
   }
@@ -431,7 +431,7 @@ function InvoicingListListing({ classes, theme }: any) {
         <Checkbox 
           color="primary"
           className={classes.checkbox}
-          checked={checkBouncedEmailsFlag}
+          checked={advanceFilterInvoiceData.checkBouncedEmails}
           onChange={props.onChange}
         />
         BOUNCED EMAILS
