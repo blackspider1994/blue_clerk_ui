@@ -19,6 +19,18 @@ const filterSidebarLinksByPermission = (user:User, links: any) => {
     linksToRemove.push('company');
   }
 
+  if (!ability.can('add', 'Vendor') && !isAdmin) {
+    linksToRemove.push('vendors');
+  }
+
+  if (!ability.can('manage', 'Items') && !isAdmin) {
+    linksToRemove.push('services_products');
+  }
+
+  if (!ability.can('manage', 'Invoicing') && !isAdmin) {
+    linksToRemove.push('invoicing');
+  }
+
   if (!ability.can('manage', 'Tickets') && !isAdmin) {
     linksToRemove.push('tickets');
   }
@@ -44,11 +56,8 @@ const filterSidebarLinksByPermission = (user:User, links: any) => {
     linksToRemove.push('brands');
     linksToRemove.push('equipment_type');
     linksToRemove.push('groups');
-    linksToRemove.push('services_products');
-    linksToRemove.push('invoicing');
     linksToRemove.push('report_number');
     linksToRemove.push('roles');
-    linksToRemove.push('vendors');
     linksToRemove.push('integrations');
     linksToRemove.push('data');
   }

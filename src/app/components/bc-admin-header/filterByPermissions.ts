@@ -27,6 +27,10 @@ export default function (user: User, links: NAVDATA[]) {
     !ability.can('manage', 'Employee') &&
     !ability.can('manage', 'Company') &&
     !ability.can('edit', 'BillingInformation') && 
+    !ability.can('add', 'Vendor') && 
+    !ability.can('manage', 'Items') && 
+    !ability.can('manage', 'Company') && 
+    !ability.can('manage', 'Employee') && 
     !isAdmin
   ) {
     linksToRemove.push('admin')

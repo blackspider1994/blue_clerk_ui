@@ -100,7 +100,7 @@ const BcRolesPermissions: FC<BcRolesPermissionsProps> = ({ classes }) => {
         }
       </div>
       <div className={classes.contentContainer}>
-        {Object.keys(roles).filter(roleKey => permissionDescriptions[roleKey])
+        {roles && Object.keys(roles).filter(roleKey => permissionDescriptions[roleKey])
           .map(roleKey => {
             const permissions = roles[roleKey];
             const roleText = permissionDescriptions[roleKey];

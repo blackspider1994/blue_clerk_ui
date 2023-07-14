@@ -7,7 +7,7 @@ import BCTableContainer from '../../../components/bc-table-container/bc-table-co
 import EmployeeProfile from './employee-profile';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getEmployeeDetailAction, getEmployees, loadingEmployees, loadingSingleEmployee } from 'actions/employee/employee.action';
+import { getEmployeeDetailAction, getEmployeePermissionsAction, getEmployees, loadingEmployees, loadingSingleEmployee } from 'actions/employee/employee.action';
 import { EmployeeRoles, UserProfile } from 'actions/employee/employee.types';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CSButton } from "../../../../helpers/custom";
@@ -90,10 +90,6 @@ function AdminEmployeesPage({ classes, children }: Props) {
 
 
     localStorage.setItem('nestedRouteKey', `${displayName}`);
-
-    dispatch(loadingSingleEmployee);
-    dispatch(getEmployeeDetailAction(employeeId));
-
 
     history.push({
       'pathname': `/main/admin/employees/${displayName}`,

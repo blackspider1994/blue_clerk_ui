@@ -68,7 +68,11 @@ function EmployeeProfilePage({ classes }: any) {
   useEffect(() => {
     if (employeeDetails === undefined) {
       const obj: any = location.state;
-      const { employeeId } = obj;
+      const employeeId = obj?.employeeId;
+
+      if (!employeeId) {
+        history.push('/main/admin/employees');
+      }
 
       dispatch(loadingSingleEmployee());
       dispatch(getEmployeeDetailAction(employeeId));
@@ -117,7 +121,7 @@ function EmployeeProfilePage({ classes }: any) {
   };
 
   const initialValuesEmail = {
-    'employeeId': location.state.employeeId,
+    'employeeId': location.state?.employeeId,
     'emailPreferences': employeeDetails?.emailPreferences.preferences,
     'emailTime': employeeDetails?.emailPreferences.preferences === 1 ? employeeDetails?.emailPreferences.time : null
   };
