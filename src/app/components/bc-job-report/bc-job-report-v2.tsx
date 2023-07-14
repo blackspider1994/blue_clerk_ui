@@ -335,7 +335,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                             </p>
                           </div>
                         </Grid>
-                        {job.customer?.contact?.phone && <Grid item xs={3}>
+                        {job.customer?.contact?.phone && <Grid item xs={2}>
                           <div className={classes.addMargin}>
                             <p className={classes.attributeKey}>
                               {'Phone Number'}
@@ -345,7 +345,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                             </p>
                           </div>
                         </Grid>}
-                        {job.customer?.info?.email && <Grid item xs={3}>
+                        {job.customer?.info?.email && <Grid item xs={4}>
                           <div className={classes.addMargin}>
                             <p className={classes.attributeKey}>
                               {'Email'}
@@ -402,7 +402,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                             {'House status'}
                           </p>
                           <p className={job.isHomeOccupied ? classes.occupiedHouseText : classes.grayBoldTextM_0}>
-                            {job.isHomeOccupied ? 'Occupied' : 'Not occuppied'}
+                            {job.isHomeOccupied ? 'Occupied' : 'Not occupied'}
                           </p>
                         </div>
                       </Grid>
