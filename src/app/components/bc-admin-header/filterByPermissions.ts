@@ -23,14 +23,7 @@ export default function (user: User, rolesAndPermissions: RolesAndPermissions, l
   if (!rolesAndPermissions?.accounting?.reporting && !isAdmin) {
     linksToRemove.push('reports');
   }
-  console.log(!rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions ,
-    !rolesAndPermissions?.admin?.manageCompanySettings ,
-    !rolesAndPermissions?.superAdmin?.editBillingInformation , 
-    !rolesAndPermissions?.admin?.addVendors , 
-    !rolesAndPermissions?.admin?.manageItems , 
-    !rolesAndPermissions?.admin?.manageCompanySettings , 
-    !rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions , 
-    !isAdmin)
+
   if (
     !rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions &&
     !rolesAndPermissions?.admin?.manageCompanySettings &&

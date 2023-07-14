@@ -158,7 +158,7 @@ function AdminServiceAndProductsPage({ classes }: Props) {
       </>
     ) : (
       <>
-        <Can I={'manage'} a={'Company'}>
+        <Can I={'manage'} a={'Items'}>
           {/* <CSButton
             disabled={updating}
             disableElevation
