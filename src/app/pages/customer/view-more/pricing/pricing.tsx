@@ -12,6 +12,7 @@ import TierPricing from './pricing-types/tier-pricing';
 import CustomPricing from './pricing-types/custom-pricing';
 import { useDispatch } from 'react-redux';
 import BCCircularLoader from 'app/components/bc-circular-loader/bc-circular-loader';
+import PORequired from './pricing-types/po-required';
 
 
 interface PricingProps {
@@ -31,6 +32,12 @@ const PricingTypes = [
     'icon': SignalCellularAltIcon,
     'subtitle': 'Assign a Tier Pricing level',
     'title': 'Tier Pricing'
+  },
+  {
+    'color': orange,
+    'icon': SignalCellularAltIcon,
+    'subtitle': 'Set Customer Purchase Order Required',
+    'title': 'Purchase Order Required'
   },
 /*  {
     'color': yellow,
@@ -85,6 +92,11 @@ export default function Pricing({ customer }:PricingProps) {
           dispatch={dispatch}
           header={PricingTypes[active]}
         />}*/}
+        {active === 1 && <PORequired
+          customer={customer}
+          dispatch={dispatch}
+          header={PricingTypes[active]}
+        />}
       </Card>
     </PricingContainer>
   );

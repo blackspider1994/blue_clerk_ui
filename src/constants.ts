@@ -142,6 +142,7 @@ export const modalTypes = {
   'SELECT_DIVISION_MODAL': 'select-division-modal',
   'BILLING_ADDRESS_WARNING_MODAL': 'billing-address-warning-modal',
   'EDIT_JOB_COSTING_MODAL': 'edit-job-costing-modal',
+  'EMAIL_PO_REQUEST_MODAL': 'email-po-request-modal',
   'TICKET_DETAILS_MODAL': 'ticket-details-modal',
 };
 
