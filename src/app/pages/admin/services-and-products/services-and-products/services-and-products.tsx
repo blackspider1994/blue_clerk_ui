@@ -2,7 +2,7 @@ import BCTableContainer from 'app/components/bc-table-container/bc-table-contain
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import styles from './services-and-products.styles';
-import { Button, Fab, Grid, withStyles, Tooltip } from '@material-ui/core';
+import { Button, Fab, Grid, Tooltip, withStyles } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'reducers';
@@ -24,6 +24,7 @@ import {
 import BCQbSyncStatus from '../../../../components/bc-qb-sync-status/bc-qb-sync-status';
 import { CSButton, CSButtonSmall } from '../../../../../helpers/custom';
 import { stringSortCaseInsensitive } from '../../../../../helpers/sort';
+import { Can, ability } from 'app/config/Can';
 
 interface Props {
   classes: any;
@@ -157,29 +158,31 @@ function AdminServiceAndProductsPage({ classes }: Props) {
       </>
     ) : (
       <>
-        {/* <CSButton
-          disabled={updating}
-          disableElevation
-          onClick={() => setEditMode(true)}
-          size={'small'}
-          style={{ 'backgroundColor': PRIMARY_GREEN,
-            'color': 'white' }}
-          variant={'contained'}>
-          {'Edit Prices'}
-        </CSButton> */}
-        <CSButton
-          color={'primary'}
-          disabled={updating}
-          disableElevation
-          onClick={renderAdd}
-          size={'small'}
-          style={{
-            color: 'white',
-          }}
-          variant={'contained'}
-        >
-          {'New Item'}
-        </CSButton>
+        <Can I={'manage'} a={'Items'}>
+          {/* <CSButton
+            disabled={updating}
+            disableElevation
+            onClick={() => setEditMode(true)}
+            size={'small'}
+            style={{ 'backgroundColor': PRIMARY_GREEN,
+              'color': 'white' }}
+            variant={'contained'}>
+            {'Edit Prices'}
+          </CSButton> */}
+          <CSButton
+            color={'primary'}
+            disabled={updating}
+            disableElevation
+            onClick={renderAdd}
+            size={'small'}
+            style={{
+              color: 'white',
+            }}
+            variant={'contained'}
+          >
+            {'New Item'}
+          </CSButton>
+        </Can>
       </>
     );
   }
@@ -221,6 +224,8 @@ function AdminServiceAndProductsPage({ classes }: Props) {
             name: '',
             description: '',
             isFixed: true,
+            itemType: "Service",
+            productCost: '',
             isJobType: true,
             tax: 0,
             tiers: activeTiers.reduce(
@@ -388,16 +393,20 @@ function AdminServiceAndProductsPage({ classes }: Props) {
       let constructedColumns: any = [
         ...columns,
         ...chargeColumn,
-        ...actions,
-        ...dbSync,
+        ...ability.can('manage', 'Company')
+          ? actions
+          : [],
+        ...dbSync
       ];
 
       if (tiers.length > 0) {
         constructedColumns = [
           ...columns,
           ...tierColumns,
-          ...actions,
-          ...dbSync,
+          ...ability.can('manage', 'Company')
+            ? actions
+            : [],
+          ...dbSync
         ];
       }
       setColumns(constructedColumns);

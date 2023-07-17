@@ -1,5 +1,6 @@
 import request from 'utils/http.service';
 import { Auth, AuthInfo, ChangePassword } from 'app/models/user';
+import axios from 'axios';
 
 const login = async (param: Auth) => {
   let loginData: AuthInfo = {
@@ -11,8 +12,12 @@ const login = async (param: Auth) => {
   try {
     const response: any = await request('/login', 'POST', param, false);
     loginData = response.data;
-    // const responseCustomerAPI: any = await request('/login', 'POST', param, false, undefined, undefined, true);
-    // loginData = {...loginData, tokenCustomerAPI: responseCustomerAPI.data.token}
+
+
+    /*
+     * Const responseCustomerAPI: any = await request('/login', 'POST', param, false, undefined, undefined, true);
+     * loginData = {...loginData, tokenCustomerAPI: responseCustomerAPI.data.token}
+     */
     loginData.tokenCustomerAPI = response.data.token;
   } catch (err) {
     loginData = err.data;

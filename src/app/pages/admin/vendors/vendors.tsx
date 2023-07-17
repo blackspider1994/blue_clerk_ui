@@ -34,6 +34,7 @@ import BCItemsFilter from '../../../components/bc-items-filter/bc-items-filter';
 import BCMenuButton from '../../../components/bc-menu-more';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import { getContractors } from 'actions/payroll/payroll.action';
+import { Can } from 'app/config/Can';
 
 interface StatusTypes {
   status: number;
@@ -241,16 +242,14 @@ function AdminVendorsPage({ classes }: any) {
     },
     {
       Cell({ row }: any) {
-        return renderCommission(row.original);
-      },
-      Header: (
-        <div style={{ display: 'inline' }}>
-          <span>Type of Pay</span>
-        </div>
-      ),
-      accessor: 'commission',
-      className: 'font-bold',
-      sortable: true,
+        if (row.original?.contractor?.admin?.accountType == 4) {
+          //Vendor Type is Contractor
+          return ""  
+        }else{
+          //Vendor Type is Company
+          return <span> {row.original?.contractor?.info?.companyName || row.original?.contractorEmail}</span>;
+        }
+      }
     },
     {
       Header: 'Contact Name',
@@ -434,16 +433,19 @@ function AdminVendorsPage({ classes }: any) {
             ]}
           />
           <div className={classes.addButtonArea}>
-            {curTab === 0 ? (
-              <CSButton
-                aria-label={'new-job'}
-                color={'primary'}
-                onClick={() => openVendorModal()}
-                variant={'contained'}
-              >
-                {'Invite Vendor'}
-              </CSButton>
-            ) : null}
+            {
+              curTab === 0
+                ? <Can I={'add'} a={'Vendor'}>
+                  <CSButton
+                    aria-label={'new-job'}
+                    color={'primary'}
+                    onClick={() => openVendorModal()}
+                    variant={'contained'}>
+                    {'Invite Vendor'}
+                  </CSButton>
+                </Can>
+                : null
+            }
           </div>
           <SwipeableViews index={curTab}>
             <div

@@ -5,7 +5,7 @@ export const getHomeOwnerAction = (address: string, subdivision : string) : any 
       if (address !== '') {
         const homeOwner: any = await callGetHomeownerByAddress(address, subdivision);
 
-        if (homeOwner.status === 0) {
+        if (!homeOwner || homeOwner?.status === 0) {
           dispatch({ type: HomeOwnerType.FAILED, payload: homeOwner.message});
         } else {
           dispatch(setHomeOwner(homeOwner));

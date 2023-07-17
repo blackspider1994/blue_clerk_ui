@@ -289,7 +289,6 @@ function BCViewJobModal({
       SetIsSubmitting(false);
     })
   }
-
   const openEditJobCostingModal = () => {
     dispatch(
       setModalDataAction({

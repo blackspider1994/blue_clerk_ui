@@ -10,7 +10,7 @@ import { contactsReducer as contacts } from './contacts.reducer';
 import { ImageReducer as image } from './image.reducer';
 import { EmployeesReducer as employees } from './employee.reducer';
 import { jobReducer as jobState } from './jobs.reducer';
-import {jobRequestsReducer as jobRequests} from './job-request.reducer'
+import { jobRequestsReducer as jobRequests } from './job-request.reducer';
 import { PayrollReducer as payroll } from './payroll.reducer';
 import { CalendarReducer as calendar } from './calendar.reducer';
 import { ChatReducer as chat } from './chat.reducer';
@@ -37,14 +37,10 @@ import {
   InvoiceDetailReducer as invoiceDetail,
   InvoicingListReducer as invoiceList,
   InvoicingTodoReducer as invoiceTodos,
-  InvoicingPurchaseOrderReducer as purchaseOrder
+  InvoicingPurchaseOrderReducer as purchaseOrder,
 } from './invoicing.reducer';
-import {
-  InvoicesForBulkPaymentsState
-} from 'actions/invoicing/invoices-for-bulk-payments/invoices-for-bulk-payments.types';
-import {
-  InvoicesForBulkPaymentsListReducer as invoicesForBulkPayments,
-} from './invoices-for-bulk-payments.reducer'
+import { InvoicesForBulkPaymentsState } from 'actions/invoicing/invoices-for-bulk-payments/invoices-for-bulk-payments.types';
+import { InvoicesForBulkPaymentsListReducer as invoicesForBulkPayments } from './invoices-for-bulk-payments.reducer';
 import { PaymentsListReducer as paymentList } from './payments.reducer';
 import { PaymentsState } from 'actions/invoicing/payments/payments.types';
 import { BrandsReducer as brands } from './brands.reducer';
@@ -59,7 +55,11 @@ import { NotificationsReducer as notifications } from './notifications.reducer';
 import { NotificationState } from './notifications.types';
 import { UserModel } from 'app/models/user';
 import { VendorsState } from 'actions/vendor/vendor.types';
-import { QuickbooksState, quickbooksReducer as quickbooks } from './quickbooks.reducer';
+import { PermissionsState } from 'actions/permissions/permissions.types';
+import {
+  QuickbooksState,
+  quickbooksReducer as quickbooks,
+} from './quickbooks.reducer';
 import { mapState, mapReducer as map } from './map.reducer';
 
 import { InvoiceItemsState
@@ -67,27 +67,28 @@ import { InvoiceItemsState
   , InvoiceItemsTierList as invoiceItemsTiers
   , InvoiceJobCostingList as InvoiceJobCosting} from './items.reducer';
 import { EmailState, EmailReducer as email } from './email.reducer';
-import {removeQBAuthStateLocalStorage} from "../utils/local-storage.service";
-import {PayrollState} from "../actions/payroll/payroll.types";
-import {CalendarState} from "../actions/calendar/bc-calendar.types";
-import {ChatState} from "../actions/chat/bc-chat.types";
-import { DiscountItemsReducer as discountItems} from './discount.reducer'
+import { removeQBAuthStateLocalStorage } from '../utils/local-storage.service';
+import { PayrollState } from '../actions/payroll/payroll.types';
+import { CalendarState } from '../actions/calendar/bc-calendar.types';
+import { ChatState } from '../actions/chat/bc-chat.types';
+import { DiscountItemsReducer as discountItems } from './discount.reducer';
 import { DiscountState } from 'actions/discount/discount.types';
-import { reportReducer as reportState } from './report.reducer'
-import { AdvanceFilterInvoiceReducer as advanceFilterInvoiceState } from './advance-filter.reducer'
-import { MapTechnicianFilterReducer as mapTechnicianFilterState } from './map-technician-filter.reducer'
+import { reportReducer as reportState } from './report.reducer';
+import { AdvanceFilterInvoiceReducer as advanceFilterInvoiceState } from './advance-filter.reducer';
+import { MapTechnicianFilterReducer as mapTechnicianFilterState } from './map-technician-filter.reducer';
 import { MapTechnicianJobsReducer as mapTechnicianJobsState } from './map-technician-jobs.reducer';
 import { WorkTypeReducer as workTypes } from './work-type.reducer';
 import { DivisionReducer as divisions } from './division.reducer';
-import { FilterDivisionReducer as currentDivision } from "./filter-division.reducer";
+import { FilterDivisionReducer as currentDivision } from './filter-division.reducer';
 import homeOwner from './home-owner.reducer';
+import permissions from './permissions.reducer';
 
 export interface ReducerParamsInterface {
   payload: any;
   type: string;
 }
 export interface RootState {
-  auth: UserModel
+  auth: UserModel;
   jobState: JobsSate;
   snackbarState?: SnackbarState;
   customersState: CustomersState;
@@ -105,8 +106,8 @@ export interface RootState {
   discountItems: DiscountState;
   paymentList: PaymentsState;
   invoicesForBulkPayments: InvoicesForBulkPaymentsState;
+  permissions: PermissionsState;
 }
-
 
 const appReducer = combineReducers({
   auth,
@@ -144,7 +145,7 @@ const appReducer = combineReducers({
   profile,
   purchaseOrder,
   purchasedTags,
-  'routeData': routeReducer,
+  routeData: routeReducer,
   searchTerm,
   quickbooks,
   serviceTicket,
@@ -169,7 +170,8 @@ const appReducer = combineReducers({
   workTypes,
   divisions,
   currentDivision,
-  homeOwner
+  homeOwner,
+  permissions,
 });
 
 const rootReducer = (state: any, action: any) => {
@@ -178,6 +180,7 @@ const rootReducer = (state: any, action: any) => {
     // removeQBAuthStateLocalStorage();
   }
   return appReducer(state, action);
-}
+};
 
 export default rootReducer;
+

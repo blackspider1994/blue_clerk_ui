@@ -225,8 +225,8 @@ export const PageContainer = styled.div`
   flex-direction: column;
   flex: 1 1 100%;
   width: 100%;
-  padding-left: 65px;
-  padding-right: 65px;
+  padding-left: 25px;
+  padding-right: 25px;
   background-color: ${CONSTANTS.PRIMARY_WHITE};
   margin: 45px 20px 20px 0px;
   border-radius: 25px;

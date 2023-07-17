@@ -1,21 +1,36 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import styles from './add-new-employee.style';
-import { Card, CardActionArea, Checkbox, Fab, FormControlLabel, Grid, IconButton, TextField, withStyles } from "@material-ui/core";
+import {
+  Checkbox,
+  Fab,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  TextField,
+  withStyles,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Typography,
+} from '@material-ui/core';
+import { ArrowDropDown } from '@material-ui/icons';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import validator from 'validator';
 import { UserProfile } from 'actions/employee/employee.types';
-import { Roles as RoleEnums } from './add-new-employee';
-import { useDispatch } from 'react-redux';
-import { createTechnician, createAdministrator, createManager, createOfficeAdmin } from 'actions/employee/employee.action';
-import { useLocation, useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { createOfficeAdmin } from 'actions/employee/employee.action';
+import { useLocation, useHistory } from 'react-router-dom';
 import { info, error, success } from 'actions/snackbar/snackbar.action';
+import { permissionDescriptions } from 'app/components/bc-roles-permissions/rolesAndPermissions';
+import axios from 'axios';
+import { RolesAndPermissions } from 'actions/permissions/permissions.types';
 
 export enum Roles {
   Technician = 'Technician',
   Administrator = 'Administrator',
   Manager = 'Manager',
-  OfficeAdmin = 'OfficeAdmin'
+  OfficeAdmin = 'OfficeAdmin',
 }
 
 interface Props {
@@ -24,85 +39,65 @@ interface Props {
 }
 
 function AdminAddNewEmployeePage({ classes, children }: Props) {
-  const [step, setStep] = useState(1);
-
   const dispatch = useDispatch();
-
+  const { rolesAndPermissions } = useSelector((state: any) => state.permissions)
+  const [roles, setRoles] = useState<RolesAndPermissions>(rolesAndPermissions);
+  const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
   const location = useLocation<any>();
   const history = useHistory();
-
 
   const renderGoBack = (location: any) => {
     const baseObj = location;
 
-    const stateObj = baseObj && baseObj['currentPage'] !== undefined ? {
-      prevPage: baseObj['currentPage']
-    } : {}
+    const stateObj =
+      baseObj && baseObj['currentPage'] !== undefined
+        ? {
+            prevPage: baseObj['currentPage'],
+          }
+        : {};
 
     history.push({
       pathname: `/main/admin/employees`,
-      state: stateObj
+      state: stateObj,
     });
+  };
 
-  }
-
-  const submit = async (firstName: string, lastName: string, email: string, phoneNumber: string, role: string, allLocation: boolean) => {
+  const submit = async (
+    firstName: string,
+    lastName: string,
+    email: string,
+    phoneNumber: string,
+    allLocation: boolean
+  ) => {
     const data: UserProfile = {
       firstName,
       lastName,
       email,
       phone: phoneNumber,
-      canAccessAllLocations: allLocation
+      canAccessAllLocations: allLocation,
     };
 
     let response: any;
-
-    switch (role) {
-      case RoleEnums.Technician:
-        response = await dispatch(createTechnician(data));
-        if (response.message === "Maximum No. of technicians already added please buy more subscription to add more.") {
-          dispatch(info(response.message));
-        } else if (response.message === "Email address already registered. Please try with some other email address") {
-          dispatch(info(response.message))
-        } else if (response.status) {
-          await renderGoBack(location.state)
-          dispatch(success("Employee created successfully."));
-        }
-        break;
-      case RoleEnums.Administrator:
-        try {
-          response = await dispatch(createAdministrator(data));
-          if (response.message !== "Employee created successfully.") {
-            dispatch(info(response.message));
-          } else if (response.status) {
-            await renderGoBack(location.state)
-            dispatch(success("Employee created successfully."));
-          }
-        } catch (err) {
-          dispatch(error('Something went wrong, please try other role'));
-        }
-        break;
-      case RoleEnums.Manager:
-        response = await dispatch(createManager(data));
-        if (response.status) {
-          await renderGoBack(location.state)
-          dispatch(success("Employee created successfully."));
-        } else if (response.message === "Email address already registered. Please try with some other email address") {
-          dispatch(info(response.message))
-        }
-        break;
-      case RoleEnums.OfficeAdmin:
-        response = await dispatch(createOfficeAdmin(data));
-        if (response.status) {
-          await renderGoBack(location.state)
-          dispatch(success("Employee created successfully."));
-        } else if (response.message === "Email address already registered. Please try with some other email address") {
-          dispatch(info(response.message))
-        }
-        break;
-      default:
+    response = await dispatch(createOfficeAdmin(data));
+    
+    if (response.employee?._id) {
+      try {
+        await axios.post(`${process.env.REACT_APP_LAMBDA_URL}/permissions/${response.employee._id}`, { 'permission': roles });
+      } catch (err) {
+        dispatch(info('Something went wrong.'));
+      }
     }
-  }
+
+    if (response.status) {
+      await renderGoBack(location.state);
+      dispatch(success('Employee created successfully.'));
+    } else if (
+      response.message ===
+      'Email address already registered. Please try with some other email address'
+    ) {
+      dispatch(info(response.message));
+    }
+  };
 
   const [firstName, setFirstName] = useState('');
   const [firstNameValid, setFirstNameValid] = useState(true);
@@ -111,7 +106,7 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
     setFirstName(newValue);
     if (newValue === '') setFirstNameValid(false);
     else setFirstNameValid(true);
-  }
+  };
 
   const [lastName, setLastName] = useState('');
   const [lastNameValid, setLastNameValid] = useState(true);
@@ -120,7 +115,7 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
     setLastName(newValue);
     if (newValue === '') setLastNameValid(false);
     else setLastNameValid(true);
-  }
+  };
 
   const [email, setEmail] = useState('');
   const [emailValid, setEmailValid] = useState(true);
@@ -129,58 +124,87 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
     setEmail(newValue);
     if (newValue === '' || !validator.isEmail(newValue)) setEmailValid(false);
     else setEmailValid(true);
-  }
+  };
 
   const [phoneNumber, setPhoneNumber] = useState('');
   const [phoneNumberValid, setPhoneNumberValid] = useState(true);
 
   const phoneNumberChanged = (newValue: string) => {
     setPhoneNumber(newValue);
-    if (newValue === '' || !validator.isMobilePhone(newValue)) setPhoneNumberValid(false);
+    if (newValue === '' || !validator.isMobilePhone(newValue))
+      setPhoneNumberValid(false);
     else setPhoneNumberValid(true);
-  }
-
-  const [role, setRole] = useState('');
+  };
 
   const next = () => {
-    if (!firstNameValid || !lastNameValid || !emailValid || !phoneNumberValid) return;
+    if (!firstNameValid || !lastNameValid || !emailValid || !phoneNumberValid)
+      return;
     if (!firstName || !lastName || !email || !phoneNumber) return;
-    if (step === 1) setStep(2);
     else {
-      if (role === '') return;
-      submit(firstName, lastName, email, phoneNumber, role, showAllLocation);
+      submit(
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        showAllLocation
+      );
     }
-  }
+  };
 
   const [showAllLocation, setShowLocation] = useState<boolean>(false);
   const handleShowAllLocation = (event: any) => {
     setShowLocation(event.target.checked);
-  }
+  };
 
   const prev = () => {
-    if (step === 2) setStep(1);
-    else renderGoBack(location.state);
-  }
+    renderGoBack(location.state);
+  };
 
-  const technicianSelected = () => {
-    setRole(Roles.Technician);
-  }
+  const handleUpdateRoles = (key: string) => {
+    const permissions = roles[key];
+    let value = false;
 
-  const administratorSelected = () => {
-    setRole(Roles.Administrator);
-  }
+    if (Object.values(permissions).some((p) => p)) {
+      // Turn off everything if one sub permission is on
+      value = false;
+    } else {
+      value = true;
+    }
 
-  const managerSelected = () => {
-    setRole(Roles.Manager);
-  }
+    Object.keys(permissions).forEach((p) => {
+      permissions[p] = value;
+    });
 
-  const officeSelected = () => {
-    setRole(Roles.OfficeAdmin);
-  }
+    setRoles((state: RolesAndPermissions) => ({
+      ...state,
+      [key]: permissions,
+    }));
+  };
+
+  const handleUpdatePermissions = (roleKey: string, permissionKey: string) => {
+    const permissions = roles[roleKey];
+    permissions[permissionKey] = !permissions[permissionKey];
+
+    setRoles((state: RolesAndPermissions) => ({
+      ...state,
+      [roleKey]: permissions,
+    }));
+  };
+
+  const getIsRoleActive = (key: string) => {
+    const permissions = roles[key];
+    // If one of the permissions is active, role is active
+    return Object.values(permissions).some((a) => a);
+  };
+
+  const handleExpand = (key: string) => {
+    setExpanded((state) => {
+      return { ...state, [key]: !state[key] };
+    });
+  };
 
   return (
     <>
-
       <div className={classes.pageMainContainer}>
         <div className={classes.pageContainer}>
           <div className={classes.pageContent}>
@@ -188,71 +212,88 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
               <IconButton
                 onClick={prev}
                 className={classes.roundBackground}
-                color={'primary'}>
+                color={'primary'}
+              >
                 <ArrowBackIcon fontSize={'small'} />
               </IconButton>
               <div className={classes.mainPane}>
-                {step === 1 && <div className={classes.infoPane}>
+                <div className={classes.infoPane}>
                   <h2>Add New Employee</h2>
-                  <h4 className={classes.required}><span className={classes.asterisk}>*</span>All fields are required</h4>
-                  <TextField
-                    id={'first-name'}
-                    placeholder={'First Name'}
-                    variant={'outlined'}
-                    error={!firstNameValid}
-                    value={firstName}
-                    onChange={(e) => { firstNameChanged(e.target.value) }}
-                    autoComplete='off'
-                    style={{
-                      width: '85%',
-                      paddingTop: '15px',
-                      paddingBottom: '15px'
-                    }}
-                  />
-                  <TextField
-                    id={'last-name'}
-                    placeholder={'Last Name'}
-                    variant={'outlined'}
-                    error={!lastNameValid}
-                    value={lastName}
-                    onChange={(e) => { lastNameChanged(e.target.value) }}
-                    autoComplete='off'
-                    style={{
-                      width: '85%',
-                      paddingTop: '15px',
-                      paddingBottom: '15px'
-                    }}
-                  />
-                  <TextField
-                    id={'email'}
-                    placeholder={'Email'}
-                    variant={'outlined'}
-                    error={!emailValid}
-                    value={email}
-                    onChange={(e) => { emailChanged(e.target.value) }}
-                    autoComplete='off'
-                    style={{
-                      width: '85%',
-                      paddingTop: '15px',
-                      paddingBottom: '15px'
-                    }}
-                  />
-                  <TextField
-                    id={'phone-number'}
-                    placeholder={'Phone Number'}
-                    variant={'outlined'}
-                    error={!phoneNumberValid}
-                    value={phoneNumber}
-                    onChange={(e) => { phoneNumberChanged(e.target.value) }}
-                    autoComplete='off'
-                    style={{
-                      width: '85%',
-                      paddingTop: '15px',
-                      paddingBottom: '15px'
-                    }}
-                  />
-                  <Grid container item xs>
-                    <FormControlLabel
+                  <h4 className={classes.required}>
+                    <span className={classes.asterisk}>*</span>All fields are
+                    required
+                  </h4>
+                  <Grid container spacing={2}>
+                    <Grid xs={12} md={6}>
+                      <TextField
+                        id={'first-name'}
+                        placeholder={'First Name'}
+                        variant={'outlined'}
+                        error={!firstNameValid}
+                        value={firstName}
+                        onChange={(e) => {
+                          firstNameChanged(e.target.value);
+                        }}
+                        autoComplete="off"
+                        style={{
+                          width: '100%',
+                          padding: '15px 15px 15px 0',
+                        }}
+                      />
+                    </Grid>
+                    <Grid xs={12} md={6}>
+                      <TextField
+                        id={'last-name'}
+                        placeholder={'Last Name'}
+                        variant={'outlined'}
+                        error={!lastNameValid}
+                        value={lastName}
+                        onChange={(e) => {
+                          lastNameChanged(e.target.value);
+                        }}
+                        autoComplete="off"
+                        style={{
+                          width: '100%',
+                          padding: '15px 0 15px 0',
+                        }}
+                      />
+                    </Grid>
+                    <Grid xs={12} md={6}>
+                      <TextField
+                        id={'email'}
+                        placeholder={'Email'}
+                        variant={'outlined'}
+                        error={!emailValid}
+                        value={email}
+                        onChange={(e) => {
+                          emailChanged(e.target.value);
+                        }}
+                        autoComplete="off"
+                        style={{
+                          width: '100%',
+                          padding: '15px 15px 15px 0',
+                        }}
+                      />
+                    </Grid>
+                    <Grid xs={12} md={6}>
+                      <TextField
+                        id={'phone-number'}
+                        placeholder={'Phone Number'}
+                        variant={'outlined'}
+                        error={!phoneNumberValid}
+                        value={phoneNumber}
+                        onChange={(e) => {
+                          phoneNumberChanged(e.target.value);
+                        }}
+                        autoComplete="off"
+                        style={{
+                          width: '100%',
+                          padding: '15px 0 15px 0',
+                        }}
+                      />
+                    </Grid>
+                    <Grid container item xs>
+                      <FormControlLabel
                         control={
                           <Checkbox
                             color={'primary'}
@@ -261,50 +302,103 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
                             name="ShowAllLocation"
                           />
                         }
-                        label={"Access All Locations"}
+                        label={'Access All Locations'}
                       />
+                    </Grid>
+                    <div className={classes.contentContainer}>
+                      {Object.keys(roles)
+                        .filter((roleKey) => permissionDescriptions[roleKey])
+                        .map((roleKey) => {
+                          const permissions = roles[roleKey];
+                          const roleText = permissionDescriptions[roleKey];
+                          let permissionKeys: string[] = [];
+
+                          if (permissions) {
+                            permissionKeys = Object.keys(permissions);
+                          }
+
+                          return (
+                            <Accordion
+                              expanded={Boolean(expanded[roleKey])}
+                              className={classes.card}
+                              style={{
+                                borderTopLeftRadius: '10px',
+                                borderTopRightRadius: '10px',
+                              }}
+                            >
+                              <AccordionSummary
+                                className={classes.accordionSummary}
+                                onClick={() => handleExpand(roleKey)}
+                                expandIcon={
+                                  <ArrowDropDown
+                                    style={{ cursor: 'pointer' }}
+                                  />
+                                }
+                              >
+                                <FormControlLabel
+                                  classes={{ label: classes.checkboxLabel }}
+                                  control={
+                                    <Checkbox
+                                      color={'primary'}
+                                      checked={getIsRoleActive(roleKey)}
+                                      onChange={() => {
+                                        handleUpdateRoles(roleKey);
+                                      }}
+                                      name={roleKey}
+                                    />
+                                  }
+                                  label={roleText}
+                                />
+                              </AccordionSummary>
+                              <AccordionDetails className={classes.permissions}>
+                                {permissionKeys
+                                  .filter((key) => permissionDescriptions[key])
+                                  .map((key) => {
+                                    const permissionValue = permissions[key];
+                                    const permissionText =
+                                      permissionDescriptions[key];
+                                    return (
+                                      <FormControlLabel
+                                        classes={{
+                                          label: classes.checkboxLabel,
+                                        }}
+                                        control={
+                                          <Checkbox
+                                            color={'primary'}
+                                            checked={permissionValue}
+                                            onChange={() =>
+                                              handleUpdatePermissions(
+                                                roleKey,
+                                                key
+                                              )
+                                            }
+                                            name={permissionText}
+                                          />
+                                        }
+                                        label={permissionText}
+                                      />
+                                    );
+                                  })}
+                              </AccordionDetails>
+                            </Accordion>
+                          );
+                        })}
+                    </div>
                   </Grid>
-                </div>}
-                {step === 2 && <div className={classes.infoPane}>
-                  <h2>Roles</h2>
-                  <h4 className={classes.required}>Choose level of role for new user to view schedule and mark work complete</h4>
-                  <div className={classes.rolesRow}>
-                    <Card className={classes.card} style={{ backgroundColor: role !== Roles.Technician ? 'white' : '#00aaff' }}>
-                      <CardActionArea className={classes.cardActionArea} onClick={() => technicianSelected()}>
-                        Technician
-                </CardActionArea>
-                    </Card>
-                    <Card className={classes.card} style={{ backgroundColor: role !== Roles.Administrator ? 'white' : '#00aaff' }}>
-                      <CardActionArea className={classes.cardActionArea} onClick={() => administratorSelected()}>
-                        Administrator
-                </CardActionArea>
-                    </Card>
-                  </div>
-                  <div className={classes.rolesRow}>
-                    <Card className={classes.card} style={{ backgroundColor: role !== Roles.Manager ? 'white' : '#00aaff' }}>
-                      <CardActionArea className={classes.cardActionArea} onClick={() => managerSelected()}>
-                        Manager
-                </CardActionArea>
-                    </Card>
-                    <Card className={classes.card} style={{ backgroundColor: role !== Roles.OfficeAdmin ? 'white' : '#00aaff' }}>
-                      <CardActionArea className={classes.cardActionArea} onClick={() => officeSelected()}>
-                        Office/Dispatch
-                </CardActionArea>
-                    </Card>
-                  </div>
-                </div>}
+                </div>
                 <div className={classes.buttonPane}>
                   <Fab
                     aria-label={'new-ticket'}
                     classes={{
-                      'root': classes.fabRoot
+                      root: classes.fabRoot,
                     }}
                     color={'primary'}
                     style={{
                       width: '15%',
                     }}
                     onClick={next}
-                    variant={'extended'}>
+                    variant={'extended'}
+                  >
                     {'Save'}
                   </Fab>
                 </div>
@@ -317,26 +411,4 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
   );
 }
 
-const MainContainer = styled.div`
-  display: flex;
-  flex: 1 1 100%;
-  width: 100%;
-  overflow-x: hidden;
-`;
-
-const PageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 100%;
-  padding: 30px;
-  width: 100%;
-  padding-left: 65px;
-  padding-right: 65px;
-  margin: 0 auto;
-`;
-
-
-export default withStyles(
-  styles,
-  { 'withTheme': true }
-)(AdminAddNewEmployeePage);
+export default withStyles(styles, { withTheme: true })(AdminAddNewEmployeePage);

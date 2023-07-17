@@ -335,7 +335,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                             </p>
                           </div>
                         </Grid>
-                        {job.customer?.contact?.phone && <Grid item xs={3}>
+                        {job.customer?.contact?.phone && <Grid item xs={2}>
                           <div className={classes.addMargin}>
                             <p className={classes.attributeKey}>
                               {'Phone Number'}
@@ -345,7 +345,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                             </p>
                           </div>
                         </Grid>}
-                        {job.customer?.info?.email && <Grid item xs={3}>
+                        {job.customer?.info?.email && <Grid item xs={4}>
                           <div className={classes.addMargin}>
                             <p className={classes.attributeKey}>
                               {'Email'}
@@ -402,7 +402,7 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                             {'House status'}
                           </p>
                           <p className={job.isHomeOccupied ? classes.occupiedHouseText : classes.grayBoldTextM_0}>
-                            {job.isHomeOccupied ? 'Occupied' : 'Not occuppied'}
+                            {job.isHomeOccupied ? 'Occupied' : 'Not occupied'}
                           </p>
                         </div>
                       </Grid>
@@ -497,9 +497,12 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                               <p className={classes.attributeKey}>
                                 {'Technician(s) Name(s)'}
                               </p>
-                              {job.tasks.map((task: any, idx: number) => <span className={classes.grayBoldTextM_0} key={idx}>
-                                {task.technician?.profile?.displayName || 'N/A'}
-                              </span>
+                              {job.tasks.map((task: any, idx: number) => <>
+                                <span className={classes.grayBoldTextM_0} key={idx}>
+                                  {task.technician?.profile?.displayName || 'N/A'}
+                                </span>
+                                <br />
+                              </>
                               )}
                             </div>
                           </Grid>
@@ -510,13 +513,10 @@ function BCJobReport({ classes, jobReportData, jobTypes, generateInvoiceHandler,
                               <p className={classes.attributeKey}>
                                 {'Job Type(s)'}
                               </p>
-                              {getJobTypesFromJob(job).map((item: any, index: number) =>
-                                <span
-                                  className={classes.grayBoldTextM_0}
-                                  key={index.toString()}>
-                                  {item || 'N/A'}
+                              <span className={classes.grayBoldTextM_0}>
+                                  {getJobTypesFromJob(job).map((item: any) =>
+                                   { return item || 'N/A'; }).join(', ')}
                                 </span>
-                              )}
                             </div>
                           </Grid>
                         </Grid>

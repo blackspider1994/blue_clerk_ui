@@ -212,7 +212,7 @@ export const getTodaysJobsAPI = (status = '-1', keyword?: string, division?: Div
 
       cancelTokenGetTodaysJobsAPI = axios.CancelToken.source();
 
-      requestApiV2(`/getJobs`, 'post', optionObj,cancelTokenGetTodaysJobsAPI, division)
+      requestApiV2(`/getJobs`, 'post', optionObj, cancelTokenGetTodaysJobsAPI, division)
         .then((res: any) => {
           let tempJobs = res.data.jobs;
           tempJobs = tempJobs.map((tempJob: any) => {

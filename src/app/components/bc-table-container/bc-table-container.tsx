@@ -5,7 +5,7 @@ import TableSearchUtils from 'utils/table-search';
 import Typography from '@material-ui/core/Typography';
 import styles from './bc-table.styles';
 import { Grid, Paper, withStyles } from '@material-ui/core';
-import React, { useEffect,  useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import '../../../scss/index.scss';
@@ -45,7 +45,7 @@ function BCTableContainer({
   setCurrentPageSizeFunction = () => { },
   setKeywordFunction = () => { },
   disableInitialSearch = false,
-  rowTooltip,
+  rowTooltip
 }: any) {
   const location = useLocation<any>();
   const history = useHistory();
@@ -77,7 +77,7 @@ function BCTableContainer({
     handleSearchTextChanged('');
     setFocusSearch(false);
     setFocusSearch(true);
-  }
+  };
 
   const handleSearchChange = (event: any) => {
     setSearchText(event.target.value);
@@ -85,14 +85,14 @@ function BCTableContainer({
 
   /**
    * Receive the event when the user key down on the searcher
-   * @param event 
+   * @param event
    */
   const handleKeyDown = (event: any) => {
     if (event.key === 'Enter') {
-      const value = event.target.value;
+      const { value } = event.target;
       handleSearchTextChanged(value);
     }
-  }
+  };
 
   /**
    * Receive the event when the user clicks on the search button
@@ -101,13 +101,13 @@ function BCTableContainer({
     handleSearchTextChanged(searchText);
     setFocusSearch(false);
     setFocusSearch(true);
-  }
+  };
 
   /**
    * Start the searching when the search text changing, it is activated
    * by enter key or by click on search button
    * @param value the new search text
-   * @returns 
+   * @returns
    */
   const handleSearchTextChanged = (value: string) => {
     if (manualPagination) {
@@ -131,7 +131,7 @@ function BCTableContainer({
         });
       }
     }
-  }
+  };
 
   const getFilteredArray = (entities: any, text: any) => {
     const arr = Object.keys(entities).map(id => entities[id]);
