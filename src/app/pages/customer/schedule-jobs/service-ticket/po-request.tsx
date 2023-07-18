@@ -49,8 +49,6 @@ function PORequired({ classes, hidden }: any) {
     }));
     const filteredTickets = po_request.filter((ticket: any) => {
         let cond = true
-
-        // if (!showAllTickets) cond = cond && ticket.status !== 2 && !ticket.jobCreated;
         return cond;
     });
 
@@ -59,8 +57,6 @@ function PORequired({ classes, hidden }: any) {
             customerId: ticket.customer?._id,
             locationId: ticket.jobLocation
         }
-        //dispatch(loadingJobLocations());
-        //dispatch(getJobLocationsAction({customerId: reqObj.customerId}));
         if (reqObj.locationId !== undefined && reqObj.locationId !== null) {
             dispatch(loadingJobSites());
             dispatch(getJobSites(reqObj));
@@ -71,11 +67,11 @@ function PORequired({ classes, hidden }: any) {
         ticket.updateFlag = true;
         dispatch(setModalDataAction({
             'data': {
-                'modalTitle': 'Edit Service Ticket',
+                'modalTitle': 'Edit PO Request',
                 'removeFooter': false,
                 'ticketData': ticket,
                 'className': 'serviceTicketTitle',
-                'maxHeight': '754px',
+                'maxHeight': '900px',
             },
             'type': modalTypes.EDIT_TICKET_MODAL
         }));
@@ -131,7 +127,7 @@ function PORequired({ classes, hidden }: any) {
         if (status === 1) {
             dispatch(setModalDataAction({
                 'data': {
-                    'modalTitle': 'Service Ticket Details',
+                    'modalTitle': 'PO Request Details',
                     'removeFooter': false,
                     'job': serviceTicket,
                     'className': 'serviceTicketTitle',
@@ -144,39 +140,6 @@ function PORequired({ classes, hidden }: any) {
         } else {
             dispatch(error(message));
         }
-    };
-
-    const openCreateJobModal = (ticket: any) => {
-        dispatch(setModalDataAction({
-            'data': {
-                'job': {
-                    'customer': {
-                        '_id': ''
-                    },
-                    'description': '',
-                    'employeeType': false,
-                    'equipment': {
-                        '_id': ''
-                    },
-                    'scheduleDate': null,
-                    'scheduledEndTime': null,
-                    'scheduledStartTime': null,
-                    'technician': {
-                        '_id': ''
-                    },
-                    ticket,
-                    'type': {
-                        '_id': ''
-                    }
-                },
-                'modalTitle': 'Create Job',
-                'removeFooter': false,
-            },
-            'type': modalTypes.EDIT_JOB_MODAL
-        }));
-        setTimeout(() => {
-            dispatch(openModalAction());
-        }, 200);
     };
 
     const columns: any = [
@@ -278,11 +241,11 @@ function PORequired({ classes, hidden }: any) {
 
     const handleRowClick = (event: any, row: any) => {
     };
-    
+
     const sendPORequestEmail = (ticket: any) => {
         dispatch(setModalDataAction({
             'data': {
-                'po_request': ticket,
+                'po_request_id': ticket._id,
                 'modalTitle': `Send this ${ticket.ticketId}`,
                 'removeFooter': false,
             },

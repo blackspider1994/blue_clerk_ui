@@ -98,7 +98,8 @@ export default (theme: Theme): any => ({
     'width': '160px'
   },
   relative: {
-    position: 'relative'
+    position: 'relative',
+    marginBottom: "2px!important"
   },
   addJobTypeButton: {
     width: '100%',
