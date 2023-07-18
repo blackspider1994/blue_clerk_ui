@@ -48,7 +48,7 @@ export const getAllPORequestsAPI = (pageSize = 10, currentPageIndex = 0, status 
 
       cancelTokenGetAllPORequestsAPI = axios.CancelToken.source();
 
-      requestApiV2(`/getServiceTickets`, 'post', optionObj, cancelTokenGetAllPORequestsAPI, division)
+      requestApiV2(`/getPORequest`, 'post', optionObj, cancelTokenGetAllPORequestsAPI, division)
         .then((res: any) => {
           let tempPORequests = res.data.serviceTickets;
           tempPORequests = tempPORequests.map((tempPORequest: { createdAt: string }) => ({

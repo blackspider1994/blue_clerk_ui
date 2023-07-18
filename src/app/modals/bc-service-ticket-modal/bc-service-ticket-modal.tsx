@@ -68,6 +68,8 @@ import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { refreshPORequests } from 'actions/po-request/po-request.action';
 import { getAllDiscountItemsAPI } from 'api/discount.api';
+import InfoIcon from '@material-ui/icons/Info';
+import { grey, red } from '@material-ui/core/colors';
 
 var initialJobType = {
   jobTypeId: undefined,
@@ -133,6 +135,7 @@ function BCServiceTicketModal(
   const [isPORequired, setIsPORequired] = useState(false);
   const [itemTier, setItemTier] = useState("");
   const [chargeTotal, setChargeTotal] = useState(0);
+  const [discountApplied, setDiscountApplied] = useState(0);
   const {discountItems} = useSelector(({ discountItems }: any) => discountItems);
 
   const filter = createFilterOptions();
@@ -363,6 +366,8 @@ function BCServiceTicketModal(
   const _setJobTotal = () =>{
     const jobTypes = [...FormikValues.jobTypes];
     let total = 0;
+    let discountTotal = 0;
+
     jobTypes?.forEach((jobType: any, index: number) => {
       total += jobType.price;
     })
@@ -384,19 +389,22 @@ function BCServiceTicketModal(
       // Find the discount item based on how many item that gonna be discounted
       const customerDiscount = customer.discountPrices?.find((disc: any) => disc.quantity === totalItemDiscounted);
       const discountItem = discountItems.find((res: any) => res._id == customerDiscount?.discountItem);
+
       if (discountItem) {
         const discountAmount = discountItem.charges ?? 0;
-        
+
+        discountTotal += discountAmount; 
         total += discountAmount;
       }
     }
 
+    setDiscountApplied(discountTotal);
     setChargeTotal(total);
   }
 
   const isValidate = (requestObj: any) => {
     let validateFlag = true;
-    if (requestObj.note === undefined || requestObj.note === '') {
+    if ((requestObj.note === undefined || requestObj.note === '') && ticket?.type != "PO Request") {
       setNotesLabelState(true);
       validateFlag = false;
     } else {
@@ -690,35 +698,42 @@ function BCServiceTicketModal(
             if(!homeOwnerResult) { return; }
           }
         }
-        callCreateTicketAPI(formatedRequest)
-          .then((response: any) => {
-            if (response.status === 0) {
-              dispatch(SnackBarError(response.message));
-              setSubmitting(false);
-              return;
-            }
-            dispatch(refreshPORequests(true))
-            dispatch(refreshServiceTickets(true));
-            dispatch(closeModalAction());
-            setTimeout(() => {
-              dispatch(
-                setModalDataAction({
-                  data: {},
-                  type: '',
-                })
-              );
-            }, 200);
-            setSubmitting(false);
-            updateHomeOccupationStatus();
 
-            if (response.message === 'Service Ticket created successfully.' || response.message === 'Purchase Order Request created successfully.') {
-              dispatch(success(response.message));
-            }
-          })
-          .catch((err: any) => {
-            setSubmitting(false);
-            throw err;
-          });
+          callCreateTicketAPI(formatedRequest)
+            .then((response: any) => {
+              if (response.status === 0) {
+                dispatch(SnackBarError(response.message));
+                setSubmitting(false);
+                return;
+              }
+              dispatch(refreshPORequests(true))
+              dispatch(refreshServiceTickets(true));
+              dispatch(closeModalAction());
+              setTimeout(() => {
+                dispatch(
+                  setModalDataAction({
+                    data: {},
+                    type: '',
+                  })
+                );
+              }, 200);
+              setSubmitting(false);
+              updateHomeOccupationStatus();
+  
+              if (response.message === 'Service Ticket created successfully.' || response.message === 'Purchase Order Request created successfully.') {
+                if (tempData.type == "PO Request") {
+                  setTimeout(() => {
+                    createPORequest(response.createdID)
+                  },300)
+                }else{
+                  dispatch(success(response.message));
+                }
+              }
+            })
+            .catch((err: any) => {
+              setSubmitting(false);
+              throw err;
+            });
       }
     },
     validate: (values: any) => {
@@ -973,13 +988,27 @@ function BCServiceTicketModal(
       );
       setItemTier(customer?.itemTierObj?.[0]?.name || "");
     }
-  }, [items]);
+  }, [items, discountItems]);
   
-  const sendPORequestEmail = () => {
+  const createPORequest = (po_request_id: string) => {
     dispatch(setModalDataAction({
       'data': {
-        'po_request': ticket,
-        'modalTitle': `Send this ${ticket.ticketId}`,
+        'po_request_id': po_request_id,
+        'modalTitle': "",
+        'removeFooter': false,
+      },
+      'type': modalTypes.PO_REQUEST_WARNING_MODAL
+    }));
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
+  }
+  
+  const sendPORequestEmail = (po_request_id?: string) => {
+    dispatch(setModalDataAction({
+      'data': {
+        'po_request_id': po_request_id,
+        'modalTitle': `Send PO Request`,
         'removeFooter': false,
       },
       'type': modalTypes.EMAIL_PO_REQUEST_MODAL
@@ -1013,19 +1042,19 @@ function BCServiceTicketModal(
           justify={'space-between'}
           spacing={4}
         >
-          {ticket.type == "PO Request" && (
-            <Grid item xs={12}>
+          {ticket._id && ticket.type == "PO Request" && (
+            <Grid item xs={12} className={'noPaddingTopAndButton'}>
               <Button
                 color='primary'
                 variant="outlined"
                 className={'whiteButton'}
-                onClick={sendPORequestEmail}
+                onClick={() => sendPORequestEmail(ticket._id)}
               >
                 Send PO Request
               </Button>
             </Grid>
           )}
-          <Grid item xs={5}>
+          <Grid item xs={5} className={'noPaddingTopAndButton'}>
             <Typography variant={'caption'} className={'previewCaption'}>
               customer
             </Typography>
@@ -1067,10 +1096,17 @@ function BCServiceTicketModal(
               )}
             />
           </Grid>
-          <Grid item xs={1}>
-            &nbsp;
+          <Grid item xs={5}>
+            {isPORequired && (
+              <Grid container className={'poRequiredContainer'}>
+                <InfoIcon style={{ color: red[400] }} ></InfoIcon> 
+                <Typography variant={'body1'} className='poRequiredText'>
+                  Customer PO Is Required
+                </Typography>
+              </Grid>
+            )}
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={2} className={'noPaddingTopAndButton'}>
             <Typography variant={'caption'} className={'previewCaption'}>
               due date
             </Typography>
@@ -1087,16 +1123,28 @@ function BCServiceTicketModal(
             />
           </Grid>
           <Grid container xs={6}>
-            <Grid item xs>
-              <Typography variant={'caption'} className={'previewCaption'}>
+            <Grid item className={'noPaddingTopAndButton'} xs={3}>
+              <Typography variant={'subtitle1'} className={'totalDetailText'} >
                 Tier : {itemTier || "N/A"}
               </Typography>
             </Grid>
-            <Grid item xs>
-              <Typography variant={'caption'} className={'previewCaption'}>
-                Total : {chargeTotal || 0}
+            <Grid item className={'noPaddingTopAndButton'} xs={3}>
+              <Typography variant={'subtitle1'} className={'totalDetailText'}>
+                Total : ${chargeTotal || 0}
               </Typography>
             </Grid>
+            <Grid item className={'noPaddingTopAndButton'} xs={6}>
+              <Typography variant={'subtitle1'} className={'totalDetailText'}>
+                Discount Applied: ${Math.abs(discountApplied) || 0}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid container xs={6}>
+            {ticket?.poOverriddenBy && (
+              <Typography variant={'subtitle1'} className='customerOverriddenByText'>
+                PO Required: Overridden by {ticket.poOverriddenBy?.profile?.displayName}
+              </Typography>
+            )}
           </Grid>
         </Grid>
         <div className={'modalDataContainer'}>
@@ -1205,9 +1253,9 @@ function BCServiceTicketModal(
           </Grid>
           {FormikValues.jobTypes.map((jobType: any, index: number) =>
             <Grid container key={`Grid_${index}`}
-              className={`modalContent ${classes.relative}`}
+              className={`modalContent ${classes.relative} jobTypesContainer`}
               justify={'space-between'} spacing={3}>
-              <Grid item xs={6}>
+              <Grid item xs={6} className={'noPaddingTopAndButton'}>
                 <Typography
                   variant={'caption'}
                   className={`required ${'previewCaption'}`}
@@ -1274,7 +1322,7 @@ function BCServiceTicketModal(
                   getOptionSelected={() => false}
                 />
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={2} className={'noPaddingTopAndButton'}>
                 <Typography
                   variant={'caption'}
                   className={`${'previewCaption'}`}
@@ -1283,6 +1331,7 @@ function BCServiceTicketModal(
                 </Typography>
                 <BCInput
                   type="number"
+                  disabled={detail || !!ticket.jobCreated}
                   className={'serviceTicketLabel'}
                   handleChange={(ev: any, newValue: any) =>
                     handleJobTypeChange("quantity", ev.target?.value, index)
@@ -1291,7 +1340,7 @@ function BCServiceTicketModal(
                   value={jobType.quantity}
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={3} className={'noPaddingTopAndButton'}>
                 <Typography
                   variant={'caption'}
                   className={`${'previewCaption'}`}
@@ -1313,24 +1362,28 @@ function BCServiceTicketModal(
                 container xs={1}
                 justify={"flex-start"}
                 alignItems="center"
-              >
-                <IconButton
-                  component="span"
-                  color={'primary'}
-                  size="small"
-                  onClick={() => addEmptyJobType()}
-                >
-                  <AddCircleIcon />
-                </IconButton>
-                {index > 0 &&
-                  <IconButton 
-                    component="span"
-                    size="small"
-                    onClick={() => removeJobType(index)}
-                  >
-                    <RemoveCircleIcon />
-                  </IconButton>
-                }
+              > 
+                {!(detail || !!ticket.jobCreated) && (
+                  <>
+                    <IconButton
+                      component="span"
+                      color={'primary'}
+                      size="small"
+                      onClick={() => addEmptyJobType()}
+                    >
+                      <AddCircleIcon />
+                    </IconButton>
+                    {index > 0 &&
+                      <IconButton 
+                        component="span"
+                        size="small"
+                        onClick={() => removeJobType(index)}
+                      >
+                        <RemoveCircleIcon />
+                      </IconButton>
+                    }
+                  </>
+                )}
               </Grid>
             </Grid>
           )}
@@ -1615,6 +1668,33 @@ const DataContainer = styled.div`
     border-radius: 6px;
   }
   
+  .noPaddingTopAndButton {
+    padding: 0px 16px!important;
+  }
+  
+  .totalDetailText {
+    color: #828282;
+    text-transform: uppercase;
+  }
+
+  .poRequiredContainer{
+    padding: 0px!important;
+  }
+
+  .poRequiredText {
+    color: #ef5350;
+    margin-left: 4px;
+  }
+
+  .customerOverriddenByText {
+    color: red;
+    padding-left: 16px;
+  }
+
+  .jobTypesContainer{
+    padding: 0px 40px!important;
+  }
+
   span.required:after {
     margin-left: 3px;
     content: '*';

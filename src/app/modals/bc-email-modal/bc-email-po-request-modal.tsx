@@ -31,11 +31,11 @@ const validationSchema = yup.object().shape({
     cc: yup.string().email('Please insert a valid email').nullable(),
 });
 
-function EmailPORequestModal({ classes, po_request }: any) {
+function EmailPORequestModal({ classes, po_request_id }: any) {
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
     const [sent, setSent] = useState(false);
-    const [emailTemplate, setEmailTemplate] = useState({subject: '', message: '', })
+    const [emailTemplate, setEmailTemplate] = useState({subject: '', message: '', from: '', to: ''})
     const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
     const { user } = useSelector((state: any) => state.auth);
     const closeModal = () => {
@@ -49,10 +49,10 @@ function EmailPORequestModal({ classes, po_request }: any) {
             );
         }, 200);
     };
-
+    
     const getData = async () => {
         const params: any = {
-            ticketId: po_request._id
+            ticketId: po_request_id
         };
         try {
             const { status, message, emailTemplate: data } = await generatePORequestEmailTemplate(params);
@@ -61,7 +61,9 @@ function EmailPORequestModal({ classes, po_request }: any) {
                 closeModal();
             } else {
                 setEmailTemplate(data);
-                form.validateForm()
+                setTimeout(() => {
+                    form.validateForm()
+                }, 100)
             }
         } catch (e) {
             dispatch(error(e.message));
@@ -80,8 +82,6 @@ function EmailPORequestModal({ classes, po_request }: any) {
         enableReinitialize: true,
         initialValues: {
             ...emailTemplate,
-            from: user?.auth?.email,
-            to: po_request.customer.info.email,
             cc: '',
             sendToMe: false,
             withPDF: true
@@ -89,7 +89,7 @@ function EmailPORequestModal({ classes, po_request }: any) {
         validationSchema,
         onSubmit: async (values: any, { setSubmitting }: any) => {
             const params = {
-                ticketId: po_request._id,
+                ticketId: po_request_id,
                 recipients: JSON.stringify([values.to]),
                 subject: values.subject,
                 message: values.message,
