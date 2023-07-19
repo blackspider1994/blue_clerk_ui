@@ -326,7 +326,7 @@ function BCTableContent({
         ? `invoice-paper`
         : ''} ${className} `}
       component={StyledPaperContainer}
-      style={{marginBottom:'190px'}}
+      style={{marginBottom: '300px'}}
       >
         
       <MaUTable
