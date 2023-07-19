@@ -3,6 +3,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 import { Button } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 import { markAsRead } from 'api/invoicing.api';
+import { useSelector } from 'react-redux';
 
 interface PopupProps {
   mouseLeave: () => void;
@@ -14,6 +15,7 @@ interface PopupProps {
 const Popup: React.FC<PopupProps> = ({ mouseEnter, mouseLeave, bounceEmails, invoiceId}) => {
 
   const dispatch = useDispatch()
+  const advanceFilterInvoiceData: any = useSelector(({ advanceFilterInvoiceState }: any) => advanceFilterInvoiceState)
 
   const popupStyles: React.CSSProperties = {
     position: 'absolute',
@@ -79,7 +81,7 @@ const Popup: React.FC<PopupProps> = ({ mouseEnter, mouseLeave, bounceEmails, inv
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     mouseLeave();
-    dispatch(markAsRead(invoiceId))
+    dispatch(markAsRead(invoiceId, advanceFilterInvoiceData))
   };
 
   const emailStyles={
