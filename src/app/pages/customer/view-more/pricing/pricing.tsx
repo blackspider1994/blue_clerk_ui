@@ -36,8 +36,8 @@ const PricingTypes = [
   {
     'color': orange,
     'icon': SignalCellularAltIcon,
-    'subtitle': 'Set Customer Purchase Order Required',
-    'title': 'Purchase Order Required'
+    'subtitle': 'Set Customer PO Required',
+    'title': 'PO Required'
   },
 /*  {
     'color': yellow,

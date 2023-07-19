@@ -14,17 +14,25 @@ interface PORequiredProps {
 
 export default function PORequired({ customer, header, dispatch }:PORequiredProps) {
   const [value, setValue] = useState(customer.isPORequired ? "Yes" : "No");
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
   const handleChange = (e:any) => {
     setValue(e.target.value);
+    const defaultValue = customer.isPORequired ? "Yes" : "No";
+    if (defaultValue == e.target.value) {
+      setIsSubmitDisabled(true);
+    }else{
+      setIsSubmitDisabled(false);
+    }
   };
 
-
   const handleSubmit = async () => {
+    setIsSubmitDisabled(true);
     const customerUpdate = { ...customer,
       'customerId': customer._id,
       'isPORequired': value == "Yes" ? true : false
     };
     await dispatch(updateCustomerAction(customerUpdate, () => {
+      setIsSubmitDisabled(false);
       dispatch(loadingSingleCustomers());
       dispatch(getCustomerDetailAction(customerUpdate));
     }));
@@ -37,27 +45,28 @@ export default function PORequired({ customer, header, dispatch }:PORequiredProp
         fullWidth
         variant={'outlined'}>
         <InputLabel >
-          {'Purchase Order Required'}
+          {'PO Required'}
         </InputLabel>
         <Select
-          label={'Purchase Order Required'}
+          label={'PO Required'}
           onChange={handleChange}
           value={value}>
-          <MenuItem
-            key={"Yes"}
-            value={"Yes"}>
-            Yes
-          </MenuItem>
           <MenuItem
             key={"No"}
             value={"No"}>
             No
           </MenuItem>
+          <MenuItem
+            key={"Yes"}
+            value={"Yes"}>
+            Yes
+          </MenuItem>
         </Select>
       </FormControl>
-
+    
       <Fab
         color={'primary'}
+        disabled={isSubmitDisabled}
         onClick={handleSubmit}>Save
       </Fab>
     </div>

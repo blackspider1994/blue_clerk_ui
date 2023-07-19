@@ -83,8 +83,7 @@ function EmailPORequestModal({ classes, po_request_id }: any) {
         initialValues: {
             ...emailTemplate,
             cc: '',
-            sendToMe: false,
-            withPDF: true
+            sendToMe: false
         },
         validationSchema,
         onSubmit: async (values: any, { setSubmitting }: any) => {
@@ -94,7 +93,6 @@ function EmailPORequestModal({ classes, po_request_id }: any) {
                 subject: values.subject,
                 message: values.message,
                 copyToMyself: values.sendToMe,
-                withPDF: values.withPDF,
                 workType: currentDivision.data?.workTypeId ? JSON.stringify([currentDivision.data?.workTypeId]) : null,
                 companyLocation: currentDivision.data?.locationId ? JSON.stringify([currentDivision.data?.locationId]) : null,
             }
@@ -134,7 +132,7 @@ function EmailPORequestModal({ classes, po_request_id }: any) {
                     {loading ? (
                         <BCCircularLoader heightValue={'20vh'} />
                     ) : sent ? (
-                        <BCSent title={'Purchase Order Request was sent successfully'} showLine={false} />
+                        <BCSent title={'PO Request was sent successfully'} showLine={false} />
                     ) : (
                         <Grid container direction={'column'} spacing={1}>
                             <Grid item xs={12}>
@@ -289,19 +287,6 @@ function EmailPORequestModal({ classes, po_request_id }: any) {
                                         xs={2}
                                     ></Grid>
                                     <Grid item xs={10}>
-                                        <FormControlLabel
-                                            classes={{ label: classes.checkboxLabel }}
-                                            control={
-                                                <Checkbox
-                                                    color={'primary'}
-                                                    checked={FormikValues.withPDF}
-                                                    onChange={formikChange}
-                                                    name="withPDF"
-                                                    classes={{ root: classes.checkboxInput }}
-                                                />
-                                            }
-                                            label={`Add PDF as attachment`}
-                                        />
                                         <FormControlLabel
                                             classes={{ label: classes.checkboxLabel }}
                                             control={
