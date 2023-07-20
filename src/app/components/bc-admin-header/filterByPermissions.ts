@@ -11,7 +11,7 @@ export default function (user: User, rolesAndPermissions: RolesAndPermissions, l
   }
 
   const role = user.permissions?.role;
-  const isAdmin = role === 3 || role === 4;
+  const isAdmin = role === 3;
 
   if (!rolesAndPermissions?.accounting?.invoicing && !rolesAndPermissions?.accounting?.customerPayments && !isAdmin) {
     linksToRemove.push('invoicing');

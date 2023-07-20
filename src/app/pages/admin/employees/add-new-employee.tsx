@@ -25,6 +25,7 @@ import { info, error, success } from 'actions/snackbar/snackbar.action';
 import { permissionDescriptions } from 'app/components/bc-roles-permissions/rolesAndPermissions';
 import axios from 'axios';
 import { RolesAndPermissions } from 'actions/permissions/permissions.types';
+import { updateUserPermissionsAction } from 'actions/permissions/permissions.action';
 
 export enum Roles {
   Technician = 'Technician',
@@ -82,7 +83,7 @@ function AdminAddNewEmployeePage({ classes, children }: Props) {
     
     if (response.employee?._id) {
       try {
-        await axios.post(`${process.env.REACT_APP_LAMBDA_URL}/permissions/${response.employee._id}`, { 'permission': roles });
+        dispatch(updateUserPermissionsAction(response.employee._id, roles));
       } catch (err) {
         dispatch(info('Something went wrong.'));
       }

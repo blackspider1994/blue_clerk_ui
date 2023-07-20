@@ -11,7 +11,7 @@ const filterSidebarLinksByPermission = (user:User, rolesAndPermissions: RolesAnd
 
   const role = user?.permissions?.role;
 
-  const isAdmin = role === 3 || role === 4;
+  const isAdmin = role === 3;
 
   if (!rolesAndPermissions?.admin?.manageEmployeeInfoAndPermissions && !isAdmin) {
     linksToRemove.push('employees');

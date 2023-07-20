@@ -246,16 +246,6 @@ function EmployeeProfilePage({ classes }: any) {
                           }
                         ]}
                       />
-                      {
-                        employeeDetails?.permissions?.role !== 4 &&
-                        <CSButton
-                          aria-label={'new-ticket'}
-                          color={'primary'}
-                          onClick={updateEmployee}
-                          variant={'contained'}>
-                          {'Make Admin'}
-                        </CSButton>
-                      }
                     </PageContainer>
 
                   </MainContainer>
