@@ -33,6 +33,8 @@ import { modalTypes } from '../../../constants';
 import { getDivision, refreshDivision } from "actions/division/division.action";
 import { openModalAction, setModalDataAction } from "actions/bc-modal/bc-modal.action";
 import { setFlagUnsignedVendors } from "actions/vendor/vendor.action";
+import filterByPermissions from './filterByPermissions';
+import { Can } from 'app/config/Can';
 
 interface Props {
   classes: any;
@@ -139,6 +141,13 @@ const useSearchStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+export type NAVDATA = { 
+  key?: string; 
+  label: string;
+  link: string;
+  flag?: string;
+}
+
 function BCAdminHeader({
   classes,
   drawerToggle,
@@ -174,7 +183,8 @@ function BCAdminHeader({
   const divisions = useSelector((state: any) => state.divisions);
   const divisionList = divisions.data as IDivision[];
   const vendors = useSelector((state: any) => state.vendors);
-
+  const auth = useSelector((state: any) => state.auth);
+  const permissions = useSelector((state: any) => state.permissions.rolesAndPermissions);
 
   useEffect(() => {
     initialLoad()
@@ -241,6 +251,13 @@ function BCAdminHeader({
           }, 200);
         }
     }
+
+    if (!divisionList.length && !divisions.loading) {
+      history.push({
+        pathname: `/main/no-locations-assigned`,
+        state: {}
+      })
+    }
   }, [divisionList]);
 
   useEffect(() => {
@@ -284,16 +301,19 @@ function BCAdminHeader({
     setMenuAnchorEl(null);
   };
 
-  const NAV_DATA = [
+  const NAV_DATA: NAVDATA[] = [
     {
+      'key': 'dashboard',
       'label': 'Dashboard',
       'link': '/main/dashboard'
     },
     {
+      'key': 'customers',
       'label': 'Customers',
       'link': '/main/customers'
     },
     {
+      'key': 'invoicing',
       'label': 'Invoicing',
       'link': '/main/invoicing'
     },
@@ -302,6 +322,7 @@ function BCAdminHeader({
     //   'link': '/main/tags/purchasedtag'
     // },
     {
+      'key': 'payroll',
       'label': 'Payroll',
       'link':  currentDivision.isDivisionFeatureActivated && currentDivision.urlParams ? `/main/payroll/${currentDivision.urlParams}` : `/main/payroll`
     },
@@ -316,15 +337,19 @@ function BCAdminHeader({
      * },
      */
     {
+      'key': 'reports',
       'label': 'Reports',
       'link': '/main/reports'
     },
     {
+      'key': 'admin',
       'label': ' Admin',
       'link': '/main/admin',
       'flag':  currentDivision.isDivisionFeatureActivated && vendors.unsignedVendorsFlag 
     }
   ];
+
+  const filteredNavData = filterByPermissions(auth.user, permissions, NAV_DATA);
 
   const handleLocationChange = (params: any) => {
     const selectedDivision = divisionList[params.target.value];
@@ -385,7 +410,7 @@ function BCAdminHeader({
 
           <Toolbar className={classes.bcHeaderToolBar}>
             <ul className={classes.bcAdminHeaderNav}>
-              {NAV_DATA.map((item, idx) => {
+              {filteredNavData.map((item, idx) => {
                 return (
                   <li
                     className={classNames({
@@ -422,7 +447,7 @@ function BCAdminHeader({
               open={isMenuOpen}
               onClose={closeMenu}
             >
-              {NAV_DATA.map((item, idx) => {
+              {filteredNavData.map((item, idx) => {
                 return (
                   <MenuItem key={idx} onClick={closeMenu} className={classNames({
                     [classes.bcAdminHeaderNavItem]: true,

@@ -13,8 +13,11 @@ import { getEmployeesForJobAction } from 'actions/employees-for-job/employees-fo
 import '../../../scss/job-poup.scss';
 import moment from 'moment';
 import classNames from "classnames";
-import {getVendors} from "../../../actions/vendor/vendor.action";
+import { getVendors } from "../../../actions/vendor/vendor.action";
 import BCDragAndDrop from "../../components/bc-drag-drop/bc-drag-drop";
+import { Button } from '@material-ui/core';
+import { openModalAction, setModalDataAction } from 'actions/bc-modal/bc-modal.action';
+import { modalTypes } from '../../../constants';
 
 const initialJobState = {
   customer: {
@@ -51,16 +54,55 @@ const initialJobState = {
 };
 
 function BCViewServiceTicketModal({
-                          classes,
-                          job = initialJobState,
-                        }: any): JSX.Element {
+  classes,
+  job = initialJobState,
+}: any): JSX.Element {
   const dispatch = useDispatch();
+  const customers = useSelector(({ customers }: any) => customers.data);
+  const items = useSelector((state: any) => state.invoiceItems.items);
+
   const calculateJobType = () => {
     let title = [];
     if (job.tasks) {
-      job.tasks.forEach((task: any) => title.push(task.jobType?.title))
+      job.tasks.forEach((task: any) => {
+        let jobType = {
+          title: task.jobType?.title,
+          quantity: task.quantity || 1,
+          price: 0
+        };
+
+        const item = items.find((res: any) => res.jobType == task.jobType?._id);
+        const customer = customers.find((res: any) => res._id == job?.customer?._id);
+        if (item) {
+          let price = item?.tiers?.find((res: any) => res.tier?._id == customer?.itemTier)
+          if (customer && price) {
+            jobType.price = price?.charge * jobType.quantity;
+          } else {
+            price = item?.tiers?.find((res: any) => res.tier?.isActive == true)
+            jobType.price = price?.charge * jobType.quantity;
+          }
+        }
+        title.push(jobType);
+      })
     } else if (job.jobType) {
-      title.push(job.jobType.title || 'N/A');
+      let jobType = {
+        title: job.jobType.title || 'N/A',
+        quantity: 1,
+        price: 0
+      };
+      const item = items.find((res: any) => res.jobType == job.jobType?._id);
+      const customer = customers.find((res: any) => res._id == job?.customer?._id);
+      if (item) {
+        let price = item?.tiers?.find((res: any) => res.tier?._id == customer?.itemTier)
+        if (customer && price) {
+          jobType.price = price?.charge * jobType.quantity;
+        } else {
+          price = item?.tiers?.find((res: any) => res.tier?.isActive == true)
+          jobType.price = price?.charge * jobType.quantity;
+        }
+      }
+
+      title.push(jobType);
     }
     return title;
   }
@@ -131,13 +173,40 @@ function BCViewServiceTicketModal({
       },
     },
   ];
-  
+
   const scheduleDate = job?.dueDate;
+
+  const sendPORequestEmail = (id:string) => {
+    dispatch(setModalDataAction({
+      'data': {
+        'po_request_id': id,
+        'modalTitle': `Send PO Request`,
+        'removeFooter': false,
+      },
+      'type': modalTypes.EMAIL_PO_REQUEST_MODAL
+    }));
+    setTimeout(() => {
+      dispatch(openModalAction());
+    }, 200);
+  }
+
 
   return (
     <DataContainer className={'new-modal-design'}>
       <Grid container className={'modalPreview'} justify={'space-around'}>
-        <Grid item style={{width: '40%'}}>
+        {job._id && job?.type == "PO Request" && (
+          <Grid item xs={12}>
+            <Button
+              color='primary'
+              variant="outlined"
+              className={'whiteButton'}
+              onClick={() => {sendPORequestEmail(job._id)}}
+            >
+              Send PO Request
+            </Button>
+          </Grid>
+        )}
+        <Grid item style={{ width: '40%' }}>
           <Typography variant={'caption'} className={'previewCaption'}>customer</Typography>
           <Typography variant={'h6'} className={'bigText'}>{job?.customer?.profile?.displayName || 'N/A'}</Typography>
         </Grid>
@@ -161,7 +230,7 @@ function BCViewServiceTicketModal({
           <Grid item xs>
             <Typography variant={'caption'} className={'previewCaption'}>job type</Typography>
             <Typography variant={'h6'} className={'previewText'}>
-              {calculateJobType().map((type:string) => <span className={'jobTypeText'}>{type}</span>)}
+              {calculateJobType().map((type: any) => <span className={'jobTypeText'}>{type.title} - {type.quantity} - ${type.price}</span>)}
             </Typography>
           </Grid>
           <Grid item xs>
@@ -172,13 +241,13 @@ function BCViewServiceTicketModal({
         <Grid container className={'modalContent'} justify={'space-around'}>
           <Grid item xs>
             <Typography variant={'caption'} className={'previewCaption'}>contact associated</Typography>
-            <Typography variant={'h6'} className={'previewText'}>{job.customerContactId?.name ||'N/A'}</Typography>
+            <Typography variant={'h6'} className={'previewText'}>{job.customerContactId?.name || 'N/A'}</Typography>
           </Grid>
           <Grid item xs>
             <Typography variant={'caption'} className={'previewCaption'}>Customer PO</Typography>
             <Typography variant={'h6'} className={'previewText'}>{job.customerPO || 'N/A'}</Typography>
           </Grid>
-          <Grid item style={{width: '50%'}}>
+          <Grid item style={{ width: '50%' }}>
             <Typography variant={'caption'} className={'previewCaption'}>note</Typography>
             <Typography variant={'h6'} className={classNames('previewText', 'description')}>{job.note || 'N/A'}</Typography>
           </Grid>
@@ -189,45 +258,45 @@ function BCViewServiceTicketModal({
             <Typography variant={'h6'} className={'previewText'}>{job?.isHomeOccupied ? 'YES' : 'NO'}</Typography>
           </Grid>
         </Grid>
-        { 
-          job?.isHomeOccupied 
-          ? (
-                <Grid container className={'modalContent'} justify={'space-around'}>                
-                  <Grid item xs>
-                    <Typography variant={'caption'} className={'previewCaption'}>home owner name</Typography>
-                    <Typography variant={'h6'} className={'previewText'}>{job?.homeOwner?.profile?.displayName ||'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs>
-                    <Typography variant={'caption'} className={'previewCaption'}>home owner email</Typography>
-                    <Typography variant={'h6'} className={'previewText'}>{job?.homeOwner?.info?.email || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item style={{width: '50%'}}>
-                    <Typography variant={'caption'} className={'previewCaption'}>home owner phone</Typography>
-                    <Typography variant={'h6'} className={classNames('previewText', 'description')}>{job?.homeOwner?.contact?.phone || 'N/A'}</Typography>
-                  </Grid>
-                </Grid>  
+        {
+          job?.isHomeOccupied
+            ? (
+              <Grid container className={'modalContent'} justify={'space-around'}>
+                <Grid item xs>
+                  <Typography variant={'caption'} className={'previewCaption'}>home owner name</Typography>
+                  <Typography variant={'h6'} className={'previewText'}>{job?.homeOwner?.profile?.displayName || 'N/A'}</Typography>
+                </Grid>
+                <Grid item xs>
+                  <Typography variant={'caption'} className={'previewCaption'}>home owner email</Typography>
+                  <Typography variant={'h6'} className={'previewText'}>{job?.homeOwner?.info?.email || 'N/A'}</Typography>
+                </Grid>
+                <Grid item style={{ width: '50%' }}>
+                  <Typography variant={'caption'} className={'previewCaption'}>home owner phone</Typography>
+                  <Typography variant={'h6'} className={classNames('previewText', 'description')}>{job?.homeOwner?.contact?.phone || 'N/A'}</Typography>
+                </Grid>
+              </Grid>
             )
-          : <div />
+            : <div />
         }
         <Grid container className={classNames('modalContent', classes.lastContent)} justify={'space-between'}>
-          <Grid item style={{width: '30%'}}>
+          <Grid item style={{ width: '30%' }}>
             <Typography variant={'caption'} className={'previewCaption'}>&nbsp;</Typography>
-            <BCDragAndDrop images={job.images?.map((image: any) => image.imageUrl) || []} readonly={true}  />
+            <BCDragAndDrop images={job.images?.map((image: any) => image.imageUrl) || []} readonly={true} />
           </Grid>
-          <Grid item style={{width: '68%'}}>
+          <Grid item style={{ width: '68%' }}>
             <Typography variant={'caption'} className={'previewCaption'}>&nbsp;&nbsp;ticket history</Typography>
-            <div style={{height: 180, overflowY: 'auto'}}>
+            <div style={{ height: 180, overflowY: 'auto' }}>
               <BCTableContainer
                 className={classes.tableContainer}
                 columns={columns}
                 initialMsg={'No history yet'}
                 isDefault
                 isLoading={loading}
-                onRowClick={() => {}}
+                onRowClick={() => { }}
                 pageSize={5}
                 pagination={true}
                 stickyHeader
-                tableData={[{action: 'Service Ticket Created', date: job.createdAt, user: job.createdBy}, ...track].reverse()}
+                tableData={[{ action: 'Service Ticket Created', date: job.createdAt, user: job.createdBy }, ...track].reverse()}
               />
             </div>
           </Grid>
@@ -271,6 +340,10 @@ const DataContainer = styled.div`
     padding: 0px 16px;
   }
 
+  .whiteButton {
+    background-color: #ffffff;
+    border-radius: 6px;
+  }  
 `;
 
 export default withStyles(styles, { withTheme: true })(BCViewServiceTicketModal);

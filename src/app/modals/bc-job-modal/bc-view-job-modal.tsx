@@ -73,9 +73,34 @@ function BCViewJobModal({
   job = initialJobState,
 }: any): JSX.Element {
   const dispatch = useDispatch();
+  const customers = useSelector(({ customers }: any) => customers.data);
+  const items = useSelector((state: any) => state.invoiceItems.items);
+  
   const calculateJobType = (task: any) => {
-    let title: string[] = [];
-    task.jobTypes.forEach((type: any) => title.push(type.jobType?.title))
+    let title: any[] = [];
+    if (task.jobTypes) {
+      task.jobTypes.forEach((type: any) => {
+        let jobType = {
+          title: type.jobType?.title,
+          quantity: type.quantity || 1,
+          price: 0
+        };
+        
+        const item = items.find((res: any) => res.jobType == type.jobType?._id);
+        const customer = customers.find((res: any) => res._id == job?.customer?._id);
+        
+        if (item) {
+          let price = item?.tiers?.find((res: any) => res.tier?._id == customer?.itemTier)
+          if (customer && price) {
+            jobType.price = price?.charge * jobType.quantity;
+          } else {
+            price = item?.tiers?.find((res: any) => res.tier?.isActive == true)
+            jobType.price = price?.charge * jobType.quantity;
+          }
+        }
+        title.push(jobType);
+      })
+    }
     return title;
   }
   // const equipments = useSelector(({ inventory }: any) => inventory.data);
@@ -264,7 +289,6 @@ function BCViewJobModal({
       SetIsSubmitting(false);
     })
   }
-
   const openEditJobCostingModal = () => {
     dispatch(
       setModalDataAction({
@@ -351,7 +375,7 @@ function BCViewJobModal({
               <Typography variant={'h6'} className={'previewText'} style={{borderTop: 1}}>{task.technician?.profile?.displayName || 'N/A'}</Typography>
               </Grid>
               <Grid item xs>
-                  <Typography variant={'h6'} className={'previewText'} style={{ borderTop: 1 }}>{calculateJobType(task).map((type: string, i: number) => <span key={i} className={'jobTypeText'}>{type}</span>)}</Typography>
+                  <Typography variant={'h6'} className={'previewText'} style={{ borderTop: 1 }}>{calculateJobType(task).map((type: any, i: number) => <span key={i} className={'jobTypeText'}>{type.title} - {type.quantity} - ${type.price}</span>)}</Typography>
               </Grid>
               <Grid item style={{width: 100}}>
                 <BCJobStatus status={task.status || 0} size={'small'}/>

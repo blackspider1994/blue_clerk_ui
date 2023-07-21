@@ -322,7 +322,7 @@ function ViewMorePage({ classes }: any) {
                     'value': 2
                   },
                   {
-                    'label': 'PRICING',
+                    'label': 'SETUP',
                     'value': 3
                   }
                 ]}

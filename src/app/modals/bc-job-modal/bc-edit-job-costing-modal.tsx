@@ -142,7 +142,7 @@ function BCEditJobCostingModal({
       res.task.jobTypes.forEach((taskJobType: any) => {
         const costingList = items?.find(({ jobType }) => jobType === taskJobType?.jobType?._id)?.costing;
         const charge = costingList?.find(({ tier }) => tier?._id === technicianTier?._id)?.charge
-        jobCostingCharge += Number(charge || 0)
+        jobCostingCharge += Number(charge || 0) * (taskJobType.quantity || 1)
       });
 
       const commisionHistory: any = getCommissionHistory(res.task?.contractor?._id);
@@ -223,7 +223,7 @@ function BCEditJobCostingModal({
                   res.task.jobTypes.forEach((taskJobType: any) => {
                     const costingList = items?.find(({ jobType }) => jobType === taskJobType?.jobType?._id)?.costing;
                     const charge = costingList?.find(({ tier }) => tier?._id === technicianTier?._id)?.charge
-                    jobCostingCharge += Number(charge || 0);
+                    jobCostingCharge += Number(charge || 0) * (taskJobType.quantity || 1);
 
                     jobTypesTitle.push(taskJobType.jobType?.title);
                   });

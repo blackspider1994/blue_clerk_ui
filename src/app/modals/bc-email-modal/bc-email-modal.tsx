@@ -31,6 +31,7 @@ import { error as SnackBarError } from 'actions/snackbar/snackbar.action';
 import { PRIMARY_GREEN } from '../../../constants';
 import ChevronLeft from '@material-ui/icons/ChevronLeft'
 import ChevronRight from '@material-ui/icons/ChevronRight'
+import { getAllInvoicesAPI } from 'api/invoicing.api';
 
 const EmailJobReportModalContainer = styled.div`
   display: flex;
@@ -83,6 +84,7 @@ function EmailJobReportModal({ classes, data }: any) {
 
   const closeModal = () => {
     dispatch(closeModalAction());
+    dispatch(getAllInvoicesAPI(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined));
     setTimeout(() => {
       dispatch(
         setModalDataAction({

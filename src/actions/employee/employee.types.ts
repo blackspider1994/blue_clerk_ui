@@ -1,9 +1,26 @@
+import { RolesAndPermissions } from "actions/permissions/permissions.types";
+
 export const types = {
   'EMPLOYEE_LOAD': 'loadAllEmployeesActions',
   'EMPLOYEE_NEW': 'newEmployeeAction',
   'EMPLOYEE_REMOVE': 'deleteEmployeeActions',
   'SET_EMPLOYEES': 'setEmployee'
 };
+
+export enum Role {
+  OFFICE_ADMIN,
+  TECHNICIAN,
+  MANAGER,
+  COMPANY_ADMIN,
+  ADMIN_EMPLOYEE,
+  GLOBAL_ADMIN,
+  CUSTOMER,
+  CUSTOMER_CONTACT,
+  CONTRACTOR,
+  SUPPLIER_ADMIN,
+  ACCOUNT_MANAGER,
+  ACCOUNTS_PAYABLE
+}
 
 export interface updateEmployeeLocPermParam {
   employeeId: string;
@@ -39,7 +56,7 @@ export interface User {
     phone?: string
   },
   permissions?: {
-    role?: 0
+    role?: Role
   },
   info?: {
     companyName?: string,
@@ -47,7 +64,7 @@ export interface User {
     industry?: string
   },
   company?: string
-  allLocation?: boolean
+  allLocation?: boolean,
 }
 
 export interface UserDetails {
@@ -59,7 +76,7 @@ export interface UserDetails {
     'preferences': string,
     'time': string,
     'timezone': string
-  }
+  },
 }
 
 export interface UsersState {
@@ -67,7 +84,8 @@ export interface UsersState {
   readonly data?: User[]
   readonly error?: string
   readonly added?: boolean
-  readonly employeeDetails?: UserDetails
+  readonly employeeDetails?: UserDetails,
+  readonly employeePermissions?: RolesAndPermissions | null
 }
 
 export const EmployeeRoles = ['Office Admin', 'Technician', 'Manager', 'Company Administrator', 'Admin', 'Customer'];
@@ -79,4 +97,5 @@ export enum UsersActionType {
   ADDED = 'addedUser',
   GET_SINGLE_EMPLOYEE = 'getSingleEmployee',
   SET_SINGLE_EMPLOYEE = 'setSingleEmployee',
+  SET_SINGLE_EMPLOYEE_PERMISSIONS = 'setSingleEmployeePermissions'
 }

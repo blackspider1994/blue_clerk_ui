@@ -42,7 +42,8 @@ export const getAllServiceTicketsAPI = (pageSize = 10, currentPageIndex = 0, sta
       dispatch(setServiceTicketLoading(true));
       const optionObj:any = {
         pageSize,
-        currentPage: currentPageIndex
+        currentPage: currentPageIndex,
+        type: "Ticket"
       };
 
       if(status)

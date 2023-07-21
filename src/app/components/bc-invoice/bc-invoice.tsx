@@ -381,7 +381,7 @@ function BCInvoice({ classes, invoiceDetail }: Props) {
   return (
     <DataContainer>
       <div className={invoiceStyles.invoiceTop}>
-        {invoiceDetail?.job?._id &&
+        {invoiceDetail?.job?._id && invoiceDetail?.showJobId &&
           <Typography variant={'caption'} className={'jobIdText'}>{invoiceDetail?.job?.jobId}</Typography>
         }
         <Grid container>

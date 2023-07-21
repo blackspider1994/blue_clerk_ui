@@ -1,5 +1,5 @@
 import { DivisionParams } from 'app/models/division';
-import request from '../utils/http.service';
+import request, { requestApiV2 } from '../utils/http.service';
 
 export const generateIncomeReport = async (params: any, division?: DivisionParams) => {
   try {
