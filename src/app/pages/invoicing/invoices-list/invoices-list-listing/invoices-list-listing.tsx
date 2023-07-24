@@ -54,7 +54,6 @@ function InvoicingListListing({ classes, theme }: any) {
       currentPageSize: invoiceList.currentPageSize,
       keyword: invoiceList.keyword,
       voidStatus:invoiceList.voidStatus,
-
     })
   );
   // const [selectionRange, setSelectionRange] = useState<Range | null>(null);
