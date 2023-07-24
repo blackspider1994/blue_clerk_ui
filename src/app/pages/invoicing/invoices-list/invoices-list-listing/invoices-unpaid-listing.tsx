@@ -34,7 +34,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
   const location = useLocation<any>();
 
   const unpaidInvoices = useSelector(getSortedInvoices)
-  const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword,} = useSelector(
+  const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword} = useSelector(
     ({ invoiceList }: any) => ({
       unpaidInvoices: invoiceList.unpaid,
       loading: invoiceList.loadingUnpaid,
@@ -44,7 +44,6 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
       currentPageIndex: invoiceList.currentPageIndexUnpaid,
       currentPageSize: invoiceList.currentPageSizeUnpaid,
       keyword: invoiceList.keywordUnpaid,
-      
     })
   );
   const [selectionRange, setSelectionRange] = useState<Range | null>(location?.state?.option?.selectionRange || null);

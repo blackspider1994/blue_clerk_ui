@@ -23,7 +23,6 @@ function CreateInvoice({ classes }: any) {
   const customers = useSelector(({ customers }: any) => customers.data);
   const { 'items': invoiceItems } = useSelector(({ invoiceItems }:RootState) => invoiceItems);
   const taxes = useSelector(({ tax }: any) => tax.data);
-  
   const currentDivision: ISelectedDivision = useSelector((state: any) => state.currentDivision);
 
   const getCustomersDispatcher = () => {
