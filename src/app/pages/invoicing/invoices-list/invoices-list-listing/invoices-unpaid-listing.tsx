@@ -20,6 +20,7 @@ import moment from "moment";
 import TableFilterService from 'utils/table-filter';
 import { ISelectedDivision } from 'actions/filter-division/fiter-division.types';
 import debounce from 'lodash.debounce';
+import invoicesList from '../invoices-list';
 
 const getSortedInvoices = (state: any) => {
   return TableFilterService.filterByDateDesc(state?.invoiceList.unpaid);
@@ -33,7 +34,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
   const location = useLocation<any>();
 
   const unpaidInvoices = useSelector(getSortedInvoices)
-  const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword } = useSelector(
+  const { loading, total, prevCursor, nextCursor, currentPageIndex, currentPageSize, keyword,} = useSelector(
     ({ invoiceList }: any) => ({
       unpaidInvoices: invoiceList.unpaid,
       loading: invoiceList.loadingUnpaid,
@@ -43,6 +44,7 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
       currentPageIndex: invoiceList.currentPageIndexUnpaid,
       currentPageSize: invoiceList.currentPageSizeUnpaid,
       keyword: invoiceList.keywordUnpaid,
+      
     })
   );
   const [selectionRange, setSelectionRange] = useState<Range | null>(location?.state?.option?.selectionRange || null);
@@ -119,7 +121,8 @@ function InvoicingUnpaidListing({ classes, theme }: any) {
       'sortable': true
     },
     {
-      'accessor': (originalRow: any) => formatCurrency(originalRow.total),
+      'accessor': (originalRow: any) =>formatCurrency(originalRow.total),
+
       'Header': 'Total',
       'sortable': true,
       'width': 20

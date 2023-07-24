@@ -1,9 +1,11 @@
 export interface InvoicingState {
     readonly loading: boolean
     readonly loadingDraft: boolean
+    readonly voidStatus? : string
     readonly data?: any
     readonly draft?: any
     readonly error?: string
+
     prevCursor: string;
     nextCursor: string;
     total: number;

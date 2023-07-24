@@ -44,7 +44,7 @@ function InvoicingListListing({ classes, theme }: any) {
   const customStyles = useCustomStyles();
 
   // const isLoading = useSelector((state: any) => state?.invoiceList?.loading);
-  const { loading, total, currentPageIndex, currentPageSize, keyword } = useSelector(
+  const { loading, total, currentPageIndex, currentPageSize, keyword,voidStatus } = useSelector(
     ({ invoiceList }: any) => ({
       loading: invoiceList.loading,
       prevCursor: invoiceList.prevCursor,
@@ -53,6 +53,8 @@ function InvoicingListListing({ classes, theme }: any) {
       currentPageIndex: invoiceList.currentPageIndex,
       currentPageSize: invoiceList.currentPageSize,
       keyword: invoiceList.keyword,
+      voidStatus:invoiceList.voidStatus,
+
     })
   );
   // const [selectionRange, setSelectionRange] = useState<Range | null>(null);
@@ -128,7 +130,7 @@ function InvoicingListListing({ classes, theme }: any) {
       'Header': 'Customer PO',
     },
     {
-      'accessor': (originalRow: any) => formatCurrency(originalRow.total),
+      'accessor': (originalRow: any) => originalRow.voidStatus==true ? 'voided':formatCurrency(originalRow.total), 
       'Header': 'Total',
       'sortable': true,
       'width': 20
