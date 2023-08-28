@@ -93,6 +93,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
   const { 'data': taxes } = useSelector(({ tax }: any) => tax);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
+ 
   const isAdd = _id ? false : true;
 
   const closeModal = () => {
@@ -190,7 +191,7 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         costing: costingArr,
       }
       let response;
-      
+   
        
       if (isAdd) {
         
@@ -256,7 +257,15 @@ let isFixedDisabled=false;
 
   }, [formik.values.itemType]);
 
-
+  const handlePopupClick=()=>
+  {
+    const isConfirmed = window.confirm('There is an item already with this name that is deactivated (or active), would you like to go to that item?');
+    if (isConfirmed) {
+         alert('Item added confirmed!');
+    } else {
+          alert('item action halted');
+    }
+  }
   return <DataContainer>
     <hr
       style={{ height: '1px', background: '#D0D3DC', borderWidth: '0px' }}
@@ -673,7 +682,9 @@ let isFixedDisabled=false;
               </Grid>
             </Grid>
           )}
-         
+        </Grid>
+        <Grid>
+          <button onClick={handlePopupClick}>Pop up Click</button>
         </Grid>
       </DialogContent>
       <hr

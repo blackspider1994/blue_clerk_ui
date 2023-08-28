@@ -26,6 +26,8 @@ import { CSButton, CSButtonSmall } from '../../../../../helpers/custom';
 import { stringSortCaseInsensitive } from '../../../../../helpers/sort';
 import { Can, ability } from 'app/config/Can';
 
+
+
 interface Props {
   classes: any;
 }
@@ -70,6 +72,7 @@ function AdminServiceAndProductsPage({ classes }: Props) {
   const [columns, setColumns] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [isRowEnabled, setIsRowEnabled] = useState(true);
 
   const { loading: tiersLoading, error: tiersError, tiers } = useSelector(
     ({ invoiceItemsTiers }: any) => invoiceItemsTiers
@@ -79,6 +82,11 @@ function AdminServiceAndProductsPage({ classes }: Props) {
     ({ InvoiceJobCosting }: any) => InvoiceJobCosting.costingList
   );
   const activeJobCosts = costingList.filter(({ tier }: any) => tier.isActive);
+
+  // Function to toggle row enablement
+  const toggleRowEnablement = () => {
+    setIsRowEnabled(!isRowEnabled);
+  };
 
   const handleTierChange = (id: number, value: string, tierId: string) => {
     const newItems: any = [...localItems];
@@ -281,6 +289,40 @@ function AdminServiceAndProductsPage({ classes }: Props) {
           width: 60,
         },
       ];
+
+      const activateButton=[
+        {
+          Cell({ row }: any) {
+            const handleActivateDeactivate = () => {
+
+              const updatedItem = { ...row.original, isActive: !row.original.isActive };
+              // Update the item in your localItems state
+              const updatedLocalItems = localItems.map((item: Item) =>
+                item._id === updatedItem._id ? updatedItem : item
+              );
+              setLocalItems(updatedLocalItems);
+              console.log(`Toggled activation for item: ${row.original._id}`);
+            };
+
+            return (
+              <div className="flex items-center">
+                <Button
+                  variant="outlined"
+                  color={row.original.isActive ? 'secondary' : 'primary'}
+                  onClick={handleActivateDeactivate}
+                  disabled={!isRowEnabled}
+                >
+                  {row.original.isActive ? 'Deactivate' : 'Activate'}
+                </Button>
+              </div>
+            );
+          },
+          Header: 'Activate/Deactivate',
+          id: 'activateDeactivate',
+          sortable: false,
+          width: 150, // Adjust the width as needed
+        },  
+      ];
       const dbSync = [
         {
           Cell({ row }: any) {
@@ -396,7 +438,8 @@ function AdminServiceAndProductsPage({ classes }: Props) {
         ...ability.can('manage', 'Company')
           ? actions
           : [],
-        ...dbSync
+        ...dbSync,
+        ...activateButton
       ];
 
       if (tiers.length > 0) {
@@ -406,12 +449,13 @@ function AdminServiceAndProductsPage({ classes }: Props) {
           ...ability.can('manage', 'Company')
             ? actions
             : [],
-          ...dbSync
+          ...dbSync,
+          ...activateButton
         ];
       }
       setColumns(constructedColumns);
     }
-  }, [tiers, editMode]);
+  }, [tiers, editMode, localItems]);
 
   useEffect(() => {
     dispatch(loadInvoiceItems.fetch());
@@ -422,6 +466,7 @@ function AdminServiceAndProductsPage({ classes }: Props) {
   return (
     <MainContainer>
       <PageContainer>
+       
         <BCTableContainer
           columns={columns}
           isLoading={loading || tiersLoading}
