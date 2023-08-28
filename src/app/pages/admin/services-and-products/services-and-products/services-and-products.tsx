@@ -2,7 +2,7 @@ import BCTableContainer from 'app/components/bc-table-container/bc-table-contain
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import styles from './services-and-products.styles';
-import { Button, Fab, Grid, Tooltip, withStyles } from '@material-ui/core';
+import { Button, Checkbox, Fab, FormControlLabel, Grid, TextField, Tooltip, withStyles, FormGroup } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'reducers';
@@ -71,6 +71,7 @@ function AdminServiceAndProductsPage({ classes }: Props) {
   );
   const [columns, setColumns] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  const [includeDisabled, setIncludeDisabled] = useState<any>(false);
   const [updating, setUpdating] = useState(false);
   const [isRowEnabled, setIsRowEnabled] = useState(true);
 
@@ -82,12 +83,6 @@ function AdminServiceAndProductsPage({ classes }: Props) {
     ({ InvoiceJobCosting }: any) => InvoiceJobCosting.costingList
   );
   const activeJobCosts = costingList.filter(({ tier }: any) => tier.isActive);
-
-  // Function to toggle row enablement
-  const toggleRowEnablement = () => {
-    setIsRowEnabled(!isRowEnabled);
-  };
-
   const handleTierChange = (id: number, value: string, tierId: string) => {
     const newItems: any = [...localItems];
     const index = newItems.findIndex((item: any) => item._id === id);
@@ -140,7 +135,12 @@ function AdminServiceAndProductsPage({ classes }: Props) {
       }
     }
   };
+  const handleDisableItemCheckBox=(event:any)=>{
 
+  setIncludeDisabled(event.target.checked);
+
+
+  }
   function Toolbar() {
     return editMode ? (
       <>
@@ -165,8 +165,13 @@ function AdminServiceAndProductsPage({ classes }: Props) {
         </CSButton>
       </>
     ) : (
+
       <>
-        <Can I={'manage'} a={'Items'}>
+          <FormGroup>
+            <FormControlLabel control={<Checkbox style={{ }} color="primary" onChange={handleDisableItemCheckBox}/>} label="Include Disabled" />
+            </FormGroup>
+        
+       <Can I={'manage'} a={'Items'}>
           {/* <CSButton
             disabled={updating}
             disableElevation
@@ -177,7 +182,7 @@ function AdminServiceAndProductsPage({ classes }: Props) {
             variant={'contained'}>
             {'Edit Prices'}
           </CSButton> */}
-          <CSButton
+         <CSButton
             color={'primary'}
             disabled={updating}
             disableElevation
@@ -439,7 +444,6 @@ function AdminServiceAndProductsPage({ classes }: Props) {
           ? actions
           : [],
         ...dbSync,
-        // ...activateButton
       ];
 
       if (tiers.length > 0) {
@@ -450,7 +454,6 @@ function AdminServiceAndProductsPage({ classes }: Props) {
             ? actions
             : [],
           ...dbSync,
-          // ...activateButton
         ];
       }
       setColumns(constructedColumns);
@@ -458,25 +461,29 @@ function AdminServiceAndProductsPage({ classes }: Props) {
   }, [tiers, editMode, localItems]);
 
   useEffect(() => {
-    dispatch(loadInvoiceItems.fetch());
+    dispatch(loadInvoiceItems.fetch({ payload: { includeDisabled, includeDiscountItems: false }}));
     dispatch(getAllSalesTaxAPI());
     localStorage.setItem('nestedRouteKey', 'services/services-and-products');
   }, []);
 
+  useEffect(() => {
+    dispatch(loadInvoiceItems.fetch({ payload: { includeDisabled, includeDiscountItems:false } }))
+  }, [includeDisabled]);
+
   return (
     <MainContainer>
       <PageContainer>
-       
-        <BCTableContainer
-          columns={columns}
-          isLoading={loading || tiersLoading}
-          isPageSaveEnabled
-          search
-          searchPlaceholder={'Search Items'}
-          tableData={localItems}
-          toolbar={Toolbar()}
-        />
-      </PageContainer>
+            <BCTableContainer
+            columns={columns}
+            isLoading={loading || tiersLoading}
+            isPageSaveEnabled
+          toolbarPositionSpaceBetween={true}
+            search
+            searchPlaceholder={'Search Items'}
+            tableData={localItems}
+            toolbar={Toolbar()}
+          />
+            </PageContainer>
     </MainContainer>
   );
 }

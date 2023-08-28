@@ -2,12 +2,24 @@ import { Item } from 'actions/invoicing/items/items.types';
 import request from 'utils/http.service';
 
 
-export const getItems = async (includeDiscountItems = false) => {
+export const getItems = async (data:any) => {
   try {
-    const requestObj:any = {}
-    if(includeDiscountItems){
-      requestObj.includeDiscountItems = true;
+    let requestObj:any={
+      includeDiscountItems: false, includeDisabled: false
     }
+    if(data){
+      const { payload } = data;
+
+      let { includeDiscountItems, includeDisabled } = payload ? payload : { includeDiscountItems: false, includeDisabled: false };
+      if (includeDiscountItems) {
+        requestObj.includeDiscountItems = true;
+      }
+      if (includeDisabled) {
+        requestObj.includeInactiveItems = true;
+      }
+    } 
+    
+  
     const response: any = await request('/getItems', 'POST', requestObj);
     return response.data;
   } catch (err) {

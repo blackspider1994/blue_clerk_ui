@@ -35,6 +35,7 @@ function BCTableContainer({
   toolbar,
   noPadding = false,
   toolbarPositionLeft = false,
+  toolbarPositionSpaceBetween=false,
   manualPagination = false,
   lastPageCursorImplemented = false,
   fetchFunction = () => { },
@@ -181,7 +182,7 @@ function BCTableContainer({
             autoFocus={autoFocusSearch}
           />
           : null}
-        {toolbar && <BCTableToolBarContainer left={toolbarPositionLeft}>
+        {toolbar && <BCTableToolBarContainer left={toolbarPositionLeft} spaceBetween={toolbarPositionSpaceBetween}>
           {toolbar}
         </BCTableToolBarContainer>}
       </Grid>
@@ -247,11 +248,11 @@ padding: ${props => props.$noPadding ? '0' : '5px'};
 `;
 
 
-const BCTableToolBarContainer = styled.div<{ left: boolean }>`
+const BCTableToolBarContainer = styled.div<{ left: boolean ,spaceBetween:boolean}>`
     margin-bottom: 10px;
     display: flex;
     flex: 1.66;
-    justify-content: ${props => props.left ? 'flex-start' : 'flex-end'};
+    justify-content: ${props => props.left ? 'flex-start' : props.spaceBetween ?'space-between':'flex-end'};
     button {
       margin-left: 20px;
     }

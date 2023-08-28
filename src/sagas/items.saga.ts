@@ -3,10 +3,10 @@ import { loadInvoiceItems, loadJobCostingList, loadTierListItems, updateInvoiceI
 import { all, call, cancelled, put, takeLatest } from 'redux-saga/effects';
 
 
-export function *handleGetItems() {
+export function* handleGetItems(action:any) {
   try {
     const [itemsResult, tierListResult, jobCostingListResult]:any = yield all([
-      call(getItems),
+      call(getItems, action?.payload),
       call(getItemTierList),
       call(getJobCostingList),
     ]);
