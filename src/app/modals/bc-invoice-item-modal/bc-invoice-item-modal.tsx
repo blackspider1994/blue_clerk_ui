@@ -32,7 +32,7 @@ import {
 } from 'actions/snackbar/snackbar.action';
 import * as CONSTANTS from '../../../constants';
 import styles from './bc-invoice-item-modal.styles';
-import { updateItems, addItem, addItemProduct } from 'api/items.api';
+import { updateItems, addItem, addItemProduct, disableItem, checkItemExist } from 'api/items.api';
 
 const EditItemValidation = yup.object().shape({
   'name': yup
@@ -91,6 +91,9 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
   const { _id, name, isFixed, isJobType, description, tax, tiers, costing, itemType, productCost } = item;
   const { itemObj, error, loadingObj } = useSelector(({ invoiceItems }: RootState) => invoiceItems);
   const { 'data': taxes } = useSelector(({ tax }: any) => tax);
+  const [timer, setTimer] = useState<any>(null)
+  const [itemExist, setItemExist] = useState<boolean>(false)
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
  
@@ -176,6 +179,10 @@ function BCInvoiceEditModal({ item, classes }: ModalProps) {
         dispatch(errorSnackBar('Tier Prices cannot be empty'));
         return setIsSubmitting(false);
       }
+      if (itemExist) {
+        dispatch(errorSnackBar('Item with the same name already exist'));
+        return setIsSubmitting(false);
+      }
       
       const isProduct=values.itemType=='Product';
       const itemObject = {
@@ -257,15 +264,56 @@ let isFixedDisabled=false;
 
   }, [formik.values.itemType]);
 
-  const handlePopupClick=()=>
-  {
-    const isConfirmed = window.confirm('There is an item already with this name that is deactivated (or active), would you like to go to that item?');
-    if (isConfirmed) {
-         alert('Item added confirmed!');
-    } else {
-          alert('item action halted');
-    }
+
+  const handleDisableItem=async ()=>{
+    const itemObject:any = {
+      itemId: _id
+}
+    let responseDisable = await disableItem(itemObject).catch((err: { message: any; }) => {
+      dispatch(errorSnackBar(err.message));
+    });
+  
+    if (responseDisable) {
+    dispatch(loadInvoiceItems.fetch());
+    dispatch(success(`Items successfully deactivated`));
+    closeModal();
   }
+  }
+  const handleItemName=(name:string)=>{
+    console.log("Item Name",name);
+    formik.setFieldValue(
+      'name',
+      name
+    );
+
+    clearTimeout(timer)
+
+    const newTimer = setTimeout(async () => {
+      console.log("calling check item",name);
+      const itemObject:any = {
+        name: name
+      }
+      let responseDisable = await checkItemExist(itemObject).catch((err: { message: any; }) => {
+        dispatch(errorSnackBar(err.message));
+      });
+
+      if (responseDisable) {
+        console.log("responseDisable", responseDisable);
+        if(responseDisable?.status==1){
+          setItemExist(true)
+        }else{
+          setItemExist(false)
+
+        }
+        // dispatch(loadInvoiceItems.fetch());
+        // dispatch(success(`Items successfully deactivated`));
+        // closeModal();
+      }
+    }, 250)
+
+    setTimer(newTimer)
+  }
+
   return <DataContainer>
     <hr
       style={{ height: '1px', background: '#D0D3DC', borderWidth: '0px' }}
@@ -285,9 +333,9 @@ let isFixedDisabled=false;
                 ITEM NAME
               </Grid>
               <BCInput
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                handleChange={formik.handleChange}
-                helperText={formik.touched.name && formik.errors.name}
+                error={formik.touched.name && Boolean(formik.errors.name) || itemExist}
+                handleChange={(event: React.ChangeEvent<HTMLInputElement>) =>handleItemName(event.target.value)}
+                helperText={formik.touched.name && formik.errors.name || itemExist&& "Item with this name already exists"}
                 name={'name'}
                 value={formik.values.name}
                 margin={'none'}
@@ -683,9 +731,7 @@ let isFixedDisabled=false;
             </Grid>
           )}
         </Grid>
-        <Grid>
-          <button onClick={handlePopupClick}>Pop up Click</button>
-        </Grid>
+      
       </DialogContent>
       <hr
         style={{ height: '1px', background: '#D0D3DC', borderWidth: '0px' }}
@@ -696,7 +742,20 @@ let isFixedDisabled=false;
         }}
       >
         <Grid container justify={'space-between'}>
-          <Grid item />
+          <Grid item>
+            {
+            !isAdd&&<Button
+              disabled={isSubmitting}
+              aria-label={'deactivate-item'}
+              onClick={handleDisableItem}
+              classes={{
+                root: classes.closeButton,
+              }}
+              variant={'outlined'}
+            >
+              Deactivate
+            </Button>}
+            </Grid>
           <Grid item>
             <Button
               disabled={isSubmitting}
